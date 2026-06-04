@@ -32,4 +32,4 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           cd pipeline
-          python -m carcinos_ingestion.run --all --persist
+          python -m carcinos_ingestion.run --all --persist --no-conferences

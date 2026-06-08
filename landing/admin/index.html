@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CarcinoS — Editor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:           #030406;
+      --surface:      #0c0e12;
+      --surface-2:    #111318;
+      --surface-3:    #181b20;
+      --border:       rgba(255,255,255,0.07);
+      --border-bright:rgba(255,255,255,0.13);
+      --text:         #e4e6e4;
+      --text-sec:     rgba(228,230,228,0.52);
+      --text-dim:     rgba(228,230,228,0.28);
+      --green:        #7a8e7a;
+      --green-bright: rgba(122,142,122,0.9);
+      --green-dim:    rgba(122,142,122,0.10);
+      --green-border: rgba(122,142,122,0.30);
+      /* tier colors */
+      --pi-color:     #7a9e7a;
+      --pi-bg:        rgba(122,158,122,0.10);
+      --pi-border:    rgba(122,158,122,0.28);
+      --inc-color:    #b09a5a;
+      --inc-bg:       rgba(176,154,90,0.08);
+      --inc-border:   rgba(176,154,90,0.25);
+      --hor-color:    #7898b8;
+      --hor-bg:       rgba(120,152,184,0.08);
+      --hor-border:   rgba(120,152,184,0.22);
+      /* status */
+      --approved:     #5fa870;
+      --rejected:     #b05050;
+      --pending-col:  #b08840;
+    }
+
+    html, body {
+      min-height: 100%; background: var(--bg); color: var(--text);
+      font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+      font-size: 14px; line-height: 1.5;
+    }
+
+    /* ── LOGIN ── */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: var(--bg); padding: 24px;
+    }
+    .login-card {
+      background: var(--surface); border: 1px solid var(--border-bright);
+      border-radius: 18px; padding: 44px 40px; max-width: 400px; width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+    }
+    .login-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+    .login-logo {
+      width: 36px; height: 36px; border: 1.5px solid rgba(255,255,255,0.45);
+      border-radius: 8px; background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      font-family: Georgia, serif; font-size: 14px; font-weight: 800; color: #fff;
+    }
+    .login-wordmark { font-size: 17px; font-weight: 700; color: #fff; }
+    .login-wordmark .s { color: var(--green); }
+    .login-eyebrow { font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.4px; color: var(--green); margin-bottom: 8px; }
+    .login-headline { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 26px; }
+    .login-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .login-label { font-size: 11px; font-weight: 600; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 0.8px; }
+    .login-input {
+      width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--border-bright);
+      border-radius: 9px; padding: 12px 14px; font-size: 14px; color: #fff; outline: none;
+      transition: border-color 0.15s; font-family: inherit;
+    }
+    .login-input::placeholder { color: rgba(255,255,255,0.2); }
+    .login-input:focus { border-color: var(--green); }
+    .login-btn {
+      width: 100%; background: var(--green); border: none; border-radius: 9px;
+      padding: 13px; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
+      transition: opacity 0.15s; font-family: inherit; margin-top: 8px;
+    }
+    .login-btn:hover { opacity: 0.85; }
+    .login-error { font-size: 12px; color: var(--rejected); margin-top: 8px; text-align: center; min-height: 16px; }
+
+    /* ── APP SHELL ── */
+    #appShell { display: none; min-height: 100vh; flex-direction: column; }
+
+    /* ── NAVBAR ── */
+    .admin-nav {
+      position: sticky; top: 0; z-index: 200; height: 56px;
+      background: rgba(3,4,6,0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+    }
+    .nav-left { display: flex; align-items: center; gap: 12px; }
+    .nav-logo {
+      width: 30px; height: 30px; border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 7px; background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      font-family: Georgia, serif; font-size: 12px; font-weight: 800; color: #fff;
+    }
+    .nav-wordmark { font-size: 14px; font-weight: 700; color: #fff; }
+    .nav-wordmark .s { color: var(--green); }
+    .nav-badge {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+      color: var(--green); background: var(--green-dim); border: 1px solid var(--green-border);
+      border-radius: 4px; padding: 2px 7px;
+    }
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+    .nav-week { font-size: 12px; color: var(--text-dim); }
+    .nav-logout {
+      font-size: 12px; color: var(--text-sec); background: none;
+      border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .nav-logout:hover { color: var(--text); border-color: var(--border-bright); }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+      position: sticky; top: 56px; z-index: 100;
+      background: rgba(3,4,6,0.94); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 28px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .filter-label { font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--text-dim); margin-right: 4px; }
+    .filter-btn {
+      font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
+      border: 1px solid var(--border-bright); background: none; color: var(--text-sec);
+      cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
+    }
+    .filter-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+    .filter-btn.active { background: var(--green-dim); border-color: var(--green-border); color: var(--green); }
+    .filter-sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+    .filter-clear { font-size: 11px; color: var(--text-dim); background: none; border: none;
+      cursor: pointer; font-family: inherit; padding: 4px 8px; margin-left: 4px; }
+    .filter-clear:hover { color: var(--text-sec); }
+
+    /* ── MAIN ── */
+    .admin-main { flex: 1; padding: 24px 28px; max-width: 1160px; margin: 0 auto; width: 100%; }
+
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+    .page-header-top { display: flex; align-items: baseline; justify-content: space-between;
+      gap: 16px; margin-bottom: 4px; }
+    .page-title { font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+    .page-subtitle { font-size: 12px; color: var(--text-dim); text-transform: uppercase;
+      letter-spacing: 1px; font-weight: 600; }
+
+    /* ── PIPELINE STATS ── */
+    .stats-row {
+      display: flex; gap: 0; border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin-top: 20px;
+    }
+    .stat-cell {
+      flex: 1; padding: 14px 18px; border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-cell:last-child { border-right: none; }
+    .stat-cell-label { font-size: 10px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.9px; color: var(--text-dim); }
+    .stat-cell-value { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.8px; }
+    .stat-cell-sub { font-size: 11px; color: var(--text-dim); }
+    .val-green { color: var(--pi-color); }
+    .val-amber { color: var(--pending-col); }
+    .val-approved { color: var(--approved); }
+    .val-muted { color: var(--text-sec); }
+
+    /* ── PUBLISH BAR ── */
+    .publish-bar {
+      background: var(--pi-bg); border: 1px solid var(--pi-border);
+      border-radius: 10px; padding: 14px 20px; margin-bottom: 28px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .publish-bar-left { display: flex; align-items: center; gap: 10px; }
+    .publish-bar-dot { width: 8px; height: 8px; background: var(--pi-color); border-radius: 50%; flex-shrink: 0; }
+    .publish-bar-text { font-size: 13px; color: var(--text); font-weight: 600; }
+    .publish-bar-sub { font-size: 11px; color: var(--text-sec); margin-top: 2px; }
+    .publish-btn {
+      background: var(--green); border: none; border-radius: 8px; padding: 10px 20px;
+      font-size: 13px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit;
+      transition: opacity 0.15s; white-space: nowrap;
+    }
+    .publish-btn:hover { opacity: 0.85; }
+    .publish-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* ── SECTION HEADERS ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; margin-top: 36px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-header:first-of-type { margin-top: 0; }
+    .section-left { display: flex; align-items: center; gap: 10px; }
+    .section-tier-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-pi  { background: var(--pi-color); }
+    .dot-inc { background: var(--inc-color); }
+    .dot-hor { background: var(--hor-color); }
+    .section-tier-label { font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 1px; }
+    .label-pi  { color: var(--pi-color); }
+    .label-inc { color: var(--inc-color); }
+    .label-hor { color: var(--hor-color); }
+    .section-count { font-size: 11px; color: var(--text-dim); }
+    .section-right { display: flex; align-items: center; gap: 8px; }
+    .section-approve-all {
+      font-size: 11px; color: var(--green); background: none; border: 1px solid var(--green-border);
+      border-radius: 6px; padding: 4px 10px; cursor: pointer; font-family: inherit;
+      transition: all 0.15s;
+    }
+    .section-approve-all:hover { background: var(--green-dim); }
+
+    /* ── CARDS LIST ── */
+    .cards-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      transition: border-color 0.15s;
+    }
+    .card:hover { border-color: var(--border-bright); }
+    .card.tier-pi  { border-left: 3px solid var(--pi-border); }
+    .card.tier-inc { border-left: 3px solid var(--inc-border); }
+    .card.tier-hor { border-left: 3px solid var(--hor-border); }
+    .card.status-approved { opacity: 0.6; }
+    .card.status-rejected { opacity: 0.32; }
+
+    /* Card top row */
+    .card-top {
+      display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+      padding: 10px 14px 9px; border-bottom: 1px solid var(--border);
+    }
+    .tier-pill {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+      padding: 3px 8px; border-radius: 20px; border: 1px solid; flex-shrink: 0;
+    }
+    .tier-pill.tier-pi  { color: var(--pi-color);  background: var(--pi-bg);  border-color: var(--pi-border); }
+    .tier-pill.tier-inc { color: var(--inc-color); background: var(--inc-bg); border-color: var(--inc-border); }
+    .tier-pill.tier-hor { color: var(--hor-color); background: var(--hor-bg); border-color: var(--hor-border); }
+    .site-pill {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      padding: 3px 8px; border-radius: 20px; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border-bright); color: var(--text-sec); flex-shrink: 0;
+    }
+    .source-label { font-size: 11px; font-style: italic; color: var(--text-sec); }
+    .date-label   { font-size: 11px; color: var(--text-dim); }
+    .top-spacer   { flex: 1; }
+    .status-pill {
+      font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 3px 8px; border-radius: 20px; border: 1px solid; flex-shrink: 0;
+    }
+    .status-pill.status-pending  { color: var(--pending-col);  background: rgba(176,136,64,0.10);  border-color: rgba(176,136,64,0.28); }
+    .status-pill.status-approved { color: var(--approved);     background: rgba(95,168,112,0.12);  border-color: rgba(95,168,112,0.30); }
+    .status-pill.status-rejected { color: var(--rejected);     background: rgba(176,80,80,0.10);   border-color: rgba(176,80,80,0.25); }
+    .warn-pill {
+      font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+      color: #b08840; background: rgba(176,136,64,0.10); border: 1px solid rgba(176,136,64,0.25);
+    }
+
+    /* Card body */
+    .card-body { display: flex; gap: 0; align-items: stretch; }
+    .card-content { flex: 1; min-width: 0; padding: 14px 16px; }
+    .card-actions-col {
+      display: flex; flex-direction: column; gap: 5px; padding: 14px 14px 14px 0;
+      flex-shrink: 0; justify-content: flex-start; border-left: 1px solid var(--border);
+      margin-left: 0; padding-left: 14px;
+    }
+
+    /* Title */
+    .card-title {
+      font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.45;
+      margin-bottom: 12px; letter-spacing: -0.1px;
+    }
+
+    /* Clinical fields */
+    .card-fields { margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .field-row { display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; }
+    .field-key {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px;
+      color: var(--text-dim); flex-shrink: 0; min-width: 110px;
+    }
+    .field-val { color: var(--text-sec); line-height: 1.45; }
+    .field-val.strong { color: var(--text); font-weight: 500; }
+
+    /* Key result block */
+    .key-result-box {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 7px; padding: 10px 12px; margin-bottom: 10px;
+    }
+    .key-result-label {
+      font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-dim); margin-bottom: 5px;
+    }
+    .key-result-text { font-size: 13px; color: var(--text); font-weight: 500; line-height: 1.5; }
+    .toxicity-text { font-size: 12px; color: var(--text-sec); margin-top: 5px; line-height: 1.45; }
+
+    /* So what */
+    .so-what-box { display: flex; gap: 8px; align-items: baseline; margin-bottom: 12px; }
+    .so-what-text { font-size: 12.5px; color: var(--text); line-height: 1.5; }
+
+    /* Card bottom badges */
+    .card-bottom { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .badge {
+      font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+      text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid;
+    }
+    .badge-evidence { background: rgba(255,255,255,0.04); color: var(--text-sec); border-color: var(--border-bright); }
+    .badge-score    { background: var(--green-dim); color: var(--green); border-color: var(--green-border); }
+    .badge-signal   { background: rgba(255,255,255,0.03); color: var(--text-dim);
+                      border-color: var(--border); text-transform: none; letter-spacing: 0;
+                      font-weight: 500; font-size: 10px; max-width: 280px;
+                      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .badge-rt       { background: rgba(120,152,184,0.08); color: var(--hor-color); border-color: var(--hor-border); }
+    .badge-conf     { background: rgba(255,255,255,0.03); color: var(--text-dim); border-color: var(--border); }
+    .badge-flag     { background: rgba(176,80,80,0.08); color: #a06060; border-color: rgba(176,80,80,0.20); }
+    .badge-warn     { background: rgba(176,136,64,0.10); color: var(--pending-col); border-color: rgba(176,136,64,0.25); }
+
+    /* Action buttons */
+    .act-btn {
+      font-size: 11px; font-weight: 700; padding: 7px 14px; border-radius: 7px;
+      border: 1px solid; cursor: pointer; font-family: inherit;
+      transition: all 0.15s; white-space: nowrap; width: 90px; text-align: center;
+    }
+    .act-approve {
+      background: rgba(95,168,112,0.08); color: var(--approved);
+      border-color: rgba(95,168,112,0.28);
+    }
+    .act-approve:hover { background: rgba(95,168,112,0.18); }
+    .act-approve.active { background: var(--approved); color: #fff; border-color: var(--approved); }
+    .act-edit {
+      background: rgba(255,255,255,0.04); color: var(--text-sec);
+      border-color: var(--border-bright);
+    }
+    .act-edit:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .act-reject {
+      background: rgba(176,80,80,0.06); color: #a06060;
+      border-color: rgba(176,80,80,0.22);
+    }
+    .act-reject:hover { background: rgba(176,80,80,0.14); }
+    .act-reject.active { background: var(--rejected); color: #fff; border-color: var(--rejected); }
+
+    /* ── EDIT PANEL ── */
+    .card-edit-panel {
+      display: none; border-top: 1px solid var(--border);
+      padding: 16px 18px; background: var(--surface-2);
+    }
+    .card-edit-panel.open { display: block; }
+    .edit-row { margin-bottom: 13px; }
+    .edit-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--text-dim); margin-bottom: 5px; }
+    .edit-inp {
+      width: 100%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-bright);
+      border-radius: 7px; padding: 9px 12px; font-size: 12.5px; color: var(--text); outline: none;
+      font-family: inherit; transition: border-color 0.15s; resize: vertical;
+    }
+    .edit-inp:focus { border-color: var(--green); }
+    .edit-sel {
+      background: var(--surface-3); border: 1px solid var(--border-bright);
+      border-radius: 7px; padding: 9px 12px; font-size: 12.5px; color: var(--text); outline: none;
+      font-family: inherit; cursor: pointer; width: 100%; max-width: 260px;
+    }
+    .edit-sel option { background: #1a1c20; }
+    .edit-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .edit-save {
+      background: var(--green); border: none; border-radius: 7px; padding: 8px 18px;
+      font-size: 12px; font-weight: 700; color: #fff; cursor: pointer; font-family: inherit;
+    }
+    .edit-cancel {
+      background: none; border: 1px solid var(--border); border-radius: 7px; padding: 8px 18px;
+      font-size: 12px; color: var(--text-sec); cursor: pointer; font-family: inherit;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 36px 20px; color: var(--text-dim);
+      font-size: 13px; border: 1px dashed var(--border); border-radius: 10px;
+    }
+    .empty-state-icon { font-size: 22px; margin-bottom: 8px; opacity: 0.4; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 999;
+      background: var(--surface-2); border: 1px solid var(--border-bright);
+      border-radius: 9px; padding: 12px 18px; font-size: 13px; color: var(--text);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.22s ease; pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-color: rgba(95,168,112,0.4); }
+    .toast.error   { border-color: rgba(176,80,80,0.4); }
+
+    /* ── LOADING ── */
+    .loading { text-align: center; padding: 60px; color: var(--text-dim); font-size: 13px; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500; background: rgba(0,0,0,0.78);
+      backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center;
+      padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-card {
+      background: var(--surface); border: 1px solid var(--border-bright);
+      border-radius: 14px; padding: 32px; max-width: 460px; width: 100%;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.7);
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+    .modal-body  { font-size: 13px; color: var(--text-sec); line-height: 1.6; margin-bottom: 22px; }
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-confirm {
+      flex: 1; background: var(--green); border: none; border-radius: 9px;
+      padding: 12px; font-size: 13px; font-weight: 700; color: #fff;
+      cursor: pointer; font-family: inherit;
+    }
+    .modal-cancel {
+      flex: 1; background: none; border: 1px solid var(--border); border-radius: 9px;
+      padding: 12px; font-size: 13px; color: var(--text-sec);
+      cursor: pointer; font-family: inherit;
+    }
+
+    @media (max-width: 768px) {
+      .stats-row { flex-wrap: wrap; }
+      .stat-cell { flex: 1 1 40%; }
+      .admin-main { padding: 16px; }
+      .filter-bar { padding: 8px 16px; }
+      .card-body { flex-direction: column; }
+      .card-actions-col { flex-direction: row; border-left: none; padding-left: 0;
+        border-top: 1px solid var(--border); padding: 10px 16px; }
+      .act-btn { flex: 1; width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-logo">C<span style="color:#7a8e7a">S</span></div>
+      <span class="login-wordmark">Carcino<span class="s">S</span></span>
+    </div>
+    <div class="login-eyebrow">Editorial Access</div>
+    <h1 class="login-headline">Editor sign in</h1>
+    <div class="login-field">
+      <label class="login-label">Email</label>
+      <input class="login-input" type="email" id="loginEmail" placeholder="editor@carcinos.com" autocomplete="email" />
+    </div>
+    <div class="login-field">
+      <label class="login-label">Password</label>
+      <input class="login-input" type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="login-btn" id="loginBtn">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ═══ APP SHELL ═══ -->
+<div id="appShell">
+
+  <!-- Navbar -->
+  <nav class="admin-nav">
+    <div class="nav-left">
+      <div class="nav-logo">C<span style="color:#7a8e7a">S</span></div>
+      <span class="nav-wordmark">Carcino<span class="s">S</span></span>
+      <span class="nav-badge">Editor</span>
+    </div>
+    <div class="nav-right">
+      <span class="nav-week" id="navWeek"></span>
+      <button class="nav-logout" id="logoutBtn">Sign out</button>
+    </div>
+  </nav>
+
+  <!-- Filter bar -->
+  <div class="filter-bar" id="filterBar">
+    <span class="filter-label">Filter</span>
+    <!-- Tier -->
+    <button class="filter-btn" data-filter="tier" data-value="A">Practice-Impacting</button>
+    <button class="filter-btn" data-filter="tier" data-value="B">Incremental</button>
+    <button class="filter-btn" data-filter="tier" data-value="C">Horizon</button>
+    <div class="filter-sep"></div>
+    <!-- Status -->
+    <button class="filter-btn" data-filter="status" data-value="pending">Pending</button>
+    <button class="filter-btn" data-filter="status" data-value="approved">Approved</button>
+    <button class="filter-btn" data-filter="status" data-value="rejected">Rejected</button>
+    <div class="filter-sep"></div>
+    <!-- RT relevance -->
+    <button class="filter-btn" data-filter="rt" data-value="direct">RT Direct</button>
+    <button class="filter-btn" data-filter="rt" data-value="indirect">RT Indirect</button>
+    <div class="filter-sep"></div>
+    <!-- Confidence -->
+    <button class="filter-btn" data-filter="conf" data-value="high">High conf.</button>
+    <button class="filter-btn" data-filter="conf" data-value="moderate">Moderate</button>
+    <button class="filter-btn" data-filter="conf" data-value="low">Low conf.</button>
+    <button class="filter-clear" id="filterClearBtn">Clear all</button>
+  </div>
+
+  <!-- Main content -->
+  <main class="admin-main" id="adminMain">
+    <div class="loading">Loading signal queue…</div>
+  </main>
+
+</div>
+
+<!-- ═══ PUBLISH MODAL ═══ -->
+<div class="modal-overlay" id="publishModal">
+  <div class="modal-card">
+    <div class="modal-title">Publish this week's digest?</div>
+    <div class="modal-body" id="publishModalBody">
+      This will mark the digest as published and make it available in the app.
+      Push notifications will be sent for all Practice-Impacting items.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-confirm" id="publishConfirmBtn">Publish &amp; send notifications</button>
+      <button class="modal-cancel" id="publishCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIGURATION
+// ─────────────────────────────────────────────
+const SUPABASE_URL      = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
+const DEMO_MODE = (SUPABASE_URL === 'YOUR_SUPABASE_URL');
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let sbClient   = null;
+let candidates = [];
+let pipelineStats = null; // loaded from ingestion_runs if available
+
+// Active filters: { tier, status, rt, conf }
+let filters = {};
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+function init() {
+  if (!DEMO_MODE) {
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  setupAuth();
+  setupFilters();
+}
+
+// ─────────────────────────────────────────────
+// FILTERS
+// ─────────────────────────────────────────────
+function setupFilters() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.filter;
+      const val = btn.dataset.value;
+      if (filters[key] === val) {
+        delete filters[key];
+        btn.classList.remove('active');
+      } else {
+        // Deactivate others in same group
+        document.querySelectorAll(`.filter-btn[data-filter="${key}"]`).forEach(b => b.classList.remove('active'));
+        filters[key] = val;
+        btn.classList.add('active');
+      }
+      renderDashboard();
+    });
+  });
+  document.getElementById('filterClearBtn').addEventListener('click', () => {
+    filters = {};
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    renderDashboard();
+  });
+}
+
+function applyFilters(list) {
+  return list.filter(c => {
+    if (filters.tier   && c.tier !== filters.tier) return false;
+    if (filters.status && editorStatus(c.status) !== filters.status) return false;
+    if (filters.rt     && (c.radiation_oncology_relevance || '') !== filters.rt) return false;
+    if (filters.conf   && (c.confidence || '') !== filters.conf) return false;
+    return true;
+  });
+}
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+function setupAuth() {
+  document.getElementById('loginBtn').addEventListener('click', handleLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
+  if (DEMO_MODE) return;
+
+  sbClient.auth.getSession().then(({ data: { session } }) => {
+    if (session) showApp();
+  });
+  sbClient.auth.onAuthStateChange((event, session) => {
+    if (session) showApp(); else showLogin();
+  });
+}
+
+async function handleLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errorEl  = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+  errorEl.textContent = '';
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+
+  if (DEMO_MODE) {
+    if (email && password) { setTimeout(() => showApp(), 500); }
+    else { errorEl.textContent = 'Enter email and password.'; btn.textContent = 'Sign in'; btn.disabled = false; }
+    return;
+  }
+  const { error } = await sbClient.auth.signInWithPassword({ email, password });
+  if (error) { errorEl.textContent = error.message; btn.textContent = 'Sign in'; btn.disabled = false; }
+}
+
+async function handleLogout() {
+  if (!DEMO_MODE) await sbClient.auth.signOut();
+  showLogin();
+}
+
+function showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appShell').style.display = 'none';
+  document.getElementById('loginBtn').textContent = 'Sign in';
+  document.getElementById('loginBtn').disabled = false;
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').style.display = 'flex';
+  loadDashboard();
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+async function loadDashboard() {
+  updateNavWeek();
+
+  try {
+    const { data: items, error } = await sbClient
+      .from('alerts')
+      .select('id, tier, status, title, summary_json, disease_sites(code), created_at')
+      .in('status', ['EXTRACTED', 'EDITOR_REVIEW', 'APPROVED', 'REJECTED'])
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    candidates = (items || []).map(row => {
+      const s   = row.summary_json || {};
+      const res = s.results || {};
+      const cls = s.classification || {};
+      const kr  = s.key_results || res.key_results || {};
+      const src0 = Array.isArray(s.sources) && s.sources[0] ? s.sources[0] : {};
+      return {
+        id:                          row.id,
+        tier:                        row.tier,
+        status:                      row.status,
+        disease_site_code:           row.disease_sites?.code,
+        title:                       row.title,
+        journal:                     s.journal || src0.journal || '',
+        pub_date:                    s.publication_date || src0.publication_date || '',
+        setting:                     s.setting || '',
+        carcinos_one_liner:          s.carcinos_one_liner || '',
+        population:                  s.population || '',
+        regimen_description:         s.regimen_description || '',
+        intervention:                s.intervention || '',
+        comparator:                  s.comparator || '',
+        study_design:                s.study_design || cls.study_design || '',
+        primary_endpoint:            s.primary_endpoint || res.primary_endpoint || '',
+        effect_size:                 kr.effect_size || '',
+        p_value_or_ci:               kr.p_value_or_ci || '',
+        toxicity_qol_signal:         kr.toxicity_qol_signal || '',
+        evidence_strength:           s.evidence_strength || res.evidence_strength || '',
+        impact_score:                s.impact_score || res.impact_score || 0,
+        limitations_flags:           s.limitations_flags || cls.limitations_flags || [],
+        who_should_care:             s.who_should_care || cls.who_should_care || [],
+        grounded:                    s.grounded !== false,
+        editor_notes:                s.editor_notes || '',
+        why_it_surfaced:             s.why_it_surfaced || '',
+        radiation_oncology_relevance:s.radiation_oncology_relevance || '',
+        confidence:                  s.confidence || '',
+        reject_recommendation:       s.reject_recommendation || false,
+        _summary_json:               s,
+      };
+    });
+
+    // Try to load pipeline stats from most recent ingestion run
+    try {
+      const { data: runs } = await sbClient
+        .from('ingestion_runs')
+        .select('candidates_found, candidates_passed_filter, candidates_extracted, alerts_created, completed_at')
+        .eq('status', 'done')
+        .order('completed_at', { ascending: false })
+        .limit(10);
+      if (runs && runs.length > 0) {
+        // Aggregate the most recent batch (last 10 runs = one week typically)
+        pipelineStats = runs.reduce((acc, r) => ({
+          ingested:  acc.ingested  + (r.candidates_found || 0),
+          pre_llm:   acc.pre_llm   + ((r.candidates_found || 0) - (r.candidates_passed_filter || 0)),
+          pass2:     acc.pass2     + (r.candidates_extracted || 0),
+          created:   acc.created   + (r.alerts_created || 0),
+        }), { ingested: 0, pre_llm: 0, pass2: 0, created: 0 });
+      }
+    } catch (_) { /* ingestion_runs may not be accessible via anon key */ }
+
+    renderDashboard();
+  } catch (err) {
+    document.getElementById('adminMain').innerHTML =
+      `<div class="empty-state"><div class="empty-state-icon">⚠️</div>
+       <div>Error loading signal queue.</div>
+       <div style="margin-top:6px;font-size:11px;opacity:0.5">${err.message}</div></div>`;
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function renderDashboard() {
+  const filtered = applyFilters(candidates);
+
+  const pi  = filtered.filter(c => c.tier === 'A');
+  const inc = filtered.filter(c => c.tier === 'B');
+  const hor = filtered.filter(c => c.tier === 'C');
+
+  const pending  = candidates.filter(c => editorStatus(c.status) === 'pending').length;
+  const approved = candidates.filter(c => editorStatus(c.status) === 'approved').length;
+  const rejected = candidates.filter(c => editorStatus(c.status) === 'rejected').length;
+  const piApproved = candidates.filter(c => c.tier === 'A' && editorStatus(c.status) === 'approved').length;
+  const total    = candidates.length;
+
+  const statsHtml = `
+    <div class="stats-row">
+      ${pipelineStats ? `
+      <div class="stat-cell">
+        <div class="stat-cell-label">Ingested</div>
+        <div class="stat-cell-value val-muted">${pipelineStats.ingested.toLocaleString()}</div>
+        <div class="stat-cell-sub">articles retrieved</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Rejected pre-LLM</div>
+        <div class="stat-cell-value val-muted">${pipelineStats.pre_llm.toLocaleString()}</div>
+        <div class="stat-cell-sub">no qualifying signal</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Sent to Pass 2</div>
+        <div class="stat-cell-value val-muted">${pipelineStats.pass2.toLocaleString()}</div>
+        <div class="stat-cell-sub">LLM reviewed</div>
+      </div>` : ''}
+      <div class="stat-cell">
+        <div class="stat-cell-label">In queue</div>
+        <div class="stat-cell-value val-amber">${total}</div>
+        <div class="stat-cell-sub">${pending} pending review</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Approved</div>
+        <div class="stat-cell-value val-approved">${approved}</div>
+        <div class="stat-cell-sub">${piApproved} practice-impacting</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-cell-label">Rejected</div>
+        <div class="stat-cell-value val-muted">${rejected}</div>
+        <div class="stat-cell-sub">editor rejected</div>
+      </div>
+    </div>
+  `;
+
+  const publishBar = approved > 0 ? `
+    <div class="publish-bar">
+      <div class="publish-bar-left">
+        <div class="publish-bar-dot"></div>
+        <div>
+          <div class="publish-bar-text">${approved} item${approved !== 1 ? 's' : ''} ready to publish</div>
+          <div class="publish-bar-sub">${piApproved} Practice-Impacting push notification${piApproved !== 1 ? 's' : ''} will be sent</div>
+        </div>
+      </div>
+      <button class="publish-btn" id="publishBtn">Publish Digest →</button>
+    </div>` : '';
+
+  const activeFilterCount = Object.keys(filters).length;
+  const filteredNote = activeFilterCount > 0
+    ? `<div style="font-size:11px;color:var(--text-dim);margin-bottom:16px;">Showing filtered results — ${filtered.length} of ${total} cards</div>`
+    : '';
+
+  const html = `
+    <div class="page-header">
+      <div class="page-header-top">
+        <div class="page-title">CarcinoS Admin Review</div>
+        <div class="page-subtitle">Weekly Signal Queue</div>
+      </div>
+      ${statsHtml}
+    </div>
+    ${publishBar}
+    ${filteredNote}
+    ${renderSection('Practice-Impacting', 'pi', pi, 'A')}
+    ${renderSection('Incremental', 'inc', inc, 'B')}
+    ${renderSection('Horizon', 'hor', hor, 'C')}
+  `;
+
+  document.getElementById('adminMain').innerHTML = html;
+  bindEvents();
+}
+
+function renderSection(label, tierClass, items, tierValue) {
+  return `
+    <div class="section-header">
+      <div class="section-left">
+        <div class="section-tier-dot dot-${tierClass}"></div>
+        <span class="section-tier-label label-${tierClass}">${label}</span>
+        <span class="section-count">${items.length} card${items.length !== 1 ? 's' : ''}</span>
+      </div>
+      <div class="section-right">
+        <button class="section-approve-all" data-tier="${tierValue}">Approve all</button>
+      </div>
+    </div>
+    <div class="cards-list" id="list-${tierValue}">
+      ${items.length === 0
+        ? `<div class="empty-state"><div class="empty-state-icon">—</div>No cards this tier</div>`
+        : items.map(c => renderCard(c)).join('')}
+    </div>
+  `;
+}
+
+function cap(str) {
+  if (!str) return '';
+  str = str.trim();
+  return str ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
+function truncate(str, n) {
+  return str && str.length > n ? str.slice(0, n) + '…' : str;
+}
+
+function renderCard(c) {
+  const status    = editorStatus(c.status);
+  const tierClass = c.tier === 'A' ? 'pi' : c.tier === 'B' ? 'inc' : 'hor';
+  const tierLabels = { A: '■■■ Practice-Impacting', B: '■■ Incremental', C: '■ Horizon' };
+
+  // Source: prefer journal; fall back to study design context
+  const source = c.journal || '';
+
+  // Clinical setting label
+  const settingLabel = formatSetting(c.setting || '');
+
+  // Intervention / comparator
+  const intv  = cap(c.intervention || '');
+  const comp  = (c.comparator && c.comparator !== 'not_reported') ? cap(c.comparator) : '';
+
+  // Key result
+  const keyResult = c.effect_size && c.effect_size !== 'not_reported' ? cap(c.effect_size) : '';
+  const toxicity  = c.toxicity_qol_signal && c.toxicity_qol_signal !== 'not_reported'
+                    ? cap(c.toxicity_qol_signal) : '';
+
+  // So what
+  const soWhat = cap(c.carcinos_one_liner || '');
+
+  // Gate signal (short)
+  const gateSignal = cap(c.why_it_surfaced || '');
+
+  // RT + confidence
+  const rtRel = c.radiation_oncology_relevance || '';
+  const conf  = c.confidence || '';
+
+  // Limitation flags
+  const flags = (c.limitations_flags || []).slice(0, 3);
+
+  // Status pill
+  const statusLabel = status === 'approved' ? '✓ Approved'
+                    : status === 'rejected' ? '✗ Rejected'
+                    : '⋯ Pending';
+
+  const oneLiner = cap(c.carcinos_one_liner || '');
+
+  return `
+  <div class="card tier-${tierClass} status-${status}" id="card-${c.id}">
+    <div class="card-top">
+      <span class="tier-pill tier-${tierClass}">${tierLabels[c.tier] || c.tier}</span>
+      <span class="site-pill">${escHtml(formatSite(c.disease_site_code))}</span>
+      ${source ? `<span class="source-label">${escHtml(source)}</span>` : ''}
+      ${c.pub_date ? `<span class="date-label">${escHtml(c.pub_date)}</span>` : ''}
+      <span class="top-spacer"></span>
+      <span class="status-pill status-${status}">${statusLabel}</span>
+      ${!c.grounded ? `<span class="warn-pill">⚠ Verify quotes</span>` : ''}
+    </div>
+    <div class="card-body">
+      <div class="card-content">
+        <div class="card-title">${escHtml(c.title)}</div>
+
+        ${gateSignal ? `
+        <div class="card-fields" style="margin-bottom:8px;">
+          <div class="field-row">
+            <span class="field-key">Why surfaced</span>
+            <span class="field-val">${escHtml(gateSignal)}</span>
+          </div>
+        </div>` : ''}
+
+        ${settingLabel || intv ? `
+        <div class="card-fields">
+          ${settingLabel ? `<div class="field-row">
+            <span class="field-key">Clinical setting</span>
+            <span class="field-val strong">${escHtml(settingLabel)}</span>
+          </div>` : ''}
+          ${intv ? `<div class="field-row">
+            <span class="field-key">Intervention</span>
+            <span class="field-val">${escHtml(intv)}</span>
+          </div>` : ''}
+          ${comp ? `<div class="field-row">
+            <span class="field-key">Comparator</span>
+            <span class="field-val">${escHtml(comp)}</span>
+          </div>` : ''}
+          ${rtRel && rtRel !== 'none' ? `<div class="field-row">
+            <span class="field-key">RT relevance</span>
+            <span class="field-val" style="color:var(--hor-color)">${escHtml(cap(rtRel))}</span>
+          </div>` : ''}
+        </div>` : ''}
+
+        ${keyResult ? `
+        <div class="key-result-box">
+          <div class="key-result-label">Key result</div>
+          <div class="key-result-text">${escHtml(keyResult)}</div>
+          ${toxicity ? `<div class="toxicity-text">${escHtml(toxicity)}</div>` : ''}
+        </div>` : ''}
+
+        ${soWhat ? `
+        <div class="so-what-box">
+          <span class="field-key" style="min-width:110px;">So what</span>
+          <span class="so-what-text">${escHtml(soWhat)}</span>
+        </div>` : ''}
+
+        <div class="card-bottom">
+          <span class="badge badge-evidence">Evidence ${escHtml(c.evidence_strength || '?')}</span>
+          <span class="badge badge-score">Impact ${c.impact_score || 0}</span>
+          ${conf ? `<span class="badge badge-conf">${escHtml(conf)} confidence</span>` : ''}
+          ${flags.map(f => `<span class="badge badge-flag">${escHtml(formatLimit(f))}</span>`).join('')}
+          ${c.reject_recommendation ? `<span class="badge badge-warn">⚠ Reject rec.</span>` : ''}
+        </div>
+      </div>
+      <div class="card-actions-col">
+        <button class="act-btn act-approve ${status === 'approved' ? 'active' : ''}"
+          data-id="${c.id}" data-action="approve">
+          ${status === 'approved' ? '✓ Approved' : 'Approve'}
+        </button>
+        <button class="act-btn act-edit" data-id="${c.id}" data-action="edit">Edit</button>
+        <button class="act-btn act-reject ${status === 'rejected' ? 'active' : ''}"
+          data-id="${c.id}" data-action="reject">
+          ${status === 'rejected' ? '✗ Rejected' : 'Reject'}
+        </button>
+      </div>
+    </div>
+    <div class="card-edit-panel" id="edit-${c.id}">
+      <div class="edit-row">
+        <div class="edit-lbl">Intervention</div>
+        <textarea class="edit-inp" id="editintv-${c.id}" rows="2">${escHtml(c.intervention || '')}</textarea>
+      </div>
+      <div class="edit-row">
+        <div class="edit-lbl">So what (one-liner)</div>
+        <textarea class="edit-inp" id="editliner-${c.id}" rows="2">${escHtml(oneLiner)}</textarea>
+      </div>
+      <div class="edit-row">
+        <div class="edit-lbl">Tier override</div>
+        <select class="edit-sel" id="edittier-${c.id}">
+          <option value="A" ${c.tier === 'A' ? 'selected' : ''}>Practice-Impacting ■■■ (A)</option>
+          <option value="B" ${c.tier === 'B' ? 'selected' : ''}>Incremental ■■ (B)</option>
+          <option value="C" ${c.tier === 'C' ? 'selected' : ''}>Horizon ■ (C)</option>
+        </select>
+      </div>
+      <div class="edit-row">
+        <div class="edit-lbl">Editor notes (internal)</div>
+        <input class="edit-inp" type="text" id="editnotes-${c.id}"
+          value="${escHtml(c.editor_notes || '')}" placeholder="Optional note…" />
+      </div>
+      <div class="edit-actions">
+        <button class="edit-save" data-id="${c.id}" data-action="save">Save</button>
+        <button class="edit-cancel" data-id="${c.id}" data-action="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// EVENTS
+// ─────────────────────────────────────────────
+function bindEvents() {
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', handleCardAction);
+  });
+
+  document.querySelectorAll('[data-tier]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const tier = e.target.dataset.tier;
+      candidates.filter(c => c.tier === tier).forEach(c => updateCandidateStatus(c.id, 'approved'));
+      renderDashboard();
+      showToast('All approved', 'success');
+    });
+  });
+
+  document.getElementById('publishBtn')?.addEventListener('click', () => {
+    const app = candidates.filter(c => editorStatus(c.status) === 'approved');
+    const pi  = app.filter(c => c.tier === 'A');
+    document.getElementById('publishModalBody').innerHTML =
+      `This will publish <strong style="color:var(--text)">${app.length} approved items</strong> to the app.
+       <strong style="color:var(--green)">${pi.length} Practice-Impacting push notification${pi.length !== 1 ? 's' : ''}</strong> will be sent to subscribers.`;
+    document.getElementById('publishModal').classList.add('open');
+  });
+
+  document.getElementById('publishConfirmBtn').addEventListener('click', handlePublish);
+  document.getElementById('publishCancelBtn').addEventListener('click', () => {
+    document.getElementById('publishModal').classList.remove('open');
+  });
+}
+
+function handleCardAction(e) {
+  const id     = e.currentTarget.dataset.id;
+  const action = e.currentTarget.dataset.action;
+
+  if (action === 'approve') {
+    const c = candidates.find(x => x.id === id);
+    updateCandidateStatus(id, editorStatus(c.status) === 'approved' ? 'pending' : 'approved');
+    renderDashboard();
+  } else if (action === 'reject') {
+    const c = candidates.find(x => x.id === id);
+    updateCandidateStatus(id, editorStatus(c.status) === 'rejected' ? 'pending' : 'rejected');
+    renderDashboard();
+  } else if (action === 'edit') {
+    document.getElementById(`edit-${id}`).classList.toggle('open');
+  } else if (action === 'save') {
+    const liner  = document.getElementById(`editliner-${id}`).value.trim();
+    const tier   = document.getElementById(`edittier-${id}`).value;
+    const notes  = document.getElementById(`editnotes-${id}`).value.trim();
+    const intv   = document.getElementById(`editintv-${id}`).value.trim();
+    updateCandidateEdit(id, { carcinos_one_liner: liner, tier, editor_notes: notes, intervention: intv });
+    renderDashboard();
+    showToast('Changes saved', 'success');
+  } else if (action === 'cancel') {
+    document.getElementById(`edit-${id}`).classList.remove('open');
+  }
+}
+
+// ─────────────────────────────────────────────
+// DATA UPDATES
+// ─────────────────────────────────────────────
+async function currentEditorId() {
+  if (DEMO_MODE) return null;
+  const { data } = await sbClient.auth.getUser();
+  return data?.user?.id || null;
+}
+
+async function updateCandidateStatus(id, editorAction) {
+  const c = candidates.find(x => x.id === id);
+  if (!c) return;
+  let newStatus, patch;
+  if (editorAction === 'approved') {
+    newStatus = 'APPROVED';
+    const actorId = await currentEditorId();
+    patch = { status: newStatus, approved_by: actorId, approved_at: new Date().toISOString(),
+              rejected_by: null, rejected_at: null };
+  } else if (editorAction === 'rejected') {
+    newStatus = 'REJECTED';
+    const actorId = await currentEditorId();
+    patch = { status: newStatus, rejected_by: actorId, rejected_at: new Date().toISOString(),
+              approved_by: null, approved_at: null };
+  } else {
+    newStatus = 'EXTRACTED';
+    patch = { status: newStatus, approved_by: null, approved_at: null,
+              rejected_by: null, rejected_at: null };
+  }
+  c.status = newStatus;
+  if (!DEMO_MODE && sbClient) {
+    const { error } = await sbClient.from('alerts').update(patch).eq('id', id);
+    if (error) console.error('updateCandidateStatus failed', error);
+  }
+}
+
+async function updateCandidateEdit(id, updates) {
+  const c = candidates.find(x => x.id === id);
+  if (!c) return;
+  if ('tier' in updates)              c.tier = updates.tier;
+  if ('carcinos_one_liner' in updates) c.carcinos_one_liner = updates.carcinos_one_liner;
+  if ('editor_notes' in updates)      c.editor_notes = updates.editor_notes;
+  if ('intervention' in updates)      c.intervention = updates.intervention;
+
+  if (!DEMO_MODE && sbClient) {
+    const merged = { ...(c._summary_json || {}) };
+    if ('carcinos_one_liner' in updates) merged.carcinos_one_liner = updates.carcinos_one_liner;
+    if ('editor_notes' in updates)       merged.editor_notes = updates.editor_notes;
+    if ('intervention' in updates)       merged.intervention = updates.intervention;
+    c._summary_json = merged;
+    const patch = { summary_json: merged };
+    if ('tier' in updates) patch.tier = updates.tier;
+    const { error } = await sbClient.from('alerts').update(patch).eq('id', id);
+    if (error) console.error('updateCandidateEdit failed', error);
+  }
+}
+
+async function handlePublish() {
+  document.getElementById('publishModal').classList.remove('open');
+  const btn = document.getElementById('publishBtn');
+  btn.textContent = 'Publishing…'; btn.disabled = true;
+
+  if (!DEMO_MODE && sbClient) {
+    const ids = candidates.filter(c => c.status === 'APPROVED').map(c => c.id);
+    if (ids.length > 0) {
+      const { error } = await sbClient.from('alerts')
+        .update({ status: 'PUBLISHED', published_at: new Date().toISOString() })
+        .in('id', ids);
+      if (error) {
+        console.error('publish failed', error);
+        showToast('Publish failed — see console', 'error');
+        btn.textContent = 'Publish Digest →'; btn.disabled = false;
+        return;
+      }
+    }
+  }
+  showToast('Digest published', 'success');
+  setTimeout(() => { btn.textContent = 'Published ✓'; }, 400);
+}
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatSite(site) {
+  return {
+    breast: 'Breast', thoracic: 'Thoracic', gastrointestinal: 'GI',
+    gu: 'GU', gynecologic: 'Gynecologic', hematologic: 'Hematology',
+    cns: 'CNS', head_neck: 'Head & Neck', cutaneous: 'Cutaneous', sarcoma: 'Sarcoma'
+  }[site] || site || '';
+}
+
+function formatSetting(s) {
+  if (!s) return '';
+  return {
+    metastatic:       'Metastatic',
+    locally_advanced: 'Locally advanced',
+    localized:        'Localized',
+    adjuvant:         'Adjuvant',
+    neoadjuvant:      'Neoadjuvant',
+    definitive:       'Definitive',
+    recurrent:        'Recurrent / refractory',
+    METASTATIC:       'Metastatic',
+    LOCALLY_ADVANCED: 'Locally advanced',
+    LOCALIZED:        'Localized',
+    ADJUVANT:         'Adjuvant',
+    NEOADJUVANT:      'Neoadjuvant',
+    DEFINITIVE:       'Definitive',
+    RECURRENT:        'Recurrent / refractory',
+  }[s] || s.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase());
+}
+
+function editorStatus(status) {
+  if (status === 'APPROVED') return 'approved';
+  if (status === 'REJECTED') return 'rejected';
+  return 'pending';
+}
+
+function formatLimit(l) {
+  return {
+    immature_os:              'OS immature',
+    surrogate_endpoint_only:  'Surrogate endpoint',
+    single_arm:               'Single arm',
+    small_n:                  'Small N',
+    subgroup_only:            'Subgroup',
+    observational_confounding:'Observational',
+    access_generalizability:  'Access limits',
+    post_hoc:                 'Post-hoc',
+  }[l] || l;
+}
+
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `toast ${type} show`;
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function updateNavWeek() {
+  const now  = new Date();
+  const opts = { month: 'long', day: 'numeric', year: 'numeric' };
+  document.getElementById('navWeek').textContent = `Week of ${now.toLocaleDateString('en-US', opts)}`;
+}
+
+// ─────────────────────────────────────────────
+// START
+// ─────────────────────────────────────────────
+function loadSupabaseAndInit() {
+  if (DEMO_MODE) { init(); return; }
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.onload = () => init();
+  script.onerror = () => {
+    document.getElementById('loginError').textContent = 'Failed to load auth library.';
+  };
+  document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', loadSupabaseAndInit);
+</script>
+</body>
+</html>

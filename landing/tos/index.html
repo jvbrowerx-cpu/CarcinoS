@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Terms of Service — CarcinoS</title>
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --green: #6ab87a;
+        --white: #ffffff;
+        --grey: rgba(255,255,255,0.55);
+        --border: rgba(255,255,255,0.1);
+        --dark: #080808;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+        background: var(--dark);
+        color: var(--white);
+        font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+    }
+    nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        background: rgba(8,8,8,0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        z-index: 100;
+    }
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--white);
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.3px;
+    }
+    .nav-logo {
+        width: 30px; height: 30px;
+        border: 1.5px solid rgba(255,255,255,0.4);
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 800;
+        color: var(--green);
+    }
+    .nav-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--white);
+        letter-spacing: -0.3px;
+    }
+    .nav-name .s { color: var(--green); }
+    .nav-back {
+        font-size: 13px;
+        color: var(--grey);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .nav-back:hover { color: var(--white); }
+    .page-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 120px 32px 100px;
+    }
+    .legal-notice {
+        background: rgba(106,184,122,0.08);
+        border: 1px solid rgba(106,184,122,0.25);
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 13px;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 48px;
+        line-height: 1.5;
+    }
+    .legal-notice strong { color: var(--green); }
+    h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+    }
+    .meta {
+        font-size: 13px;
+        color: var(--grey);
+        margin-bottom: 56px;
+    }
+    h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--white);
+        margin: 48px 0 12px;
+        letter-spacing: -0.2px;
+    }
+    h2::before {
+        content: '';
+    }
+    p {
+        color: rgba(255,255,255,0.7);
+        margin-bottom: 16px;
+    }
+    ul {
+        margin: 0 0 16px 20px;
+        color: rgba(255,255,255,0.7);
+    }
+    ul li { margin-bottom: 8px; }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .disclaimer-box {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-left: 3px solid var(--green);
+        border-radius: 0 8px 8px 0;
+        padding: 16px 20px;
+        margin: 24px 0;
+        font-size: 14px;
+        color: rgba(255,255,255,0.75);
+        line-height: 1.6;
+    }
+    footer {
+        border-top: 1px solid var(--border);
+        padding: 32px;
+        text-align: center;
+        font-size: 12px;
+        color: rgba(255,255,255,0.25);
+    }
+    footer a { color: rgba(255,255,255,0.4); }
+    @media (max-width: 600px) {
+        nav { padding: 0 16px; }
+        .page-wrap { padding: 100px 20px 80px; }
+    }
+    </style>
+</head>
+<body>
+    <nav>
+        <a class="nav-brand" href="../">
+            <div class="nav-logo">CS</div>
+            <div class="nav-name">Carcino<span class="s">S</span></div>
+        </a>
+        <a class="nav-back" href="../">← Back</a>
+    </nav>
+
+    <div class="page-wrap">
+
+        <div class="legal-notice">
+            <strong>Note for legal review:</strong> This document is a draft prepared as a starting point.
+            It should be reviewed and finalized by qualified legal counsel before going live,
+            particularly the arbitration clause, limitation of liability cap, and jurisdiction provisions.
+        </div>
+
+        <h1>Terms of Service</h1>
+        <p class="meta">Last updated: July 2026 &nbsp;·&nbsp; CarcinoS LLC</p>
+
+        <p>Please read these Terms of Service ("Terms") carefully before using the CarcinoS platform,
+        website, mobile application, and weekly digest (collectively, the "Service") operated by
+        CarcinoS LLC ("CarcinoS," "we," "us," or "our"). By accessing or using the Service you agree
+        to be bound by these Terms. If you do not agree, do not use the Service.</p>
+
+        <h2>Educational and Informational Purpose Only</h2>
+        <div class="disclaimer-box">
+            CarcinoS is an educational and informational platform. All content — including article
+            summaries, AI-generated triage classifications, editor commentary, and weekly digests —
+            is provided for general informational and educational purposes only.
+        </div>
+        <p>The Service does <strong>not</strong>:</p>
+        <ul>
+            <li>Constitute or provide medical advice, diagnosis, or treatment recommendations;</li>
+            <li>Establish or imply a physician-patient, physician-physician, or any other clinical relationship;</li>
+            <li>Substitute for your independent review of primary literature, FDA prescribing information,
+                NCCN guidelines, institutional protocols, or your own clinical judgment;</li>
+            <li>Guarantee the completeness, accuracy, timeliness, or applicability of any information
+                to any individual patient or clinical scenario.</li>
+        </ul>
+        <p>You remain solely and fully responsible for all clinical decisions and patient care.
+        CarcinoS expressly disclaims any responsibility for patient outcomes arising from reliance
+        on the Service.</p>
+
+        <h2>Scope of Service</h2>
+        <p>CarcinoS is designed to identify and summarize clinically relevant oncology literature
+        using automated and editorial processes. While we strive for comprehensive and timely
+        coverage, the Service does not guarantee identification of every relevant publication,
+        conference presentation, regulatory action, or guideline update. Users are responsible
+        for exercising independent clinical judgment and consulting primary sources when making
+        patient care decisions.</p>
+
+        <h2>No Substitute for Primary Literature</h2>
+        <p>The summaries and classifications provided by CarcinoS are intended to help clinicians
+        identify potentially relevant oncology evidence, not to replace it. We strongly encourage
+        users to:</p>
+        <ul>
+            <li>Review the primary paper before acting on any clinical information;</li>
+            <li>Consult current FDA prescribing information and labeling;</li>
+            <li>Apply current NCCN, ASCO, ASTRO, or other applicable society guidelines;</li>
+            <li>Follow institutional policies and tumor board recommendations;</li>
+            <li>Exercise independent clinical judgment in all patient care decisions.</li>
+        </ul>
+
+        <h2>Eligibility</h2>
+        <p>The Service is intended for use by licensed healthcare professionals, researchers, and
+        individuals engaged in oncology-related education. By using the Service, you represent that
+        you are at least 18 years of age and have the legal capacity to enter into a binding agreement.
+        The Service is not intended for use by patients seeking personal medical advice.</p>
+
+        <h2>Account Registration and Security</h2>
+        <p>To access certain features you must create an account. You agree to provide accurate and
+        complete information and to keep your credentials confidential. You are responsible for all
+        activity that occurs under your account. Notify us immediately at
+        <a href="mailto:info@carcino-s.com">info@carcino-s.com</a> if you suspect unauthorized access.</p>
+
+        <h2>Intellectual Property and Copyright</h2>
+        <p>All original content on the Service — including but not limited to the AI triage system,
+        editorial framework, interface design, and original summaries — is the intellectual property
+        of CarcinoS LLC and is protected by applicable copyright, trademark, and other laws.</p>
+        <p>CarcinoS summaries are original works and are not reproductions of underlying publications.
+        We do not reproduce figures, tables, or substantial verbatim portions of third-party papers.
+        Links to primary sources (DOI, PubMed) are provided to direct users to the original works.
+        If you believe any content infringes your copyright, contact us at
+        <a href="mailto:info@carcino-s.com">info@carcino-s.com</a>.</p>
+        <p>You may not reproduce, distribute, publicly display, or create derivative works from
+        CarcinoS content without our prior written consent, except as permitted by fair use or
+        applicable law.</p>
+
+        <h2>Acceptable Use</h2>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Use the Service in any manner that violates applicable laws or regulations;</li>
+            <li>Reproduce or redistribute digest content commercially without permission;</li>
+            <li>Attempt to reverse-engineer, scrape, or systematically harvest content from the Service;</li>
+            <li>Share login credentials or otherwise circumvent access controls;</li>
+            <li>Use the Service to provide medical advice to patients or to others as if it were
+                an authoritative clinical resource.</li>
+        </ul>
+
+        <h2>Disclaimers and Limitation of Liability</h2>
+        <div class="disclaimer-box">
+            THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
+            EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+            PURPOSE, ACCURACY, OR NON-INFRINGEMENT.
+        </div>
+        <p>CarcinoS does not warrant that:</p>
+        <ul>
+            <li>Information in the Service is accurate, complete, current, or free from errors;</li>
+            <li>The Service will be available without interruption or error;</li>
+            <li>Summaries reflect the current state of the literature or clinical practice;</li>
+            <li>AI-generated triage classifications are correct in any individual instance.</li>
+        </ul>
+        <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, CARCINOS LLC AND ITS OFFICERS,
+        DIRECTORS, EMPLOYEES, AND AFFILIATES WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL,
+        SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA,
+        OR GOODWILL, ARISING FROM YOUR USE OF OR INABILITY TO USE THE SERVICE, EVEN IF ADVISED
+        OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+        <p>IN NO EVENT WILL CARCINOS'S TOTAL LIABILITY TO YOU EXCEED THE GREATER OF (A) THE
+        AMOUNT YOU PAID TO CARCINOS IN THE TWELVE MONTHS PRECEDING THE CLAIM OR (B) ONE HUNDRED
+        U.S. DOLLARS ($100).</p>
+        <p><em>[Counsel should review the liability cap and ensure it is appropriate for your jurisdiction
+        and insurance coverage.]</em></p>
+
+        <h2>Indemnification</h2>
+        <p>You agree to indemnify and hold harmless CarcinoS LLC and its officers, directors,
+        employees, and agents from any claims, liabilities, damages, losses, and expenses
+        (including reasonable attorneys' fees) arising out of or related to: (a) your use of the
+        Service; (b) your violation of these Terms; or (c) any patient care decision or clinical
+        action you take in reliance on information from the Service.</p>
+
+        <h2>Dispute Resolution and Arbitration</h2>
+        <p>Any dispute arising from these Terms or the Service will be resolved by binding individual
+        arbitration under the rules of the American Arbitration Association (AAA), conducted in
+        [State], [Country]. You waive any right to participate in a class-action lawsuit or
+        class-wide arbitration.</p>
+        <p><em>[Counsel should confirm the jurisdiction, governing law, and whether arbitration is
+        appropriate given your user base.]</em></p>
+
+        <h2>Changes to These Terms</h2>
+        <p>We may update these Terms from time to time. If we make material changes, we will notify
+        registered users by email and update the "Last updated" date above. Continued use of the
+        Service after changes become effective constitutes acceptance of the revised Terms.</p>
+
+        <h2>Termination</h2>
+        <p>CarcinoS reserves the right to suspend or terminate your access at any time, with or
+        without notice, for any violation of these Terms or for any other reason at our sole
+        discretion.</p>
+
+        <h2>Contact</h2>
+        <p>Questions about these Terms? Contact us at
+        <a href="mailto:info@carcino-s.com">info@carcino-s.com</a> or write to:
+        CarcinoS LLC, [Address — to be added].</p>
+
+    </div>
+
+    <footer>
+        <p>© 2026 CarcinoS LLC &nbsp;·&nbsp;
+            <a href="../tos/">Terms of Service</a> &nbsp;·&nbsp;
+            <a href="../privacy/">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="mailto:info@carcino-s.com">Contact</a>
+        </p>
+        <p style="margin-top:8px;">CarcinoS provides oncology literature summaries for educational purposes only.
+        Not medical advice. Not a substitute for clinical judgment.</p>
+    </footer>
+</body>
+</html>

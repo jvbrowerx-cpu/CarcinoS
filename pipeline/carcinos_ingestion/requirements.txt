@@ -1,5 +1,0 @@
-requests>=2.31
-openai>=1.40
-supabase>=2.5
-python-dotenv>=1.0
-feedparser>=3.0

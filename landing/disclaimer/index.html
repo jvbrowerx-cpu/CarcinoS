@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Medical Disclaimer — CarcinoS</title>
+    <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+        --green: #72a37a;
+        --white: #ffffff;
+        --grey: rgba(255,255,255,0.55);
+        --border: rgba(255,255,255,0.1);
+        --dark: #080808;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+        background: var(--dark);
+        color: var(--white);
+        font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+    }
+    nav {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        background: rgba(8,8,8,0.9);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        z-index: 100;
+    }
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: var(--white);
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: -0.3px;
+    }
+    .nav-logo {
+        width: 30px; height: 30px;
+        border: 1.5px solid rgba(255,255,255,0.4);
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 13px; font-weight: 800;
+        color: #fff;
+    }
+    .nav-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--white);
+        letter-spacing: -0.3px;
+    }
+    .nav-name .s { color: var(--green); }
+    .nav-back {
+        font-size: 13px;
+        color: var(--grey);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .nav-back:hover { color: var(--white); }
+    .page-wrap {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 120px 32px 100px;
+    }
+    h1 {
+        font-size: clamp(28px, 4vw, 40px);
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+    }
+    .meta {
+        font-size: 13px;
+        color: var(--grey);
+        margin-bottom: 56px;
+    }
+    h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--white);
+        margin: 48px 0 12px;
+        letter-spacing: -0.2px;
+    }
+    h2::before {
+        content: '';
+    }
+    p {
+        color: rgba(255,255,255,0.7);
+        margin-bottom: 16px;
+    }
+    a { color: var(--green); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer {
+        border-top: 1px solid var(--border);
+        padding: 32px;
+        text-align: center;
+        font-size: 12px;
+        color: rgba(255,255,255,0.25);
+    }
+    footer a { color: rgba(255,255,255,0.4); }
+    @media (max-width: 600px) {
+        nav { padding: 0 16px; }
+        .page-wrap { padding: 100px 20px 80px; }
+    }
+    </style>
+</head>
+<body>
+    <nav>
+        <a class="nav-brand" href="../">
+            <div class="nav-logo">C<span style="color:var(--green)">S</span></div>
+            <div class="nav-name">Carcino<span class="s">S</span></div>
+        </a>
+        <a class="nav-back" href="../">← Back</a>
+    </nav>
+
+    <div class="page-wrap">
+
+        <h1>Medical Disclaimer</h1>
+        <p class="meta">CarcinoS LLC</p>
+
+        <h2>Educational Purpose</h2>
+        <p>CarcinoS is an oncology intelligence platform that identifies and summarizes clinically
+        relevant literature for educational purposes. All content — including article summaries,
+        AI-generated triage classifications, editor commentary, and weekly digests — is intended
+        to help clinicians stay informed about developments in the literature. It is not intended
+        to provide medical advice, diagnosis, or treatment recommendations.</p>
+
+        <h2>Not a Substitute for Clinical Judgment</h2>
+        <p>Content published by CarcinoS does not replace:</p>
+        <p style="padding-left:20px; border-left: 2px solid rgba(114,163,122,0.35); color:rgba(255,255,255,0.65);">
+            Independent review of the primary literature &nbsp;·&nbsp;
+            FDA prescribing information and drug labeling &nbsp;·&nbsp;
+            NCCN, ASCO, ASTRO, or other applicable society guidelines &nbsp;·&nbsp;
+            Institutional protocols and tumor board recommendations &nbsp;·&nbsp;
+            Your own clinical judgment in individual patient situations
+        </p>
+        <p>We strongly encourage users to consult the source paper directly before acting on any
+        clinical information. Links to primary sources (DOI, PubMed) are provided for this purpose.</p>
+
+        <h2>Scope of Service</h2>
+        <p>CarcinoS is designed to identify and summarize clinically relevant oncology literature
+        using automated and editorial processes. While we strive for comprehensive and timely
+        coverage, the Service does not guarantee identification of every relevant publication,
+        conference presentation, regulatory action, or guideline update. Users are responsible
+        for exercising independent clinical judgment and consulting primary sources when making
+        patient care decisions.</p>
+
+        <h2>No Physician-Patient Relationship</h2>
+        <p>Use of this Service does not create a physician-patient relationship, a
+        clinician-patient relationship, or any other professional relationship between CarcinoS
+        and any user or patient.</p>
+
+        <h2>Questions</h2>
+        <p>For questions about this disclaimer, or to report a content concern, contact us at
+        <a href="mailto:info@carcino-s.com">info@carcino-s.com</a>.</p>
+
+        <p style="margin-top: 40px;">
+            See also: <a href="../tos/">Terms of Service</a> &nbsp;·&nbsp;
+            <a href="../privacy/">Privacy Policy</a>
+        </p>
+
+    </div>
+
+    <footer>
+        <p>© 2026 CarcinoS LLC &nbsp;·&nbsp;
+            <a href="../tos/">Terms of Service</a> &nbsp;·&nbsp;
+            <a href="../privacy/">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="../disclaimer/">Medical Disclaimer</a> &nbsp;·&nbsp;
+            <a href="mailto:info@carcino-s.com">Contact</a>
+        </p>
+    </footer>
+</body>
+</html>

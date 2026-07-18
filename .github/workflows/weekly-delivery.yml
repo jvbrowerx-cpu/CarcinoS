@@ -1,0 +1,52 @@
+name: Weekly Digest Delivery
+
+on:
+  schedule:
+    - cron: '0 23 * * 2'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days to look back (default 7)'
+        required: false
+        default: '7'
+      dry_run:
+        description: 'Dry run — print recipients without sending'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          cd pipeline
+          pip install -r carcinos_ingestion/requirements.txt
+      - name: Run delivery script
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:            ${{ secrets.RESEND_API_KEY }}
+          CARCINOS_FROM_EMAIL:       ${{ secrets.CARCINOS_FROM_EMAIL }}
+        run: |
+          cd pipeline
+          DAYS="${{ github.event.inputs.days }}"
+          DAYS="${DAYS:-7}"
+          DRY="${{ github.event.inputs.dry_run }}"
+          if [ "$DRY" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          else
+            DRY_FLAG=""
+          fi
+          echo "Running delivery: days=$DAYS dry_run=${DRY:-false}"
+          python -m carcinos_ingestion.deliver --days $DAYS $DRY_FLAG

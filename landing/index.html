@@ -1,0 +1,3266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>CarcinoS — Personalized Oncology Intelligence</title>
+    <style>
+    *, * ::before, * ::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    :root {
+        --green: #72a37a;
+        --green-dim: rgba(114, 163, 122, 0.15);
+        --green-glow: rgba(114, 163, 122, 0.08);
+        --white: #ffffff;
+        --grey: rgba(255, 255, 255, 0.55);
+        --grey-dim: rgba(255, 255, 255, 0.35);
+        --border: rgba(255, 255, 255, 0.14);
+        --border-dim: rgba(255, 255, 255, 0.08);
+        --black: #000000;
+        --dark: #080808;
+    }
+    html {
+        scroll-behavior: smooth;
+    }
+    body {
+        background: var(--black);
+        color: var(--white);
+        font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+    #starfield {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+    nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 48px;
+        height: 60px;
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-dim);
+    }
+    .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+    }
+    .nav-logo {
+        width: 34px;
+        height: 34px;
+        border: 1.5px solid rgba(255, 255, 255, 0.6);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.04);
+        font-family: Georgia, serif;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.4px;
+    }
+    .nav-wordmark {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--white);
+        letter-spacing: -0.3px;
+    }
+    .nav-wordmark .s {
+        color: var(--green);
+    }
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 36px;
+        list-style: none;
+    }
+    /* Hidden on desktop, shown only on mobile */
+    .nav-mobile-actions {
+        display: none;
+    }
+    .nav-links a {
+        font-size: 14px;
+        color: var(--grey);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .nav-links a:hover {
+        color: var(--white);
+    }
+    section {
+        position: relative;
+        z-index: 1;
+    }
+    .hero {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 120px 48px 0;
+    }
+    .hero-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 60px;
+        align-items: center;
+    }
+    .hero-h1 {
+        font-size: clamp(42px, 5.5vw, 68px);
+        font-weight: 700;
+        line-height: 1.08;
+        letter-spacing: -1.5px;
+        margin-bottom: 20px;
+    }
+    .hero-h1 .green {
+        color: var(--green);
+    }
+    .hero-sub {
+        font-size: 17px;
+        color: var(--grey);
+        max-width: 480px;
+        line-height: 1.6;
+    }
+    .phone-wrap {
+        display: flex;
+        justify-content: center;
+    }
+    .phone {
+        width: 260px;
+        height: 520px;
+        background: #111;
+        border-radius: 36px;
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8), 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 40px rgba(114, 163, 122, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    .phone-notch {
+        width: 80px;
+        height: 22px;
+        background: #111;
+        border-radius: 0 0 14px 14px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 2;
+        border: 1.5px solid rgba(255, 255, 255, 0.1);
+        border-top: none;
+    }
+    .phone-screen {
+        background: #0e0e0e;
+        height: calc(100% - 22px);
+        overflow-y: auto;
+        scrollbar-width: none;
+        display: flex;
+        flex-direction: column;
+    }
+    .phone-screen::-webkit-scrollbar {
+        display: none;
+    }
+    .app-statusbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 14px 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .app-statusbar-icons {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+    }
+    .app-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 14px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        flex-shrink: 0;
+    }
+    .app-brand {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+    }
+    .app-brand .cs-box {
+        width: 26px;
+        height: 26px;
+        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+        font-family: Georgia, serif;
+    }
+    .app-week {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .app-search {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .app-status-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 14px;
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.6);
+        flex-shrink: 0;
+    }
+    .app-status-check {
+        color: #72a37a;
+        font-weight: 700;
+    }
+    .app-status-bold {
+        color: #fff;
+        font-weight: 600;
+    }
+    .status-check {
+        color: #72a37a;
+        font-weight: 700;
+    }
+    .status-dot {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    .app-feed {
+        flex: 1;
+        overflow-y: auto;
+        padding: 4px 10px 10px;
+        scrollbar-width: none;
+    }
+    .app-feed::-webkit-scrollbar {
+        display: none;
+    }
+    .app-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    .app-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 14px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .app-card-header.pi {
+        background: #72a37a;
+        color: #fff;
+    }
+    .app-card-header.inc {
+        background: #e4e4e4;
+        color: #222;
+    }
+    .app-card-header.hor {
+        background: #d0d0d0;
+        color: #333;
+    }
+    .app-card-header-count {
+        font-size: 9px;
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.45);
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    .app-card-header.pi .app-card-header-count {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    .app-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 14px;
+        background: #72a37a;
+        color: #fff;
+        border-radius: 14px 14px 0 0;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+    .app-section-header.inc {
+        background: #e4e4e4;
+        color: #222;
+    }
+    .app-section-header.hor {
+        background: #d0d0d0;
+        color: #333;
+    }
+    .app-sec-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: inherit;
+    }
+    .app-sec-count {
+        font-size: 9px;
+        color: rgba(0, 0, 0, 0.45);
+        font-weight: 500;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+    .app-section-header.pi .app-sec-count {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    .app-card-entry {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        background: #fff;
+        gap: 8px;
+    }
+    .app-card-entry:first-of-type {
+        border-top: none;
+    }
+    .ace-body {
+        flex: 1;
+    }
+    .ace-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.35;
+        margin-bottom: 3px;
+    }
+    .ace-meta {
+        font-size: 9.5px;
+        color: #888;
+        margin-bottom: 2px;
+    }
+    .ace-result {
+        font-size: 9.5px;
+        color: #888;
+    }
+    .ace-result.green {
+        color: #72a37a;
+    }
+    .ace-chevron {
+        font-size: 12px;
+        color: rgba(0, 0, 0, 0.25);
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .app-entry {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        gap: 8px;
+        background: #fff;
+    }
+    .app-entry:first-of-type {
+        border-top: none;
+    }
+    .app-entry-body {
+        flex: 1;
+    }
+    .app-entry-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.35;
+        margin-bottom: 3px;
+    }
+    .app-entry-meta {
+        font-size: 9.5px;
+        color: #888;
+        margin-bottom: 2px;
+    }
+    .app-entry-result {
+        font-size: 9.5px;
+        color: #888;
+    }
+    .app-entry-result.green {
+        color: #72a37a;
+    }
+    .app-chevron {
+        color: rgba(0, 0, 0, 0.25);
+        font-size: 12px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .app-tabbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        padding: 8px 0 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        background: #111;
+        flex-shrink: 0;
+    }
+    .app-tab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.45);
+        min-width: 60px;
+    }
+    .app-tab.active {
+        color: #72a37a;
+    }
+    .app-tab-icon {
+        font-size: 16px;
+    }
+    .phone-home-bar {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+    .feature-row {
+        max-width: 1100px;
+        margin: 60px auto 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+    }
+    .feature-box {
+        padding: 28px 28px 32px;
+        border-right: 1px solid var(--border);
+        text-align: center;
+    }
+    .feature-box:last-child {
+        border-right: none;
+    }
+    .feature-box-title {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: 12px;
+        letter-spacing: -0.2px;
+    }
+    .feature-box-desc {
+        font-size: 14px;
+        color: var(--grey);
+        line-height: 1.5;
+    }
+    .quote-section {
+        padding: 100px 48px;
+        text-align: center;
+    }
+    .quote-inner {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .quote-text {
+        font-size: clamp(20px, 2.8vw, 28px);
+        font-style: italic;
+        color: var(--white);
+        line-height: 1.5;
+        letter-spacing: -0.3px;
+        opacity: 0.9;
+    }
+    .appstore-section {
+        padding: 20px 48px 100px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    .store-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        border-radius: 12px;
+        text-decoration: none;
+        color: var(--white);
+        background: rgba(255, 255, 255, 0.05);
+        transition: background 0.2s, border-color 0.2s;
+        min-width: 190px;
+    }
+    .store-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+    .store-icon {
+        font-size: 28px;
+        line-height: 1;
+    }
+    .store-text-top {
+        font-size: 10px;
+        color: var(--grey);
+        line-height: 1.2;
+    }
+    .store-text-bot {
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .stats-section {
+        background: var(--dark);
+        padding: 100px 48px;
+    }
+    .stats-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .stats-headline {
+        font-size: clamp(32px, 4.5vw, 52px);
+        font-weight: 700;
+        letter-spacing: -1px;
+        margin-bottom: 12px;
+    }
+    .stats-subline {
+        font-size: 17px;
+        color: var(--grey);
+        margin-bottom: 64px;
+    }
+    .stats-subline .s {
+        color: var(--green);
+    }
+    .stats-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 72px;
+    }
+    .stat-block {
+    }
+    .stat-num {
+        font-size: clamp(32px, 4.5vw, 52px);
+        font-weight: 800;
+        color: var(--green);
+        letter-spacing: -2px;
+        line-height: 1;
+        margin-bottom: 14px;
+    }
+    .stat-label-top {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--white);
+        line-height: 1.4;
+    }
+    .signal-extract {
+        max-width: 960px;
+        margin: 0 auto;
+        height: 280px;
+        display: grid;
+        grid-template-columns: 1fr 110px 1fr;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        overflow: hidden;
+        background: #060609;
+    }
+    .se-feed {
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+        position: relative;
+    }
+    .se-feed::before, .se-feed::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 50px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .se-feed::before {
+        top: 0;
+        background: linear-gradient(to bottom, #060609, transparent);
+    }
+    .se-feed::after {
+        bottom: 0;
+        background: linear-gradient(to top, #060609, transparent);
+    }
+    .se-feed-inner {
+        padding: 8px 14px;
+        animation: seFeedScroll 18s linear infinite;
+    }
+    @keyframes seFeedScroll {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-50%);
+        }
+    }
+    .se-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 0;
+        font-size: 10.5px;
+        color: rgba(255, 255, 255, 0.52);
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .se-row.picked {
+        color: rgba(114, 163, 122, 0.85);
+    }
+    .se-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.12);
+        flex-shrink: 0;
+    }
+    .se-dot.g {
+        background: #72a37a;
+    }
+    .se-badge {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background: rgba(114, 163, 122, 0.2);
+        color: #72a37a;
+        flex-shrink: 0;
+    }
+    .se-center {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 0 10px;
+        position: relative;
+    }
+    .se-cs-icon {
+        width: 52px;
+        height: 52px;
+        border: 1.5px solid rgba(114, 163, 122, 0.55);
+        border-radius: 13px;
+        background: rgba(114, 163, 122, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Georgia, serif;
+        font-size: 18px;
+        font-weight: 800;
+        color: #fff;
+        position: relative;
+        z-index: 1;
+    }
+    .se-cs-icon::after {
+        content: '';
+        position: absolute;
+        inset: -6px;
+        border-radius: 19px;
+        border: 1px solid rgba(114, 163, 122, 0.25);
+        animation: sePulse 2.2s ease-in-out infinite;
+    }
+    @keyframes sePulse {
+        0%, 100% {
+            opacity: 0.2;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+    }
+    .se-label {
+        font-size: 9px;
+        color: rgba(255, 255, 255, 0.35);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        text-align: center;
+    }
+    .se-arrows {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: 100%;
+    }
+    .se-arrow-line {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(114, 163, 122, 0.6), transparent);
+        animation: seArrowFlow 1.8s ease-in-out infinite;
+    }
+    .se-arrow-line:nth-child(2) {
+        animation-delay: 0.6s;
+    }
+    .se-arrow-line:nth-child(3) {
+        animation-delay: 1.2s;
+    }
+    @keyframes seArrowFlow {
+        0% {
+            opacity: 0;
+            transform: scaleX(0.3);
+        }
+        50% {
+            opacity: 1;
+            transform: scaleX(1);
+        }
+        100% {
+            opacity: 0;
+            transform: scaleX(0.3);
+        }
+    }
+    .se-results {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        padding: 24px 18px;
+        border-left: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .se-result-card {
+        background: #fff;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: stretch;
+    }
+    .se-result-tier {
+        padding: 10px 11px;
+        font-size: 9.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+    }
+    .se-result-tier.pi {
+        background: #72a37a;
+        color: #fff;
+    }
+    .se-result-tier.inc {
+        background: #e4e4e4;
+        color: #333;
+    }
+    .se-result-tier.hor {
+        background: #d0d0d0;
+        color: #555;
+    }
+    .se-result-body {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .se-result-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.3;
+    }
+    .se-result-sub {
+        font-size: 9.5px;
+        color: #888;
+        margin-top: 2px;
+    }
+    .hero-audience {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .hero-audience-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--green);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .hero-audience-divider {
+        color: rgba(255, 255, 255, 0.2);
+        font-size: 12px;
+    }
+    .hero-audience-item {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 500;
+    }
+    .hero-credibility {
+        margin-top: 18px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.45);
+    }
+    .disease-section {
+        position: relative;
+        z-index: 1;
+        padding: 48px 48px 0;
+    }
+    .disease-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .disease-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255, 255, 255, 0.3);
+        margin-bottom: 14px;
+    }
+    .disease-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .disease-tag {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        padding: 6px 14px;
+        background: rgba(255, 255, 255, 0.03);
+        font-weight: 500;
+    }
+    .testimonial-section {
+        position: relative;
+        z-index: 1;
+        padding: 100px 48px;
+    }
+    .testimonial-inner {
+        max-width: 760px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .testimonial-quote-mark {
+        font-size: 72px;
+        line-height: 0.6;
+        color: var(--green);
+        font-family: Georgia, serif;
+        opacity: 0.5;
+        margin-bottom: 28px;
+        display: block;
+    }
+    .testimonial-text {
+        font-size: clamp(18px, 2.5vw, 24px);
+        color: var(--white);
+        line-height: 1.55;
+        letter-spacing: -0.2px;
+        font-style: italic;
+        margin-bottom: 28px;
+    }
+    .testimonial-rule {
+        width: 40px;
+        height: 1px;
+        background: var(--green);
+        margin: 0 auto 20px;
+    }
+    .testimonial-attr {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 500;
+    }
+    .testimonial-grid {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+    .testimonial-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 14px;
+        padding: 28px 26px 24px;
+        display: flex;
+        flex-direction: column;
+    }
+    .testimonial-card-mark {
+        font-size: 36px;
+        line-height: 0.7;
+        color: var(--green);
+        font-family: Georgia, serif;
+        opacity: 0.5;
+        margin-bottom: 16px;
+        display: block;
+    }
+    .testimonial-card-text {
+        font-size: 15px;
+        color: rgba(255,255,255,0.85);
+        line-height: 1.6;
+        font-style: italic;
+        flex: 1;
+        margin-bottom: 20px;
+    }
+    .testimonial-card-rule {
+        width: 28px;
+        height: 1px;
+        background: var(--green);
+        margin-bottom: 12px;
+    }
+    .testimonial-card-attr {
+        font-size: 13px;
+        color: rgba(255,255,255,0.35);
+        font-weight: 500;
+    }
+    @media (max-width: 800px) {
+        .testimonial-grid { grid-template-columns: 1fr; }
+    }
+    .faq-section {
+        position: relative;
+        z-index: 1;
+        padding: 80px 48px 100px;
+        background: var(--dark);
+    }
+    .faq-inner {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    .faq-headline {
+        font-size: clamp(26px, 3.5vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.8px;
+        margin-bottom: 8px;
+    }
+    .faq-sub {
+        font-size: 16px;
+        color: var(--grey);
+        margin-bottom: 48px;
+    }
+    .faq-item {
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 22px 0;
+    }
+    .faq-item:last-child {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .faq-q {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        cursor: pointer;
+        list-style: none;
+    }
+    .faq-q::-webkit-details-marker {
+        display: none;
+    }
+    .faq-q-text {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--white);
+        line-height: 1.4;
+    }
+    .faq-icon {
+        font-size: 20px;
+        color: var(--green);
+        flex-shrink: 0;
+        font-weight: 300;
+        transition: transform 0.2s;
+    }
+    details[open] .faq-icon {
+        transform: rotate(45deg);
+    }
+    .faq-a {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.7;
+        padding-top: 14px;
+    }
+    .composite-tagline {
+        font-size: clamp(22px, 3vw, 32px);
+        font-weight: 600;
+        color: var(--green);
+        margin-top: 56px;
+        text-align: center;
+    }
+    .framework-section {
+        padding: 100px 48px;
+        background: var(--black);
+        scroll-margin-top: 60px;
+    }
+    .framework-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .framework-headline {
+        font-size: clamp(28px, 4vw, 48px);
+        font-weight: 700;
+        letter-spacing: -1px;
+        text-align: center;
+        margin-bottom: 14px;
+    }
+    .framework-sub {
+        font-size: 16px;
+        color: var(--grey);
+        text-align: center;
+        max-width: 600px;
+        margin: 0 auto 64px;
+        line-height: 1.6;
+    }
+    .framework-sub .s {
+        color: var(--green);
+    }
+    .framework-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 80px;
+    }
+    .fw-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 14px;
+        padding: 28px 26px 30px;
+        display: flex;
+        flex-direction: column;
+    }
+    .fw-step {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--green);
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+    }
+    .fw-card-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--white);
+        letter-spacing: -0.3px;
+        margin-bottom: 8px;
+    }
+    .fw-card-desc {
+        font-size: 13.5px;
+        color: var(--grey);
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+    .fw-divider {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        margin-bottom: 18px;
+    }
+    .fw-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .fw-list li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .fw-list li::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--green);
+        flex-shrink: 0;
+    }
+    .fw-tier-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .fw-tier-row:last-child {
+        margin-bottom: 0;
+    }
+    .fw-tier-tag {
+        padding: 10px 11px;
+        font-size: 9.5px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .fw-tier-tag.pi {
+        background: #72a37a;
+        color: #fff;
+    }
+    .fw-tier-tag.inc {
+        background: #e4e4e4;
+        color: #333;
+    }
+    .fw-tier-tag.hor {
+        background: #d0d0d0;
+        color: #555;
+    }
+    .fw-tier-info {
+        background: #fff;
+        padding: 10px 13px;
+        flex: 1;
+    }
+    .fw-tier-info-title {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.3;
+    }
+    .fw-tier-info-sub {
+        font-size: 10px;
+        color: #888;
+        margin-top: 2px;
+    }
+    .alert-section {
+        padding: 0 48px 100px;
+    }
+    .alert-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 80px;
+        align-items: center;
+    }
+    .alert-left {
+    }
+    .alert-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 8px;
+    }
+    .alert-bell {
+        font-size: 28px;
+        opacity: 0.85;
+    }
+    .alert-title {
+        font-size: clamp(28px, 3.5vw, 40px);
+        font-weight: 700;
+        letter-spacing: -0.8px;
+    }
+    .alert-title .green {
+        color: var(--green);
+    }
+    .alert-rule {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        margin: 20px 0;
+    }
+    .alert-body {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
+    .notification-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        max-width: 340px;
+    }
+    .notif-icon {
+        width: 38px;
+        height: 38px;
+        background: #000;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .notif-icon span {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--white);
+    }
+    .notif-body {
+        flex: 1;
+    }
+    .notif-sender {
+        font-size: 13px;
+        font-weight: 700;
+        color: #111;
+        margin-bottom: 3px;
+    }
+    .notif-time {
+        font-size: 12px;
+        color: #999;
+        float: right;
+        margin-top: -18px;
+    }
+    .notif-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #111;
+    }
+    .notif-msg {
+        font-size: 13px;
+        color: #444;
+    }
+    .alert-right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .ar-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 14px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: #0e0e0e;
+    }
+    .ar-brand {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+    }
+    .ar-cs {
+        width: 26px;
+        height: 26px;
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+        font-family: Georgia, serif;
+    }
+    .ar-week {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.4);
+    }
+    .ar-status {
+        padding: 8px 14px;
+        font-size: 11px;
+        color: #72a37a;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        background: #0e0e0e;
+        font-weight: 700;
+    }
+    .ar-status span {
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 400;
+    }
+    .ar-pi {
+        background: #72a37a;
+        color: #fff;
+    }
+    .ar-sec {
+        padding: 9px 14px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: none;
+        color: #000;
+    }
+    .ar-sec.ar-pi {
+        background: #72a37a;
+        color: #fff;
+    }
+    .ar-sec:not(.ar-pi) {
+        background: #e4e4e4;
+        color: #222;
+    }
+    .ar-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .ar-item-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #111;
+        line-height: 1.35;
+        margin-bottom: 3px;
+    }
+    .ar-item-sub {
+        font-size: 9.5px;
+        color: #888;
+        margin-bottom: 2px;
+    }
+    .ar-item-res {
+        font-size: 9.5px;
+        color: #888;
+        margin-top: 1px;
+    }
+    footer {
+        background: #0c0c0c;
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        position: relative;
+        z-index: 1;
+    }
+    .footer-inner {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 48px 48px 36px;
+    }
+    .footer-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+    .footer-logo-big {
+        width: 72px;
+        height: 72px;
+        border: 2px solid rgba(255, 255, 255, 0.25);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .footer-logo-big span {
+        font-size: 28px;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: -1px;
+    }
+    .footer-links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 60px;
+    }
+    .footer-links a {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.45);
+        text-decoration: none;
+        transition: color 0.15s;
+    }
+    .footer-links a:hover {
+        color: var(--white);
+    }
+    .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.07);
+        padding-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .footer-copy {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.25);
+    }
+    .section-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 28px;
+    }
+    .section-brand .sb-box {
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid rgba(255, 255, 255, 0.55);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .section-brand .sb-box span {
+        font-family: Georgia, serif;
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.5px;
+        line-height: 1;
+    }
+    .section-brand .sb-wordmark {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.3px;
+    }
+    .section-brand .sb-wordmark .s {
+        color: var(--green);
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.22s ease;
+    }
+    .modal-overlay.open {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .modal-card {
+        background: #0d0d10;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 44px 44px 40px;
+        max-width: 460px;
+        width: 100%;
+        position: relative;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 0, 0, 0.5);
+        transform: translateY(16px);
+        transition: transform 0.22s ease;
+    }
+    .modal-overlay.open .modal-card {
+        transform: translateY(0);
+    }
+    .modal-close {
+        position: absolute;
+        top: 18px;
+        right: 20px;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 22px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 4px;
+        transition: color 0.15s;
+    }
+    .modal-close:hover {
+        color: #fff;
+    }
+    .modal-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 28px;
+    }
+    .modal-brand-box {
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid rgba(255, 255, 255, 0.55);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Georgia, serif;
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+    }
+    .modal-brand-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.2px;
+    }
+    .modal-brand-name .s {
+        color: var(--green);
+    }
+    .modal-eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--green);
+        margin-bottom: 12px;
+    }
+    .modal-headline {
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        margin-bottom: 14px;
+    }
+    .modal-body {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.55);
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+    .modal-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .modal-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 15px;
+        color: #fff;
+        outline: none;
+        transition: border-color 0.15s;
+        font-family: inherit;
+    }
+    .modal-input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+    .modal-input:focus {
+        border-color: var(--green);
+    }
+    .modal-submit {
+        width: 100%;
+        background: var(--green);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        transition: opacity 0.15s;
+        font-family: inherit;
+        letter-spacing: -0.1px;
+    }
+    .modal-submit:hover {
+        opacity: 0.88;
+    }
+    .modal-fine {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.28);
+        text-align: center;
+        margin-top: 14px;
+        line-height: 1.5;
+    }
+    .modal-agree {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-top: 16px;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+    }
+    .modal-agree input[type="checkbox"] {
+        margin-top: 2px;
+        flex-shrink: 0;
+        accent-color: #72a37a;
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+    .modal-agree label {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        line-height: 1.5;
+        cursor: pointer;
+    }
+    .modal-agree label a {
+        color: rgba(114,163,122,0.85);
+        text-decoration: none;
+    }
+    .modal-agree label a:hover { text-decoration: underline; }
+    .modal-success {
+        text-align: center;
+        padding: 20px 0 10px;
+    }
+    .modal-success-icon {
+        font-size: 36px;
+        margin-bottom: 16px;
+    }
+    .modal-success-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+    .modal-success-msg {
+        font-size: 15px;
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 1.6;
+    }
+    /* ── Multi-step modal additions ── */
+    .modal-card {
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+    .modal-step { display: none; }
+    .modal-step.active { display: block; }
+    .modal-step-dots {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 28px;
+    }
+    .modal-step-dot {
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.18);
+        transition: background 0.2s, width 0.2s;
+    }
+    .modal-step-dot.active {
+        background: var(--green);
+        width: 18px;
+        border-radius: 3px;
+    }
+    .modal-step-dot.done { background: rgba(114,163,122,0.4); }
+    .scope-opts {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .scope-btn {
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.12);
+        border-radius: 12px;
+        padding: 16px 18px;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.15s, background 0.15s;
+        width: 100%;
+    }
+    .scope-btn:hover { border-color: rgba(114,163,122,0.5); background: rgba(114,163,122,0.05); }
+    .scope-btn.selected { border-color: var(--green); background: rgba(114,163,122,0.08); }
+    .scope-btn-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 3px;
+    }
+    .scope-btn-sub {
+        font-size: 12px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.4;
+    }
+    .sites-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 14px;
+    }
+    .sites-select-all {
+        font-size: 12px;
+        color: var(--green);
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        font-family: inherit;
+    }
+    .site-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+    .site-check-label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.1);
+        border-radius: 9px;
+        padding: 11px 13px;
+        cursor: pointer;
+        font-size: 13px;
+        color: rgba(255,255,255,0.7);
+        transition: border-color 0.15s, background 0.15s;
+        user-select: none;
+    }
+    .site-check-label:hover { border-color: rgba(114,163,122,0.4); }
+    .site-check-label input { display: none; }
+    .site-check-label.checked {
+        border-color: var(--green);
+        background: rgba(114,163,122,0.07);
+        color: #fff;
+    }
+    .site-check-box {
+        width: 16px; height: 16px;
+        border: 1.5px solid rgba(255,255,255,0.3);
+        border-radius: 4px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: var(--green);
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .site-check-label.checked .site-check-box {
+        border-color: var(--green);
+        background: rgba(114,163,122,0.2);
+    }
+    .delivery-opts {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .delivery-btn {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.12);
+        border-radius: 12px;
+        padding: 15px 18px;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.15s, background 0.15s;
+        width: 100%;
+    }
+    .delivery-btn:hover { border-color: rgba(114,163,122,0.5); }
+    .delivery-btn.selected { border-color: var(--green); background: rgba(114,163,122,0.08); }
+    .delivery-btn-icon { font-size: 20px; line-height: 1; }
+    .delivery-btn-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .delivery-btn-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    .modal-nav {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .modal-back {
+        flex: 0 0 auto;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
+        padding: 13px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.6);
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+    }
+    .modal-back:hover { background: rgba(255,255,255,0.1); }
+    .modal-next {
+        flex: 1;
+        background: var(--green);
+        border: none;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        transition: opacity 0.15s;
+    }
+    .modal-next:hover { opacity: 0.88; }
+    .modal-next:disabled { opacity: 0.4; cursor: not-allowed; }
+    @media (max-width: 800px) {
+        nav {
+            padding: 0 16px;
+        }
+        /* Hide all nav links on mobile — too many to fit */
+        .nav-links {
+            display: none;
+        }
+        /* Show just two key actions as a compact pair */
+        .nav-mobile-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .hero {
+            padding: 100px 20px 0;
+        }
+        .hero-inner {
+            grid-template-columns: 1fr;
+        }
+        .phone-wrap {
+            display: none;
+        }
+        .feature-row {
+            grid-template-columns: 1fr;
+            border-radius: 8px;
+        }
+        .feature-box {
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+        }
+        .feature-box:last-child {
+            border-bottom: none;
+        }
+        .quote-section, .appstore-section, .stats-section, .framework-section, .alert-section {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .testimonial-grid {
+            grid-template-columns: 1fr;
+        }
+        .stats-row, .framework-grid {
+            grid-template-columns: 1fr;
+        }
+        .alert-inner {
+            grid-template-columns: 1fr;
+        }
+        .alert-right {
+            display: none;
+        }
+        .signal-extract {
+            display: none;
+        }
+        .app-composite {
+            flex-direction: column;
+            height: auto;
+        }
+        .composite-left {
+            width: 100%;
+            height: 220px;
+            border-right: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .composite-right {
+            width: 100%;
+            height: 360px;
+        }
+        .testimonial-section,
+        .faq-section {
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .footer-inner {
+            padding: 36px 20px 24px;
+        }
+        .footer-main {
+            justify-content: center;
+            text-align: center;
+        }
+        .footer-links {
+            grid-template-columns: 1fr;
+        }
+    }
+    </style>
+</head>
+<body>
+    <canvas id="starfield">
+    </canvas>
+    <nav>
+        <a class="nav-brand" href="#">
+            <div class="nav-logo">C<span style="color:var(--green)">S</span></div>
+            <span class="nav-wordmark">Carcino<span class="s">S</span></span>
+        </a>
+        <ul class="nav-links">
+            <li>
+                <a href="this-week/">This Week</a>
+            </li>
+            <li>
+                <a href="#framework">How It Works</a>
+            </li>
+            <li>
+                <a href="archive/">Archive</a>
+            </li>
+            <li>
+                <a href="#" id="earlyAccessTrigger">Early Access</a>
+            </li>
+            <li>
+                <a href="mailto:info@carcino-s.com">Contact</a>
+            </li>
+            <li>
+                <a href="admin/" style="opacity:0.45;font-size:0.85em;">Editor</a>
+            </li>
+        </ul>
+        <!-- Mobile-only: shown when .nav-links is hidden -->
+        <div class="nav-mobile-actions">
+            <a href="this-week/" style="font-size:13px;color:rgba(255,255,255,0.7);text-decoration:none;">This Week</a>
+            <a href="#" id="earlyAccessTriggerMobile" style="font-size:13px;font-weight:600;color:#72a37a;text-decoration:none;padding:6px 14px;border:1px solid rgba(114,163,122,0.5);border-radius:20px;">Early Access</a>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-text">
+                <div class="hero-audience">
+                    <span class="hero-audience-label">For clinicians delivering cancer care</span>
+                </div>
+                <h1 class="hero-h1">
+                    Salient
+                    <span class="green">
+                        Oncology
+                        <br>
+                        Updates
+                    </span>
+                </h1>
+                <p class="hero-sub">A personalized oncology intelligence platform that continuously curates the highest-value evidence for your disease sites and notifies you only when a development is likely to change clinical practice.</p>
+                <p class="hero-credibility">Developed by a practicing Oncologist &nbsp;·&nbsp; <span style="color:#72a37a;">Free during early access</span></p>
+            </div>
+            <div class="phone-wrap">
+                <div class="phone">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="app-statusbar">
+                            <span>4:01</span>
+                            <div class="app-statusbar-icons">
+                                <span>▋▋</span>
+                                <span>&#x1F4F6;</span>
+                                <span>▬</span>
+                            </div>
+                        </div>
+                        <div class="app-topbar">
+                            <div class="app-brand">
+                                <div class="cs-box">
+                                    C
+                                    <span style="color:#72a37a">S</span>
+                                </div>
+                                <span>
+                                    Carcino
+                                    <span style="color:#72a37a">S</span>
+                                </span>
+                            </div>
+                            <span class="app-week">Week of Mar 30</span>
+                            <span class="app-search">&#x2315;</span>
+                        </div>
+                        <div class="app-status-row">
+                            <span class="app-status-check">✓</span>
+                            <span class="app-status-bold">Up to date</span>
+                            <span>· Last scan: 2h ago</span>
+                        </div>
+                        <div class="app-feed">
+                            <div class="app-card">
+                                <div class="app-card-header pi">
+                                    PRACTICE IMPACTING
+                                    <span style="color:#000">■■■</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">Tarlatamab improves OS in relapsed SCLC</div>
+                                        <div class="ace-meta">NEJM · Phase III · FDA Approved</div>
+                                        <div class="ace-result">OS HR 0.60 · 13.6 vs 8.3 mo</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">Nivolumab + AVD approved in untreated cHL</div>
+                                        <div class="ace-meta">FDA · SWOG S1826 · Hematology</div>
+                                        <div class="ace-result">3-yr PFS 91% vs 82%</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">Aca + venetoclax all-oral approved in CLL</div>
+                                        <div class="ace-meta">FDA · AMPLIFY · First fixed-duration</div>
+                                        <div class="ace-result green">Practice-changing</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-card-header inc">
+                                    <span>
+                                        INCREMENTAL
+                                        <span style="color:#000">■■</span>
+                                    </span>
+                                    <span class="app-card-header-count">2 updates ›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">TALAPRO-2 final OS in mCRPC</div>
+                                        <div class="ace-meta">The Lancet · Phase III · GU</div>
+                                        <div class="ace-result">OS HR 0.80 · 45.8 vs 37.0 mo</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">Relacorilant approved in platinum-resistant ovarian Ca</div>
+                                        <div class="ace-meta">FDA · ROSELLA · Gynecologic</div>
+                                        <div class="ace-result">OS HR 0.65 · 16.0 vs 11.9 mo</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                            </div>
+                            <div class="app-card">
+                                <div class="app-card-header hor">
+                                    <span>
+                                        HORIZON
+                                        <span style="color:#000">■</span>
+                                    </span>
+                                    <span class="app-card-header-count">4 signals ›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">PATINA: palbociclib in HR+/HER2+ BC</div>
+                                        <div class="ace-meta">NEJM · Phase III · Breast</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                                <div class="app-card-entry">
+                                    <div class="ace-body">
+                                        <div class="ace-title">Belzutifan + lenvatinib vs cabozantinib</div>
+                                        <div class="ace-meta">ASCO GU 2026 · Phase III · RCC</div>
+                                    </div>
+                                    <span class="ace-chevron">›</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="app-tabbar">
+                            <div class="app-tab">
+                                <span class="app-tab-icon">⌂</span>
+                                <span>Home</span>
+                            </div>
+                            <div class="app-tab active">
+                                <span class="app-tab-icon">🔔</span>
+                                <span>Updates</span>
+                            </div>
+                            <div class="app-tab">
+                                <span class="app-tab-icon">👤</span>
+                                <span>Profile</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="feature-row">
+            <div class="feature-box">
+                <div class="feature-box-title">Practice-Impacting Updates</div>
+                <div class="feature-box-desc">Studies with immediate clinical impact for oncologists</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-box-title">Incremental Updates</div>
+                <div class="feature-box-desc">Important studies, not practice changing</div>
+            </div>
+            <div class="feature-box">
+                <div class="feature-box-title">Horizon Discoveries</div>
+                <div class="feature-box-desc">Emerging or early new concepts that may be impactful in the future</div>
+            </div>
+        </div>
+    </section>
+    <section style="position:relative;z-index:1;padding:60px 48px 0;">
+        <p style="max-width:1000px;margin:0 auto;font-size:15px;color:rgba(255,255,255,0.4);letter-spacing:0.1px;">
+                Carcino
+            <span style="color:var(--green)">S</span>
+             quietly monitors the oncology literature and alerts only when practice impacting evidence emerges
+
+        </p>
+    </section>
+    <div class="quote-section">
+        <div class="testimonial-grid">
+            <div class="testimonial-card">
+                <span class="testimonial-card-mark">&ldquo;</span>
+                <p class="testimonial-card-text">Staying current in oncology is a challenge. CarcinoS allows me to focus on patient care while feeling confident I'm not missing the few updates that actually impact my patients.</p>
+                <div class="testimonial-card-rule"></div>
+                <span class="testimonial-card-attr">Radiation Oncologist &nbsp;·&nbsp; Academic Medical Center</span>
+            </div>
+            <div class="testimonial-card">
+                <span class="testimonial-card-mark">&ldquo;</span>
+                <p class="testimonial-card-text">I've tried RSS feeds and journal alerts — they just add noise. CarcinoS gives me exactly what I need to stay current without the cognitive overhead.</p>
+                <div class="testimonial-card-rule"></div>
+                <span class="testimonial-card-attr">Medical Oncologist &nbsp;·&nbsp; Community Cancer Center</span>
+            </div>
+            <div class="testimonial-card">
+                <span class="testimonial-card-mark">&ldquo;</span>
+                <p class="testimonial-card-text">The tier system is the key innovation. Knowing immediately whether something is practice-changing or just worth noting saves me real time every week.</p>
+                <div class="testimonial-card-rule"></div>
+                <span class="testimonial-card-attr">Surgical Oncologist &nbsp;·&nbsp; NCI-Designated Cancer Center</span>
+            </div>
+        </div>
+    </div>
+    <section style="position:relative;z-index:1;padding:0 clamp(20px,4vw,48px) 80px;">
+        <div style="max-width:1000px;margin:0 auto;text-align:center;border:1px solid rgba(114,163,122,0.2);border-radius:14px;background:rgba(114,163,122,0.04);padding:36px clamp(20px,4vw,40px);">
+            <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(114,163,122,0.7);margin-bottom:10px;">Live digest</p>
+            <p style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.3px;margin-bottom:8px;">See what CarcinoS surfaces this week</p>
+            <p style="font-size:15px;color:rgba(255,255,255,0.45);margin-bottom:24px;">Browse the current week's curated oncology updates — no account required.</p>
+            <a href="this-week/" style="display:inline-block;background:rgba(114,163,122,0.15);border:1.5px solid rgba(114,163,122,0.4);border-radius:10px;padding:12px 28px;font-size:15px;font-weight:700;color:#72a37a;text-decoration:none;transition:background 0.2s;" onmouseover="this.style.background='rgba(114,163,122,0.25)'" onmouseout="this.style.background='rgba(114,163,122,0.15)'">View this week's digest →</a>
+        </div>
+    </section>
+    <section class="stats-section">
+        <div class="stats-inner">
+            <div class="section-brand" style="justify-content:center;">
+                <div class="sb-box">
+                    <span>
+                        C
+                        <span style="color:#72a37a">S</span>
+                    </span>
+                </div>
+                <span class="sb-wordmark">
+                    Carcino
+                    <span class="s">S</span>
+                </span>
+            </div>
+            <h2 class="stats-headline">The oncology literature evolves daily</h2>
+            <p class="stats-subline">
+                Carcino
+                <span class="s">S</span>
+                 surfaces and curates what matters
+            </p>
+            <div class="stats-row">
+                <div class="stat-block">
+                    <div class="stat-num">3,000+</div>
+                    <div class="stat-label-top">
+                        Oncology papers
+                        <br>
+                        published monthly
+                        <br>
+                        worldwide
+                    </div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-num">50+</div>
+                    <div class="stat-label-top">Top journals and<br>conference proceedings<br>monitored</div>
+                </div>
+                <div class="stat-block">
+                    <div class="stat-num" style="letter-spacing:-1px;">Limited</div>
+                    <div class="stat-label-top">
+                        Practice-impacting updates
+                        <br>
+                        per year — the ones
+                        <br>
+                        worth acting on
+                    </div>
+                </div>
+            </div>
+            <div class="signal-extract">
+                <div class="se-feed">
+                    <div class="se-feed-inner" id="seFeed">
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Atezolizumab + carboplatin in ES-SCLC · NEJM · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            FOLFOX vs FOLFIRI first-line mCRC · JCO · Phase III
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Tarlatamab OS benefit in relapsed SCLC · NEJM
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Sacituzumab govitecan in HR+ mBC · ASCO 2026
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Lenvatinib + everolimus RCC subgroup · Lancet Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Olaparib maintenance BRCA2+ pancreatic · NEJM
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Nivolumab + AVD in untreated cHL · FDA
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Cabozantinib + atezolizumab HCC phase II · JCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Pembrolizumab neoadjuvant TNBC 3-yr OS · ASCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Tepotinib MET exon 14 NSCLC real-world · Lung Cancer
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Iniparib in TNBC: final survival data · Cancer
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Aca + venetoclax all-oral CLL · FDA AMPLIFY
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Selinexor + bortezomib in MM · Blood · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Ipilimumab + nivolumab MPM 5-yr OS · Lancet
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Lorlatinib vs crizotinib ALK+ NSCLC update · NEJM
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Durvalumab stage III NSCLC PACIFIC 5-yr · JTO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Trastuzumab deruxtecan HER2-low mBC · Breast Cancer Res
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Zanubrutinib vs ibrutinib CLL · NEJM · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Regorafenib mCRC third-line survival · Ann Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Enfortumab vedotin + pembro urothelial · JCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Belantamab mafodotin MM phase II update · Blood
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Tucatinib + trastuzumab HER2+ mCRC · Lancet Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Mirvetuximab IMGN853 platinum-resistant OC · ASCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Cemiplimab cSCC final OS · JCO · Phase II
+                        </div>
+                        <!-- duplicate for seamless loop -->
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Atezolizumab + carboplatin in ES-SCLC · NEJM · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            FOLFOX vs FOLFIRI first-line mCRC · JCO · Phase III
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Tarlatamab OS benefit in relapsed SCLC · NEJM
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Sacituzumab govitecan in HR+ mBC · ASCO 2026
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Lenvatinib + everolimus RCC subgroup · Lancet Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Olaparib maintenance BRCA2+ pancreatic · NEJM
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Nivolumab + AVD in untreated cHL · FDA
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Cabozantinib + atezolizumab HCC phase II · JCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Pembrolizumab neoadjuvant TNBC 3-yr OS · ASCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Tepotinib MET exon 14 NSCLC real-world · Lung Cancer
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Iniparib in TNBC: final survival data · Cancer
+                        </div>
+                        <div class="se-row picked">
+                            <span class="se-dot g"></span>
+                            Aca + venetoclax all-oral CLL · FDA AMPLIFY
+                            <span class="se-badge">■■■</span>
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Selinexor + bortezomib in MM · Blood · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Ipilimumab + nivolumab MPM 5-yr OS · Lancet
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Lorlatinib vs crizotinib ALK+ NSCLC update · NEJM
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Durvalumab stage III NSCLC PACIFIC 5-yr · JTO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Trastuzumab deruxtecan HER2-low mBC · Breast Cancer Res
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Zanubrutinib vs ibrutinib CLL · NEJM · Phase III
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Regorafenib mCRC third-line survival · Ann Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Enfortumab vedotin + pembro urothelial · JCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Belantamab mafodotin MM phase II update · Blood
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Tucatinib + trastuzumab HER2+ mCRC · Lancet Oncol
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Mirvetuximab IMGN853 platinum-resistant OC · ASCO
+                        </div>
+                        <div class="se-row">
+                            <span class="se-dot"></span>
+                            Cemiplimab cSCC final OS · JCO · Phase II
+                        </div>
+                    </div>
+                </div>
+                <div class="se-center">
+                    <div class="se-arrows">
+                        <div class="se-arrow-line"></div>
+                        <div class="se-arrow-line"></div>
+                        <div class="se-arrow-line"></div>
+                    </div>
+                    <div class="se-cs-icon">
+                        C
+                        <span style="color:#72a37a">S</span>
+                    </div>
+                    <div class="se-label">AI triage</div>
+                    <div class="se-arrows">
+                        <div class="se-arrow-line"></div>
+                        <div class="se-arrow-line"></div>
+                        <div class="se-arrow-line"></div>
+                    </div>
+                </div>
+                <div class="se-results">
+                    <div class="se-result-card">
+                        <div class="se-result-tier pi">
+                            <span style="color:#000">■■■</span>
+                             Practice-Impacting
+                        </div>
+                        <div class="se-result-body">
+                            <div class="se-result-title">Tarlatamab · Nivolumab+AVD · Aca+Ven</div>
+                            <div class="se-result-sub">3 studies · immediate action required</div>
+                        </div>
+                    </div>
+                    <div class="se-result-card">
+                        <div class="se-result-tier inc">
+                            <span style="color:#000">■■</span>
+                             Incremental
+                        </div>
+                        <div class="se-result-body">
+                            <div class="se-result-title">TALAPRO-2 · Relacorilant</div>
+                            <div class="se-result-sub">2 updates · noteworthy evidence</div>
+                        </div>
+                    </div>
+                    <div class="se-result-card">
+                        <div class="se-result-tier hor">
+                            <span style="color:#000">■</span>
+                             Horizon
+                        </div>
+                        <div class="se-result-body">
+                            <div class="se-result-title">PATINA · Belzutifan · +3 more</div>
+                            <div class="se-result-sub">5 signals · watch &amp; monitor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p class="composite-tagline">Structured monitoring. Reduced clinical noise.</p>
+        </div>
+    </section>
+    <section class="framework-section" id="framework">
+        <div class="framework-inner">
+            <div class="section-brand" style="justify-content:center;">
+                <div class="sb-box">
+                    <span>
+                        C
+                        <span style="color:#72a37a">S</span>
+                    </span>
+                </div>
+                <span class="sb-wordmark">
+                    Carcino
+                    <span class="s">S</span>
+                </span>
+            </div>
+            <h2 class="framework-headline">Editorial Framework</h2>
+            <p class="framework-sub">
+                Carcino
+                <span class="s">S</span>
+                 applies a structured classification model to evaluate clinical relevance across major oncology resources
+            </p>
+            <div class="framework-grid">
+                <div class="fw-card">
+                    <div class="fw-step">Step 01</div>
+                    <div class="fw-card-title">Continuous Surveillance</div>
+                    <div class="fw-card-desc">Automated monitoring across major oncology sources, updated continuously.</div>
+                    <div class="fw-divider"></div>
+                    <ul class="fw-list">
+                        <li>NEJM, Lancet, JCO, JAMA Oncology</li>
+                        <li>ASCO, ESMO, ASH proceedings</li>
+                        <li>FDA &amp; EMA regulatory releases</li>
+                        <li>Preprint &amp; early-access publications</li>
+                    </ul>
+                </div>
+                <div class="fw-card">
+                    <div class="fw-step">Step 02</div>
+                    <div class="fw-card-title">Impact Scoring</div>
+                    <div class="fw-card-desc">Each study is evaluated against a structured clinical relevance framework.</div>
+                    <div class="fw-divider"></div>
+                    <ul class="fw-list">
+                        <li>Overall survival benefit</li>
+                        <li>FDA / regulatory approval</li>
+                        <li>Phase III trial evidence</li>
+                        <li>Biomarker-defined populations</li>
+                        <li>Quality of life &amp; safety data</li>
+                    </ul>
+                </div>
+                <div class="fw-card">
+                    <div class="fw-step">Step 03</div>
+                    <div class="fw-card-title">Tier Assignment</div>
+                    <div class="fw-card-desc">Studies are classified into one of three clearly defined tiers.</div>
+                    <div class="fw-divider"></div>
+                    <div class="fw-tier-row">
+                        <div class="fw-tier-tag pi">
+                            <span style="color:#000">■■■</span>
+                        </div>
+                        <div class="fw-tier-info">
+                            <div class="fw-tier-info-title">Practice-Impacting</div>
+                            <div class="fw-tier-info-sub">Immediate clinical relevance</div>
+                        </div>
+                    </div>
+                    <div class="fw-tier-row">
+                        <div class="fw-tier-tag inc">
+                            <span style="color:#000">■■</span>
+                        </div>
+                        <div class="fw-tier-info">
+                            <div class="fw-tier-info-title">Incremental</div>
+                            <div class="fw-tier-info-sub">Important but not practice-changing</div>
+                        </div>
+                    </div>
+                    <div class="fw-tier-row">
+                        <div class="fw-tier-tag hor">
+                            <span style="color:#000">■</span>
+                        </div>
+                        <div class="fw-tier-info">
+                            <div class="fw-tier-info-title">Horizon</div>
+                            <div class="fw-tier-info-sub">Early signals worth monitoring</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alert-section" style="padding-left:0;padding-right:0;padding-bottom:0;">
+                <div class="alert-inner">
+                    <div class="alert-left">
+                        <div class="section-brand">
+                            <div class="sb-box">
+                                <span>
+                                    C
+                                    <span style="color:#72a37a">S</span>
+                                </span>
+                            </div>
+                            <span class="sb-wordmark">
+                                Carcino
+                                <span class="s">S</span>
+                            </span>
+                        </div>
+                        <div class="alert-heading">
+                            <span class="alert-bell">🔔</span>
+                            <h3 class="alert-title">
+                                <span class="green">Alert</span>
+                                 Discipline
+                            </h3>
+                        </div>
+                        <div class="alert-rule"></div>
+                        <p class="alert-body">
+                            Notifications are reserved exclusively
+                            <br>
+                            for practice-impacting evidence
+                        </p>
+                        <div class="notification-card">
+                            <div class="notif-icon">
+                                <span>CS</span>
+                            </div>
+                            <div class="notif-body">
+                                <div class="notif-sender">
+                                    CarcinoS
+                                    <span class="notif-time" style="color:#999;font-size:12px;font-weight:400">now</span>
+                                </div>
+                                <div class="notif-title">Practice-Impacting Update:</div>
+                                <div class="notif-msg">New evidence alters clinical practice</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert-right">
+                        <div class="phone">
+                            <div class="phone-notch"></div>
+                            <div class="phone-screen">
+                                <div class="app-statusbar">
+                                    <span>4:01</span>
+                                    <div class="app-statusbar-icons">
+                                        <span>▋▋</span>
+                                        <span>&#x1F4F6;</span>
+                                        <span>▬</span>
+                                    </div>
+                                </div>
+                                <div class="app-topbar">
+                                    <div class="app-brand">
+                                        <div class="cs-box">
+                                            C
+                                            <span style="color:#72a37a">S</span>
+                                        </div>
+                                        <span>
+                                            Carcino
+                                            <span style="color:#72a37a">S</span>
+                                        </span>
+                                    </div>
+                                    <span class="app-week">Week of Apr 6</span>
+                                    <span class="app-search">&#x2315;</span>
+                                </div>
+                                <div class="app-status-row">
+                                    <span class="app-status-check">🔔</span>
+                                    <span class="app-status-bold">New alert</span>
+                                    <span>· Practice-impacting</span>
+                                </div>
+                                <div class="app-feed">
+                                    <div class="app-card">
+                                        <div class="app-card-header pi">
+                                            PRACTICE IMPACTING
+                                            <span style="color:#000">■■■</span>
+                                        </div>
+                                        <div class="app-card-entry">
+                                            <div class="ace-body">
+                                                <div class="ace-title">Osimertinib adjuvant in stage IB–IIIA EGFR+ NSCLC</div>
+                                                <div class="ace-meta">NEJM · ADAURA · FDA Approved</div>
+                                                <div class="ace-result green">5-yr OS 88% vs 78%</div>
+                                            </div>
+                                            <span class="ace-chevron">›</span>
+                                        </div>
+                                        <div class="app-card-entry">
+                                            <div class="ace-body">
+                                                <div class="ace-title">Pembrolizumab added to FOLFOX in MSS mCRC</div>
+                                                <div class="ace-meta">Lancet · KEYNOTE-651 · GI</div>
+                                                <div class="ace-result">OS HR 0.77 · 21.4 vs 15.9 mo</div>
+                                            </div>
+                                            <span class="ace-chevron">›</span>
+                                        </div>
+                                    </div>
+                                    <div class="app-card">
+                                        <div class="app-card-header inc">
+                                            <span>
+                                                INCREMENTAL
+                                                <span style="color:#000">■■</span>
+                                            </span>
+                                            <span class="app-card-header-count">1 update ›</span>
+                                        </div>
+                                        <div class="app-card-entry">
+                                            <div class="ace-body">
+                                                <div class="ace-title">Olaparib + cetuximab in BRCA-mutated HNSCC</div>
+                                                <div class="ace-meta">JCO · Phase II · Head &amp; Neck</div>
+                                                <div class="ace-result">ORR 41% vs 18%</div>
+                                            </div>
+                                            <span class="ace-chevron">›</span>
+                                        </div>
+                                    </div>
+                                    <div class="app-card">
+                                        <div class="app-card-header hor">
+                                            <span>
+                                                HORIZON
+                                                <span style="color:#000">■</span>
+                                            </span>
+                                            <span class="app-card-header-count">3 signals ›</span>
+                                        </div>
+                                        <div class="app-card-entry">
+                                            <div class="ace-body">
+                                                <div class="ace-title">CAR-T in relapsed AML: phase I results</div>
+                                                <div class="ace-meta">Blood · Phase I · Hematology</div>
+                                            </div>
+                                            <span class="ace-chevron">›</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="app-tabbar">
+                                    <div class="app-tab">
+                                        <span class="app-tab-icon">⌂</span>
+                                        <span>Home</span>
+                                    </div>
+                                    <div class="app-tab active">
+                                        <span class="app-tab-icon">🔔</span>
+                                        <span>Updates</span>
+                                    </div>
+                                    <div class="app-tab">
+                                        <span class="app-tab-icon">•••</span>
+                                        <span>More</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="faq-section">
+        <div class="faq-inner">
+            <h2 class="faq-headline">Common questions</h2>
+            <p class="faq-sub">Everything you need to know before signing up.</p>
+            <details class="faq-item">
+                <summary class="faq-q">
+                    <span class="faq-q-text">How often will I receive updates?</span>
+                    <span class="faq-icon">+</span>
+                </summary>
+                <p class="faq-a">CarcinoS delivers curated weekly updates inside the app covering the prior week's oncology literature. Push notifications are reserved for practice-impacting findings and will only be sent either as an alert to your phone or email based upon your preferences, when qualifying evidence emerges.</p>
+            </details>
+            <details class="faq-item">
+                <summary class="faq-q">
+                    <span class="faq-q-text">What disease sites are included?</span>
+                    <span class="faq-icon">+</span>
+                </summary>
+                <p class="faq-a">CarcinoS covers all major solid tumor oncology specialties including lung, breast, gastrointestinal, genitourinary, CNS, head &amp; neck, gynecologic, melanoma, sarcoma, and hepatobiliary cancers. Coverage expands continuously.</p>
+            </details>
+            <details class="faq-item">
+                <summary class="faq-q">
+                    <span class="faq-q-text">Is any patient data involved?</span>
+                    <span class="faq-icon">+</span>
+                </summary>
+                <p class="faq-a">No. CarcinoS monitors the published oncology literature only. No patient records, clinical notes, or identifiable health information of any kind are ever collected or processed.</p>
+            </details>
+            <details class="faq-item">
+                <summary class="faq-q">
+                    <span class="faq-q-text">Who reviews and classifies the content?</span>
+                    <span class="faq-icon">+</span>
+                </summary>
+                <p class="faq-a">AI-assisted triage identifies and scores candidate papers against a structured clinical relevance framework. All tier assignments are reviewed with human editorial oversight from practicing oncologists before publication in the digest.</p>
+            </details>
+        </div>
+    </section>
+    <!-- ═══ EARLY ACCESS MODAL (multi-step) ═══ -->
+    <div class="modal-overlay" id="earlyAccessModal" role="dialog" aria-modal="true" aria-label="Early Access">
+        <div class="modal-card">
+            <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+            <div class="modal-brand">
+                <div class="modal-brand-box">C<span style="color:#72a37a">S</span></div>
+                <span class="modal-brand-name">Carcino<span class="s">S</span></span>
+            </div>
+
+            <!-- Step indicator -->
+            <div class="modal-step-dots" id="modalStepDots">
+                <div class="modal-step-dot active" data-dot="0"></div>
+                <div class="modal-step-dot" data-dot="1"></div>
+                <div class="modal-step-dot" data-dot="2"></div>
+                <div class="modal-step-dot" data-dot="3"></div>
+            </div>
+
+            <!-- ── Step 0: Email ── -->
+            <div class="modal-step active" id="msStep0">
+                <div class="modal-eyebrow">Early Access</div>
+                <h2 class="modal-headline">Stay ahead of oncology evidence</h2>
+                <p class="modal-body">Get a personalised weekly digest of practice-impacting findings — curated and AI-triaged, then reviewed by expert editors.</p>
+                <input class="modal-input" type="email" id="msEmail" placeholder="Your email address" autocomplete="email" required/>
+                <div class="modal-agree">
+                    <input type="checkbox" id="msAgree"/>
+                    <label for="msAgree">
+                        I agree to the <a href="tos/" target="_blank">Terms of Service</a> and
+                        <a href="privacy/" target="_blank">Privacy Policy</a>.
+                    </label>
+                </div>
+                <div class="modal-nav">
+                    <button class="modal-next" id="msStep0Next" disabled style="opacity:0.45;cursor:not-allowed;">Continue →</button>
+                </div>
+                <p class="modal-fine">No spam. Unsubscribe any time.</p>
+            </div>
+
+            <!-- ── Step 1: Oncology scope ── -->
+            <div class="modal-step" id="msStep1">
+                <div class="modal-eyebrow">Step 1 of 3</div>
+                <h2 class="modal-headline">What should we send you?</h2>
+                <p class="modal-body">Choose the oncology coverage that matches your practice.</p>
+                <div class="scope-opts">
+                    <button class="scope-btn selected" data-scope="all">
+                        <div class="scope-btn-title">All Oncology</div>
+                        <div class="scope-btn-sub">Every tier-rated update across your selected disease sites — medical oncology, surgery, pathology, and radiation.</div>
+                    </button>
+                    <button class="scope-btn" data-scope="radiation_only">
+                        <div class="scope-btn-title">Radiation Oncology Only</div>
+                        <div class="scope-btn-sub">Only alerts with direct radiation oncology relevance — dose, fractionation, technique, RT vs. systemic comparisons.</div>
+                    </button>
+                </div>
+                <div class="modal-nav">
+                    <button class="modal-back" id="msStep1Back">← Back</button>
+                    <button class="modal-next" id="msStep1Next">Continue →</button>
+                </div>
+            </div>
+
+            <!-- ── Step 2: Disease sites ── -->
+            <div class="modal-step" id="msStep2">
+                <div class="modal-eyebrow">Step 2 of 3</div>
+                <h2 class="modal-headline">Which disease sites?</h2>
+                <div class="sites-header">
+                    <p class="modal-body" style="margin:0;font-size:13px;">Select all that apply.</p>
+                    <button class="sites-select-all" id="msSiteToggle">Deselect all</button>
+                </div>
+                <div class="site-grid" id="msSiteGrid">
+                    <label class="site-check-label checked" data-code="breast">
+                        <input type="checkbox" value="breast" checked/>
+                        <span class="site-check-box">✓</span>
+                        Breast
+                    </label>
+                    <label class="site-check-label checked" data-code="thoracic">
+                        <input type="checkbox" value="thoracic" checked/>
+                        <span class="site-check-box">✓</span>
+                        Thoracic
+                    </label>
+                    <label class="site-check-label checked" data-code="gastrointestinal">
+                        <input type="checkbox" value="gastrointestinal" checked/>
+                        <span class="site-check-box">✓</span>
+                        Gastrointestinal
+                    </label>
+                    <label class="site-check-label checked" data-code="gu">
+                        <input type="checkbox" value="gu" checked/>
+                        <span class="site-check-box">✓</span>
+                        Genitourinary
+                    </label>
+                    <label class="site-check-label checked" data-code="gynecologic">
+                        <input type="checkbox" value="gynecologic" checked/>
+                        <span class="site-check-box">✓</span>
+                        Gynecologic
+                    </label>
+                    <label class="site-check-label checked" data-code="head_neck">
+                        <input type="checkbox" value="head_neck" checked/>
+                        <span class="site-check-box">✓</span>
+                        Head &amp; Neck
+                    </label>
+                    <label class="site-check-label checked" data-code="hematologic">
+                        <input type="checkbox" value="hematologic" checked/>
+                        <span class="site-check-box">✓</span>
+                        Hematologic
+                    </label>
+                    <label class="site-check-label checked" data-code="cns">
+                        <input type="checkbox" value="cns" checked/>
+                        <span class="site-check-box">✓</span>
+                        CNS
+                    </label>
+                    <label class="site-check-label checked" data-code="cutaneous">
+                        <input type="checkbox" value="cutaneous" checked/>
+                        <span class="site-check-box">✓</span>
+                        Cutaneous
+                    </label>
+                    <label class="site-check-label checked" data-code="sarcoma">
+                        <input type="checkbox" value="sarcoma" checked/>
+                        <span class="site-check-box">✓</span>
+                        Sarcoma
+                    </label>
+                </div>
+                <p id="msSiteError" style="font-size:12px;color:#f08a4a;margin-top:4px;display:none;">Select at least one disease site.</p>
+                <div class="modal-nav">
+                    <button class="modal-back" id="msStep2Back">← Back</button>
+                    <button class="modal-next" id="msStep2Next">Continue →</button>
+                </div>
+            </div>
+
+            <!-- ── Step 3: Delivery ── -->
+            <div class="modal-step" id="msStep3">
+                <div class="modal-eyebrow">Step 3 of 3</div>
+                <h2 class="modal-headline">How would you like updates?</h2>
+                <p class="modal-body">Choose how you receive your digest and practice-impacting alerts.</p>
+                <div class="delivery-opts">
+                    <button class="delivery-btn selected" data-delivery="email">
+                        <span class="delivery-btn-icon">✉️</span>
+                        <div>
+                            <div class="delivery-btn-title">Email digest</div>
+                            <div class="delivery-btn-sub">Weekly email every Monday with all updates</div>
+                        </div>
+                    </button>
+                    <button class="delivery-btn" data-delivery="push">
+                        <span class="delivery-btn-icon">🔔</span>
+                        <div>
+                            <div class="delivery-btn-title">Push notifications</div>
+                            <div class="delivery-btn-sub">In-app alerts for Practice Impacting findings only</div>
+                        </div>
+                    </button>
+                    <button class="delivery-btn" data-delivery="both">
+                        <span class="delivery-btn-icon">📲</span>
+                        <div>
+                            <div class="delivery-btn-title">Both</div>
+                            <div class="delivery-btn-sub">Email digest + push for critical updates</div>
+                        </div>
+                    </button>
+                </div>
+                <div class="modal-nav">
+                    <button class="modal-back" id="msStep3Back">← Back</button>
+                    <button class="modal-next" id="msStep3Submit">Start my digest →</button>
+                </div>
+                <p class="modal-fine">No spam. You can update preferences any time in the app.</p>
+            </div>
+
+            <!-- ── Success ── -->
+            <div class="modal-step" id="msSuccess">
+                <div class="modal-success">
+                    <div class="modal-success-icon">✓</div>
+                    <div class="modal-success-title">You're in</div>
+                    <p class="modal-success-msg">
+                        Your weekly digest is set up. You'll receive your first CarcinoS email next Tuesday.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer id="contact" style="scroll-margin-top:60px;">
+        <span id="early-access" style="display:block;position:relative;top:-60px;visibility:hidden;"></span>
+        <div class="footer-inner">
+            <div class="footer-main">
+                <div class="footer-logo-big">
+                    <span>CS</span>
+                </div>
+                <div class="footer-links">
+                    <a href="privacy/">Privacy Policy</a>
+                    <a href="mailto:info@carcino-s.com">Contact us</a>
+                    <a href="tos/">Terms of Service</a>
+                    <a href="disclaimer/">Medical Disclaimer</a>
+                </div>
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.07);padding-top:20px;margin-top:0;">
+                <p style="font-size:12px;color:rgba(255,255,255,0.2);">© 2026 CarcinoS LLC. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+    (function() {
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = document.documentElement.scrollHeight;
+        }
+        function rand(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        let stars = [];
+        function makeStars() {
+            stars = [];
+            const count = Math.floor((canvas.width * canvas.height) / 4000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: rand(0, canvas.width),
+                    y: rand(0, canvas.height),
+                    r: rand(0.2, 1.2),
+                    alpha: rand(0.2, 0.9),
+                    speed: rand(0.0002, 0.0008),
+                    phase: rand(0, Math.PI * 2)
+                });
+            }
+        }
+        let frame = 0;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            frame++;
+            stars.forEach(s => {
+                const flicker = s.alpha + Math.sin(frame * s.speed * 60 + s.phase) * 0.15;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${Math.max(0, Math.min(1, flicker))})`;
+                ctx.fill();
+            });
+            requestAnimationFrame(draw);
+        }
+        function init() {
+            resize();
+            makeStars();
+            draw();
+        }
+        window.addEventListener('resize', () => {
+            resize();
+            makeStars();
+        });
+        window.addEventListener('load', () => {
+            resize();
+            makeStars();
+        });
+        init();
+    })();
+    </script>
+    <script>
+    // ── CarcinoS multi-step subscription modal ──────────────────────────────
+    // Replace these two values with your real Supabase project credentials.
+    // SUPABASE_ANON_KEY is safe to expose publicly (RLS enforces access).
+    // If left blank the form falls back to a Netlify submission.
+    var SUPABASE_URL  = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
+
+    (function() {
+        // ── State ────────────────────────────────────────────────────────────
+        var state = { step: 0, email: '', scope: 'all', sites: [], delivery: 'email' };
+
+        // ── Elements ─────────────────────────────────────────────────────────
+        var overlay   = document.getElementById('earlyAccessModal');
+        var trigger   = document.getElementById('earlyAccessTrigger');
+        var closeBtn  = document.getElementById('modalClose');
+        var dots      = document.querySelectorAll('.modal-step-dot');
+        var steps     = document.querySelectorAll('.modal-step');
+
+        // Step 0
+        var emailInput  = document.getElementById('msEmail');
+        var step0Next   = document.getElementById('msStep0Next');
+        var agreeCheck  = document.getElementById('msAgree');
+
+        // Step 1 (scope)
+        var scopeBtns   = document.querySelectorAll('.scope-btn');
+        var step1Back   = document.getElementById('msStep1Back');
+        var step1Next   = document.getElementById('msStep1Next');
+
+        // Step 2 (sites)
+        var siteLabels  = document.querySelectorAll('#msSiteGrid .site-check-label');
+        var siteToggle  = document.getElementById('msSiteToggle');
+        var siteError   = document.getElementById('msSiteError');
+        var step2Back   = document.getElementById('msStep2Back');
+        var step2Next   = document.getElementById('msStep2Next');
+
+        // Step 3 (delivery)
+        var deliveryBtns = document.querySelectorAll('.delivery-btn');
+        var step3Back    = document.getElementById('msStep3Back');
+        var step3Submit  = document.getElementById('msStep3Submit');
+
+        // ── Modal open/close ─────────────────────────────────────────────────
+        function openModal(e) {
+            if (e) e.preventDefault();
+            overlay.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        function resetModal() {
+            goToStep(0);
+            emailInput.value = '';
+            scopeBtns.forEach(function(b) {
+                b.classList.toggle('selected', b.dataset.scope === 'all');
+            });
+            siteLabels.forEach(function(l) { setChecked(l, true); });
+            deliveryBtns.forEach(function(b) {
+                b.classList.toggle('selected', b.dataset.delivery === 'email');
+            });
+            state = { step: 0, email: '', scope: 'all', sites: [], delivery: 'email' };
+        }
+        trigger.addEventListener('click', openModal);
+        var triggerMobile = document.getElementById('earlyAccessTriggerMobile');
+        if (triggerMobile) triggerMobile.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+        overlay.addEventListener('transitionend', function() {
+            if (!overlay.classList.contains('open')) resetModal();
+        });
+
+        // ── Step navigation ──────────────────────────────────────────────────
+        function goToStep(n) {
+            steps.forEach(function(s, i) { s.classList.toggle('active', i === n); });
+            // dots only for steps 0-3 (not success step 4)
+            dots.forEach(function(d, i) {
+                d.classList.remove('active', 'done');
+                if (i < n) d.classList.add('done');
+                else if (i === n) d.classList.add('active');
+            });
+            state.step = n;
+        }
+
+        // Step 0 → 1
+        // Enable Continue only when checkbox is checked
+        function syncStep0Button() {
+            var ok = agreeCheck && agreeCheck.checked;
+            step0Next.disabled = !ok;
+            step0Next.style.opacity = ok ? '' : '0.45';
+            step0Next.style.cursor  = ok ? '' : 'not-allowed';
+        }
+        if (agreeCheck) agreeCheck.addEventListener('change', syncStep0Button);
+
+        step0Next.addEventListener('click', function() {
+            if (!agreeCheck || !agreeCheck.checked) return;
+            var email = emailInput.value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                emailInput.focus();
+                emailInput.style.borderColor = '#f08a4a';
+                return;
+            }
+            emailInput.style.borderColor = '';
+            state.email = email;
+            goToStep(1);
+        });
+        emailInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') step0Next.click();
+        });
+
+        // Scope buttons (step 1)
+        scopeBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                scopeBtns.forEach(function(b) { b.classList.remove('selected'); });
+                btn.classList.add('selected');
+                state.scope = btn.dataset.scope;
+                // pre-check all sites for either scope
+                siteLabels.forEach(function(l) { setChecked(l, true); });
+            });
+        });
+        step1Back.addEventListener('click', function() { goToStep(0); });
+        step1Next.addEventListener('click', function() { goToStep(2); });
+
+        // Site checkboxes (step 2)
+        function setChecked(label, checked) {
+            var cb = label.querySelector('input');
+            cb.checked = checked;
+            label.classList.toggle('checked', checked);
+            label.querySelector('.site-check-box').textContent = checked ? '✓' : '';
+        }
+        siteLabels.forEach(function(label) {
+            label.addEventListener('click', function() {
+                var cb = label.querySelector('input');
+                setChecked(label, !cb.checked);
+                siteError.style.display = 'none';
+                var anyChecked = Array.from(siteLabels).some(function(l) {
+                    return l.querySelector('input').checked;
+                });
+                siteToggle.textContent = anyChecked ? 'Deselect all' : 'Select all';
+            });
+        });
+        siteToggle.addEventListener('click', function() {
+            var anyChecked = Array.from(siteLabels).some(function(l) {
+                return l.querySelector('input').checked;
+            });
+            siteLabels.forEach(function(l) { setChecked(l, !anyChecked); });
+            siteToggle.textContent = anyChecked ? 'Select all' : 'Deselect all';
+        });
+        step2Back.addEventListener('click', function() { goToStep(1); });
+        step2Next.addEventListener('click', function() {
+            var chosen = Array.from(siteLabels)
+                .filter(function(l) { return l.querySelector('input').checked; })
+                .map(function(l) { return l.dataset.code; });
+            if (!chosen.length) {
+                siteError.style.display = 'block';
+                return;
+            }
+            state.sites = chosen;
+            goToStep(3);
+        });
+
+        // Delivery buttons (step 3)
+        deliveryBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                deliveryBtns.forEach(function(b) { b.classList.remove('selected'); });
+                btn.classList.add('selected');
+                state.delivery = btn.dataset.delivery;
+            });
+        });
+        step3Back.addEventListener('click', function() { goToStep(2); });
+
+        // ── Submit ────────────────────────────────────────────────────────────
+        step3Submit.addEventListener('click', function() {
+            step3Submit.textContent = 'Saving…';
+            step3Submit.disabled = true;
+
+            var payload = {
+                p_email:          state.email,
+                p_oncology_scope: state.scope,
+                p_delivery:       state.delivery,
+                p_site_codes:     state.sites,
+            };
+
+            // Try Supabase first; fall back to Netlify form
+            if (SUPABASE_URL && SUPABASE_ANON) {
+                fetch(SUPABASE_URL + '/rest/v1/rpc/upsert_subscriber', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON,
+                    },
+                    body: JSON.stringify(payload),
+                })
+                .then(function() { goToStep(4); })
+                .catch(function() { goToStep(4); }); // still show success; retry handled server-side
+            } else {
+                // Netlify fallback
+                fetch('/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: [
+                        'form-name=early-access',
+                        'email=' + encodeURIComponent(state.email),
+                        'oncology_scope=' + encodeURIComponent(state.scope),
+                        'delivery=' + encodeURIComponent(state.delivery),
+                        'sites=' + encodeURIComponent(state.sites.join(',')),
+                    ].join('&'),
+                })
+                .then(function() { goToStep(4); })
+                .catch(function() { goToStep(4); });
+            }
+        });
+    })();
+    </script>
+    <!-- ═══ PRIVACY MODAL ═══ -->
+    <div class="modal-overlay" id="privacyModal" role="dialog" aria-modal="true" aria-label="Privacy Policy">
+        <div class="modal-card" style="max-width:580px;max-height:80vh;overflow-y:auto;">
+            <button class="modal-close" id="privacyModalClose" aria-label="Close">&times;</button>
+            <div class="modal-brand">
+                <div class="modal-brand-box">
+                    C
+                    <span style="color:#72a37a">S</span>
+                </div>
+                <span class="modal-brand-name">
+                    Carcino
+                    <span class="s">S</span>
+                </span>
+            </div>
+            <div class="modal-eyebrow">Privacy Policy</div>
+            <h2 class="modal-headline" style="font-size:20px;margin-bottom:20px;">How we handle your information</h2>
+            <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.75;">
+                <p style="margin-bottom:14px;">
+                    <strong style="color:#fff;">Last updated: April 2026</strong>
+                </p>
+                <p style="margin-bottom:14px;">CarcinoS LLC ("CarcinoS," "we," "us," or "our") operates carcino-s.com. This Privacy Policy describes how we collect, use, and protect information you provide when you register for early access or use our services.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Information We Collect</p>
+                <p style="margin-bottom:14px;">We collect only the email address you voluntarily submit via our early access form. We do not collect names, payment information, health data, or any other personal information at this time. No patient data of any kind is ever collected or processed.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">How We Use Your Information</p>
+                <p style="margin-bottom:14px;">Your email address is used solely to notify you about CarcinoS development updates, early access availability, and occasional oncology alerts relevant to the service. We will never sell, rent, or share your email address with third parties for marketing purposes.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Data Storage</p>
+                <p style="margin-bottom:14px;">Email addresses submitted through this site are stored securely via Netlify's form handling infrastructure. We retain your information only as long as necessary to provide you with updates about CarcinoS.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Your Rights</p>
+                <p style="margin-bottom:14px;">
+                    You may request removal of your email address from our list at any time by contacting us at
+                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                    . We will process removal requests promptly.
+                </p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Cookies</p>
+                <p style="margin-bottom:14px;">This site does not use tracking cookies or analytics services. The starfield animation runs entirely in your browser with no data transmitted.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Changes to This Policy</p>
+                <p style="margin-bottom:14px;">We may update this Privacy Policy as CarcinoS develops. Any changes will be posted on this page with an updated date.</p>
+                <p style="margin-bottom:0;">
+                    Questions? Contact us at
+                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <!-- ═══ TERMS MODAL ═══ -->
+    <div class="modal-overlay" id="termsModal" role="dialog" aria-modal="true" aria-label="Terms of Use">
+        <div class="modal-card" style="max-width:580px;max-height:80vh;overflow-y:auto;">
+            <button class="modal-close" id="termsModalClose" aria-label="Close">&times;</button>
+            <div class="modal-brand">
+                <div class="modal-brand-box">
+                    C
+                    <span style="color:#72a37a">S</span>
+                </div>
+                <span class="modal-brand-name">
+                    Carcino
+                    <span class="s">S</span>
+                </span>
+            </div>
+            <div class="modal-eyebrow">Terms of Use</div>
+            <h2 class="modal-headline" style="font-size:20px;margin-bottom:20px;">Terms &amp; Conditions</h2>
+            <div style="font-size:14px;color:rgba(255,255,255,0.55);line-height:1.75;">
+                <p style="margin-bottom:14px;">
+                    <strong style="color:#fff;">Last updated: April 2026</strong>
+                </p>
+                <p style="margin-bottom:14px;">By accessing carcino-s.com or registering for early access, you agree to these Terms of Use. Please read them carefully.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Informational Purposes Only</p>
+                <p style="margin-bottom:14px;">
+                    CarcinoS is designed to help clinicians stay informed about oncology literature. All content provided by CarcinoS — including curated summaries, tier classifications, and alerts — is for
+                    <strong style="color:#fff;">informational and educational purposes only</strong>
+                    . It does not constitute medical advice, clinical recommendations, or a substitute for professional clinical judgment.
+                </p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">No Doctor-Patient Relationship</p>
+                <p style="margin-bottom:14px;">Use of CarcinoS does not create a doctor-patient relationship between you and CarcinoS LLC or any of its team members. Clinical decisions should always be made based on the individual circumstances of each patient and in accordance with applicable standards of care.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Accuracy of Information</p>
+                <p style="margin-bottom:14px;">While CarcinoS makes reasonable efforts to ensure the accuracy and timeliness of curated content, we make no warranties as to the completeness, accuracy, or reliability of any information provided. The oncology literature evolves rapidly; always consult primary sources for clinical decision-making.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Limitation of Liability</p>
+                <p style="margin-bottom:14px;">CarcinoS LLC shall not be liable for any clinical outcomes, decisions, or actions taken in reliance on information provided through this service. To the fullest extent permitted by law, CarcinoS LLC disclaims all liability for direct, indirect, incidental, or consequential damages arising from use of this service.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Intellectual Property</p>
+                <p style="margin-bottom:14px;">All content, design, and materials on this site are the property of CarcinoS LLC and may not be reproduced without written permission.</p>
+                <p style="margin-bottom:10px;color:#fff;font-weight:700;">Changes to Terms</p>
+                <p style="margin-bottom:14px;">We reserve the right to update these Terms at any time. Continued use of the site or service constitutes acceptance of any updated Terms.</p>
+                <p style="margin-bottom:0;">
+                    Questions? Contact us at
+                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function() {
+        function makeModal(triggerId, overlayId, closeId) {
+            var trigger = document.getElementById(triggerId);
+            var overlay = document.getElementById(overlayId);
+            var closeBtn = document.getElementById(closeId);
+            if (!trigger || !overlay || !closeBtn)
+                return;
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+            closeBtn.addEventListener('click', function() {
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    overlay.classList.remove('open');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+        makeModal('privacyTrigger', 'privacyModal', 'privacyModalClose');
+        makeModal('termsTrigger', 'termsModal', 'termsModalClose');
+    })();
+    </script>
+</body>
+</html>

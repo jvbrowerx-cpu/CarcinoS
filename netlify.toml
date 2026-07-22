@@ -1,0 +1,10 @@
+[build]
+  publish = "landing"
+
+  # Only rebuild when the landing/ website files change.
+  # Pushes that only touch pipeline/, mobile_github/, or .github/
+  # will be ignored and won't consume Netlify build credits.
+  #
+  # Exit 0 = no changes in landing/ = skip build
+  # Exit 1 = landing/ changed = trigger build
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- landing"

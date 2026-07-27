@@ -1,0 +1,11 @@
+# Netlify config — gates the admin portal behind HTTP Basic Auth.
+# Adjust the `path` below to match how your admin page is actually served.
+#
+# Common cases:
+#   - Single file at /admin.html          → path = "/admin.html"
+#   - Folder with /admin/index.html       → path = "/admin/*"
+#   - Either of the above (broadest)      → path = "/admin*"
+
+[[edge_functions]]
+  function = "admin-auth"
+  path = "/admin*"

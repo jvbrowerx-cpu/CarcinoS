@@ -163,10 +163,6 @@ def main() -> None:
         print("No verified subscribers found.")
         return
 
-    # PREVIEW MODE: only send to yourself to check the email looks right
-    # Remove this line before sending to everyone
-    subscribers = [s for s in subscribers if s.get("email") == "jvbrowerx@gmail.com"]
-
     print(f"Found {len(subscribers)} subscriber(s). {'[DRY RUN] ' if dry_run else ''}Sending invites...\n")
 
     resend.api_key = resend_key

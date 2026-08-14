@@ -1,0 +1,40 @@
+name: Send Subscriber Invite Emails
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (print recipients without sending)'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  send-invites:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install supabase resend
+
+      - name: Send invite emails
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          CARCINOS_FROM_EMAIL: ${{ secrets.CARCINOS_FROM_EMAIL }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python pipeline/send_invite.py --dry-run
+          else
+            python pipeline/send_invite.py
+          fi

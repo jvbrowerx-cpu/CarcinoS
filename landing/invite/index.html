@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarcinoS — Colleague Invitation</title>
+
+<!-- iMessage / Open Graph preview -->
+<meta property="og:title" content="CarcinoS — Colleague Invitation">
+<meta property="og:description" content="A free weekly oncology digest surfacing practice-changing papers for the disease sites you follow. Free, takes about a minute to set up.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://carcino-s.com">
+<meta property="og:image" content="https://carcino-s.com/og-invite.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CarcinoS — Colleague Invitation">
+<meta name="twitter:description" content="A free weekly oncology digest surfacing practice-changing papers for the disease sites you follow.">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #060908;
+    --card: #0b120e;
+    --border: #79ad86;
+    --border-inner: #213329;
+    --green: #72b07f;
+    --green-dim: #3d6b4a;
+    --green-faint: #162118;
+    --text: #e6e8e6;
+    --text-muted: #728075;
+    --text-dim: #3e4a42;
+    --panel-bg: #ffffff;
+    --panel-text: #1a1a1a;
+    --panel-border: #e8ebe8;
+    --panel-dot: #68a876;
+    --new-bg: #72a87a;
+  }
+
+  html, body {
+    background: var(--bg);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 28px 16px 48px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .stripe { height: 4px; background: var(--border); }
+
+  .card-inner { padding: 28px 26px 30px; }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 22px;
+  }
+
+  .logomark {
+    width: 42px;
+    height: 42px;
+    background: #111;
+    border: 1px solid #2e3830;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .logomark-c { color: #e0e0e0; }
+  .logomark-s { color: var(--green); }
+
+  .brand-name {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.3px;
+    margin-bottom: 5px;
+  }
+
+  .brand-name .s { color: var(--green); }
+
+  .brand-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border-inner);
+    margin: 0 0 22px;
+  }
+
+  .intro {
+    font-size: 14px;
+    line-height: 1.72;
+    color: #d4d8d4;
+    margin-bottom: 20px;
+  }
+
+  .intro strong { color: #fff; font-weight: 600; }
+
+  .features {
+    background: var(--panel-bg);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    border: 1px solid var(--panel-border);
+  }
+
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--panel-border);
+    padding: 13px 16px;
+  }
+
+  .feature-row:last-child { border-bottom: none; }
+
+  .feat-dot {
+    color: var(--panel-dot);
+    font-size: 16px;
+    line-height: 22px;
+    flex-shrink: 0;
+    width: 18px;
+    margin-top: 1px;
+  }
+
+  .feat-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--panel-text);
+    flex: 1;
+  }
+
+  .new-badge {
+    display: inline-block;
+    background: var(--new-bg);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    vertical-align: 2px;
+    margin-left: 7px;
+  }
+
+  .cta-block {
+    background: var(--green-faint);
+    border: 1px solid var(--green-dim);
+    border-radius: 4px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 22px;
+    text-decoration: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .cta-block:hover { border-color: var(--border); background: #1a2e20; }
+
+  .cta-copy-head { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .cta-copy-sub { font-size: 12px; color: var(--text-muted); }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--green);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 10px 16px;
+    border-radius: 5px;
+    white-space: nowrap;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .cta-btn:hover { background: #7fbf8d; }
+
+  .closing {
+    font-size: 12px;
+    color: var(--green);
+    font-style: italic;
+    font-family: 'Libre Baskerville', Georgia, serif;
+    margin-bottom: 20px;
+  }
+
+  .foot {
+    border-top: 1px solid var(--border-inner);
+    padding-top: 18px;
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+
+  .foot a { color: var(--green-dim); text-decoration: none; }
+  .foot a:hover { color: var(--green); }
+
+  @media (max-width: 500px) {
+    body { padding: 0; align-items: stretch; }
+    .card { max-width: 100%; border-radius: 0; border-left: none; border-right: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cta-block, .cta-btn { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="stripe"></div>
+  <div class="card-inner">
+
+    <div class="brand-row">
+      <div class="logomark">
+        <span class="logomark-c">C</span><span class="logomark-s">S</span>
+      </div>
+      <div>
+        <div class="brand-name">Carcino<span class="s">S</span></div>
+        <div class="brand-sub">Colleague invitation</div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <p class="intro">
+      Wanted to share a tool I've been using — <strong>CarcinoS</strong> is a free weekly oncology digest
+      that surfaces practice-changing papers for the disease sites you follow, delivered every Tuesday evening.
+      There's also a platform behind the login worth knowing about:
+    </p>
+
+    <div class="features">
+      <div class="feature-row">
+        <div class="feat-dot">•</div>
+        <div class="feat-text">Weekly email digest filtered to your disease sites — practice-changing papers only</div>
+      </div>
+      <div class="feature-row">
+        <div class="feat-dot">•</div>
+        <div class="feat-text">Incremental &amp; Horizon views of the literature, browsable by week and disease site</div>
+      </div>
+      <div class="feature-row">
+        <div class="feat-dot">•</div>
+        <div class="feat-text">Searchable archive of everything it has ever surfaced — still growing, expanding every week</div>
+      </div>
+      <div class="feature-row">
+        <div class="feat-dot">•</div>
+        <div class="feat-text">Comment threads on articles to discuss findings with colleagues <span class="new-badge">NEW</span></div>
+      </div>
+    </div>
+
+    <a class="cta-block" href="https://carcino-s.com" target="_blank" rel="noopener">
+      <div>
+        <div class="cta-copy-head">Free — takes about a minute to set up</div>
+        <div class="cta-copy-sub">Pick your disease sites; first digest arrives Tuesday.</div>
+      </div>
+      <div class="cta-btn">Get access ↗</div>
+    </a>
+
+    <p class="closing">Let me know what you think.</p>
+
+    <div class="foot">
+      CarcinoS · carcino-s.com<br>
+      <a href="https://carcino-s.com">Terms</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+      <a href="https://carcino-s.com">Privacy</a>&nbsp;&nbsp;·&nbsp;&nbsp;
+      <a href="https://carcino-s.com">Medical Disclaimer</a>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -412,9 +412,11 @@ def send_push(
 # Main delivery loop
 # ---------------------------------------------------------------------------
 
-def run_delivery(config: Config, days: int = 7, dry_run: bool = False) -> dict:
+def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_email: str | None = None) -> dict:
     """
     Fetch all opted-in subscribers, pull their filtered alert feeds, and deliver.
+
+    If user_email is set, only that subscriber is processed (useful for one-off sends).
 
     Returns a summary dict with counts for logging.
     """
@@ -444,11 +446,21 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False) -> dict:
         .execute()
 
     subscribers = resp.data or []
-    print(f"Delivery run: {len(subscribers)} subscriber(s), days={days}, dry_run={dry_run}")
+    if user_email:
+        subscribers = [s for s in subscribers if s.get("email", "").lower() == user_email.lower()]
+        print(f"Delivery run (single-user): {user_email}, days={days}, dry_run={dry_run}")
+    else:
+        print(f"Delivery run: {len(subscribers)} subscriber(s), days={days}, dry_run={dry_run}")
 
     as_of = date.today()
     monday = as_of - timedelta(days=as_of.weekday())
-    week_label = (f"{monday.strftime('%B')} {monday.day} – {(monday + timedelta(days=6)).day}, {(monday + timedelta(days=6)).year}" if monday.month == (monday + timedelta(days=6)).month else f"{monday.strftime('%B')} {monday.day} – {(monday + timedelta(days=6)).strftime('%B')} {(monday + timedelta(days=6)).day}, {(monday + timedelta(days=6)).year}")
+    # Show the scanned week: the 7 days ending on the most recent Sunday
+    last_sunday = monday - timedelta(days=1)
+    prior_monday = last_sunday - timedelta(days=6)
+    if prior_monday.month == last_sunday.month:
+        week_label = f"{prior_monday.strftime('%B')} {prior_monday.day} – {last_sunday.day}, {last_sunday.year}"
+    else:
+        week_label = f"{prior_monday.strftime('%B')} {prior_monday.day} – {last_sunday.strftime('%B')} {last_sunday.day}, {last_sunday.year}"
 
     stats = {"total": len(subscribers), "email_sent": 0, "push_sent": 0, "skipped": 0, "errors": 0}
 
@@ -596,13 +608,15 @@ def _build_argparser() -> argparse.ArgumentParser:
         help="Lookback window in days (default 7).")
     p.add_argument("--dry-run", action="store_true",
         help="Print what would be sent without actually sending.")
+    p.add_argument("--user-email", type=str, default=None,
+        help="If set, only deliver to this subscriber (one-off send).")
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_argparser().parse_args(argv)
     cfg  = Config.from_env()
-    run_delivery(cfg, days=args.days, dry_run=args.dry_run)
+    run_delivery(cfg, days=args.days, dry_run=args.dry_run, user_email=args.user_email)
     return 0
 
 

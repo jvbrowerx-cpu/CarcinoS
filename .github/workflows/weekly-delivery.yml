@@ -2,6 +2,8 @@ name: Weekly Digest Delivery
 
 on:
   schedule:
+    # Tuesday 23:00 UTC (7pm ET / 4pm PT) — gives the editor time to review
+    # and approve alerts in the admin portal after Monday's pipeline run.
     - cron: '0 23 * * 2'
   workflow_dispatch:
     inputs:
@@ -17,21 +19,29 @@ on:
         options:
           - 'false'
           - 'true'
+      user_email:
+        description: 'Send to this email only (leave blank for all subscribers)'
+        required: false
+        default: ''
 
 jobs:
   deliver:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
       - name: Install dependencies
         run: |
           cd pipeline
           pip install -r carcinos_ingestion/requirements.txt
+
       - name: Run delivery script
         env:
           SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
@@ -40,13 +50,23 @@ jobs:
           CARCINOS_FROM_EMAIL:       ${{ secrets.CARCINOS_FROM_EMAIL }}
         run: |
           cd pipeline
+
           DAYS="${{ github.event.inputs.days }}"
           DAYS="${DAYS:-7}"
+
           DRY="${{ github.event.inputs.dry_run }}"
           if [ "$DRY" = "true" ]; then
             DRY_FLAG="--dry-run"
           else
             DRY_FLAG=""
           fi
-          echo "Running delivery: days=$DAYS dry_run=${DRY:-false}"
-          python -m carcinos_ingestion.deliver --days $DAYS $DRY_FLAG
+
+          USER_EMAIL="${{ github.event.inputs.user_email }}"
+          if [ -n "$USER_EMAIL" ]; then
+            USER_FLAG="--user-email $USER_EMAIL"
+          else
+            USER_FLAG=""
+          fi
+
+          echo "Running delivery: days=$DAYS dry_run=${DRY:-false} user_email=${USER_EMAIL:-all}"
+          python -m carcinos_ingestion.deliver --days $DAYS $DRY_FLAG $USER_FLAG

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" width="280" height="60">
+  <!-- CS badge -->
+  <rect x="0" y="10" width="40" height="40" rx="8" ry="8" fill="none" stroke="white" stroke-width="1.5"/>
+  <text x="20" y="35" font-family="Georgia, serif" font-size="15" fill="white" text-anchor="middle">CS</text>
+
+  <!-- CarcinoS wordmark using tspan so S is inline -->
+  <text x="56" y="37" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="white" letter-spacing="-0.3">Carcino<tspan>S</tspan></text>
+</svg>

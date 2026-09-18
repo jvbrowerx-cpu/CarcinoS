@@ -84,7 +84,7 @@ def build_email_html(
         is_conference = bool(getattr(a, "conference_source", ""))
         if is_conference:
             # Conference abstract cards use gold/amber styling and a distinct label
-            label       = "Potentially Practice-Impacting"
+            label       = "Potentially Practice Impacting"
             card_bg     = "#fffbf2"
             card_border = "1px solid #e8c97a"
             header_bg   = "#c98a1a"
@@ -104,6 +104,15 @@ def build_email_html(
             conference_badge_row = f"""
               <tr><td style="padding-bottom:8px;">
                 <span style="display:inline-block;font-size:10px;font-weight:700;letter-spacing:0.8px;color:#9a6a00;background:#fff3d0;border:1px solid #e8c97a;border-radius:4px;padding:3px 10px;font-family:Helvetica,Arial,sans-serif;">{conf_label} &nbsp;·&nbsp; CONFERENCE ABSTRACT</span>
+              </td></tr>"""
+
+        # Conference label row — shows "Potentially Practice Impacting" on the card itself,
+        # making it visually distinct from regular Practice Impacting tier A cards.
+        label_row = ""
+        if is_conference:
+            label_row = f"""
+              <tr><td style="padding-bottom:6px;">
+                <span style="font-size:12px;font-weight:700;color:{badge_color};font-family:Helvetica,Arial,sans-serif;letter-spacing:0.2px;">{_esc(label)}</span>
               </td></tr>"""
 
         # Journal / Date line
@@ -166,6 +175,7 @@ def build_email_html(
           <tr><td style="padding:16px 18px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               {conference_badge_row}
+              {label_row}
               <tr><td style="font-size:11px;color:{text_muted};padding-bottom:8px;font-family:Helvetica,Arial,sans-serif;">{meta_line}</td></tr>
               <tr><td style="font-size:15px;font-weight:700;color:{text_dark};line-height:1.4;padding-bottom:12px;font-family:Helvetica,Arial,sans-serif;"><strong>Title:</strong> {_esc(a.title)}</td></tr>
               {population_row}
@@ -306,7 +316,7 @@ def build_push_messages(alerts: list, scope: str) -> list[dict]:
         site_label = SITE_LABEL.get(a.disease_site_code or "", "")
         conf_source = getattr(a, "conference_source", "")
         if conf_source:
-            title = f"[{site_label}] {conf_source} — Potentially Practice-Impacting" if site_label else f"{conf_source} — Potentially Practice-Impacting"
+            title = f"[{site_label}] {conf_source} — Potentially Practice Impacting" if site_label else f"{conf_source} — Potentially Practice Impacting"
         else:
             title = f"[{site_label}] Practice Impacting" if site_label else "Practice Impacting Update"
         body = (a.one_liner or a.title or "")[:200]

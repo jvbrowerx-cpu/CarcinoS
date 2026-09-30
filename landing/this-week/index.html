@@ -882,7 +882,7 @@ function renderCard(c, tier) {
     : '';
 
   return `
-    <div class="card ${tierClass}" id="card-${escHtml(c.id)}">
+    <div class="card ${tierClass}">
       <div class="card-meta">
         ${c.journal ? `<strong>Journal:</strong> <em>${escHtml(c.journal)}</em>` : ''}
         ${c.journal && c.pub_date ? '<span class="dot">·</span>' : ''}

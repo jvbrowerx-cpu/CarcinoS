@@ -381,20 +381,22 @@
   .comment-submit:disabled { opacity: 0.4; cursor: not-allowed; }
   .comment-empty { font-size: 12px; color: #888888; font-style: italic; margin-bottom: 8px; }
 
-  /* ── LIKE BUTTONS (👍) ── */
+  /* ── LIKE BUTTONS ── */
   .like-btn {
     position: relative;
-    font-size: 14px; color: var(--grey-dim);
+    font-size: 14px; color: #333333;
     cursor: pointer; transition: color 0.15s;
     border: none; background: none; padding: 0;
     font-family: inherit; display: inline-flex;
     align-items: center; gap: 3px; line-height: 1;
   }
-  .card.inc .like-btn, .card.hor .like-btn { color: #999999; }
-  .like-btn:hover { color: var(--green); }
-  .card.inc .like-btn:hover, .card.hor .like-btn:hover { color: #3a7a3a; }
-  .like-btn.liked { color: var(--green); }
-  .card.inc .like-btn.liked, .card.hor .like-btn.liked { color: #3a7a3a; }
+  /* SVG thumb icon: white fill, dark outline by default */
+  .like-btn .thumb-icon { fill: white; stroke: #1a1a1a; stroke-width: 1.2px; transition: fill 0.15s, stroke 0.15s; }
+  .like-btn:hover .thumb-icon { fill: #e8ffe8; stroke: #2a6a2a; }
+  .like-btn.liked .thumb-icon { fill: #39ff6e; stroke: #1db84a; stroke-width: 0.8px; }
+  /* Count text color */
+  .like-btn .like-count { color: #333333; }
+  .like-btn.liked .like-count { color: #1db84a; }
   .like-count { font-size: 12px; font-variant-numeric: tabular-nums; }
   /* Tooltip — only shown when data-tip attribute is set (count > 0) */
   .like-btn[data-tip]:hover::after {
@@ -419,13 +421,16 @@
   /* Comment-level like button */
   .comment-like-btn {
     position: relative;
-    font-size: 11px; color: #cccccc;
+    font-size: 11px; color: #666666;
     cursor: pointer; transition: color 0.15s;
     border: none; background: none; padding: 0;
     font-family: inherit; float: right; line-height: 1;
+    display: inline-flex; align-items: center; gap: 2px;
   }
-  .comment-like-btn:hover { color: #3a7a3a; }
-  .comment-like-btn.liked { color: #3a7a3a; }
+  .comment-like-btn .thumb-icon { fill: white; stroke: #555555; stroke-width: 1.2px; transition: fill 0.15s, stroke 0.15s; }
+  .comment-like-btn:hover .thumb-icon { fill: #e8ffe8; stroke: #2a6a2a; }
+  .comment-like-btn.liked .thumb-icon { fill: #39ff6e; stroke: #1db84a; stroke-width: 0.8px; }
+  .comment-like-btn.liked { color: #1db84a; }
   .comment-like-btn[data-tip]:hover::after {
     content: attr(data-tip);
     position: absolute;
@@ -868,7 +873,7 @@ function renderCard(c, tier) {
   // Like button — visible always; anon clicks → login modal, auth → toggle
   const likeHtml = AUTH_ENABLED
     ? `<button class="like-btn" id="lb-${escHtml(c.id)}"
-        onclick="handleLikeClick('${escHtml(c.id)}', this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg> <span class="like-count" id="lc-${escHtml(c.id)}">Like</span></button>`
+        onclick="handleLikeClick('${escHtml(c.id)}', this)"><svg width="18" height="18" viewBox="0 0 24 24" class="thumb-icon" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg> <span class="like-count" id="lc-${escHtml(c.id)}">Like</span></button>`
     : '';
 
   // Comment section placeholder (logged-in, AUTH_ENABLED)
@@ -1089,7 +1094,7 @@ function buildCommentSection(alertId, comments, tier) {
         return `<div class="comment-item" id="ci-${escHtml(c.id)}">
           <div class="comment-author">${name} <span class="comment-time">${time}</span>
             <button class="comment-like-btn" id="clb-${escHtml(c.id)}"
-              onclick="handleCommentLikeClick('${escHtml(c.id)}', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg><span id="clc-${escHtml(c.id)}"></span></button>
+              onclick="handleCommentLikeClick('${escHtml(c.id)}', this)"><svg width="14" height="14" viewBox="0 0 24 24" class="thumb-icon" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg><span id="clc-${escHtml(c.id)}"></span></button>
           </div>
           <div class="comment-content">${escHtml(c.content)}</div>
         </div>`;

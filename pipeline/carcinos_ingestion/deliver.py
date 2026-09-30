@@ -61,6 +61,7 @@ def build_email_html(
     week_label: str,
     unsubscribe_url: str = "https://carcino-s.com/settings",
     papers_scanned: int = 0,
+    headline: str = "Weekly Digest",
 ) -> str:
     scope_note = (
         "Radiation Oncology scope — showing only alerts with direct or indirect radiation oncology relevance."
@@ -240,7 +241,7 @@ def build_email_html(
         </td>
         <td valign="middle" style="padding-left:12px;">
           <p style="margin:0;font-size:20px;font-weight:700;color:#ffffff;font-family:Helvetica,Arial,sans-serif;letter-spacing:-0.3px;">Carcino<span style="color:#72a37a;">S</span></p>
-          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.45);font-family:Helvetica,Arial,sans-serif;">Weekly Digest &middot; {_esc(week_label)} &middot; {total} update{"s" if total != 1 else ""}{f" &middot; <strong style='color:rgba(255,255,255,0.75);'>{papers_scanned:,} papers scanned</strong>" if papers_scanned > 0 else ""} &middot; Delivered every Tuesday evening</p>
+          <p style="margin:0;font-size:12px;color:rgba(255,255,255,0.45);font-family:Helvetica,Arial,sans-serif;">{_esc(headline)} &middot; {_esc(week_label)} &middot; {total} update{"s" if total != 1 else ""}{f" &middot; <strong style='color:rgba(255,255,255,0.75);'>{papers_scanned:,} papers scanned</strong>" if papers_scanned > 0 else ""} &middot; Delivered every Tuesday evening</p>
         </td>
       </tr>
     </table>
@@ -332,14 +333,14 @@ def build_push_messages(alerts: list, scope: str) -> list[dict]:
 # Sending helpers
 # ---------------------------------------------------------------------------
 
-def build_email_text(alerts: list, scope: str, week_label: str) -> str:
+def build_email_text(alerts: list, scope: str, week_label: str, headline: str = "Weekly Digest") -> str:
     """Plain-text fallback for the HTML digest. Required for deliverability."""
     pi  = [a for a in alerts if a.tier == "A"]
     inc = [a for a in alerts if a.tier == "B"]
     hor = [a for a in alerts if a.tier == "C"]
 
     lines = [
-        f"CarcinoS Weekly Digest — {week_label}",
+        f"CarcinoS {headline} — {week_label}",
         "=" * 50,
         "",
     ]
@@ -449,7 +450,7 @@ def send_push(
 # Main delivery loop
 # ---------------------------------------------------------------------------
 
-def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_email: str | None = None) -> dict:
+def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_email: str | None = None, label: str | None = None, subject_override: str | None = None) -> dict:
     """
     Fetch all opted-in subscribers, pull their filtered alert feeds, and deliver.
 
@@ -498,6 +499,10 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_emai
         week_label = f"{prior_monday.strftime('%B')} {prior_monday.day} – {last_sunday.day}, {last_sunday.year}"
     else:
         week_label = f"{prior_monday.strftime('%B')} {prior_monday.day} – {last_sunday.strftime('%B')} {last_sunday.day}, {last_sunday.year}"
+
+    if label:
+        week_label = label
+    headline = label if label else "Weekly Digest"
 
     stats = {"total": len(subscribers), "email_sent": 0, "push_sent": 0, "skipped": 0, "errors": 0}
 
@@ -589,9 +594,9 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_emai
         email_ok = False
         if delivery in ("email", "both") and resend_key:
             unsubscribe_url = f"https://carcino-s.com/unsubscribe?uid={user_id}"
-            html_body  = build_email_html(alerts, scope, week_label, unsubscribe_url=unsubscribe_url, papers_scanned=papers_scanned)
-            text_body  = build_email_text(alerts, scope, week_label)
-            subject    = f"CarcinoS Weekly Digest | {week_label}"
+            html_body  = build_email_html(alerts, scope, week_label, unsubscribe_url=unsubscribe_url, papers_scanned=papers_scanned, headline=headline)
+            text_body  = build_email_text(alerts, scope, week_label, headline=headline)
+            subject    = subject_override if subject_override else f"CarcinoS Weekly Digest | {week_label}"
             email_ok = send_email(
                 resend_key, from_email, email, subject, html_body,
                 text_body=text_body,
@@ -647,13 +652,17 @@ def _build_argparser() -> argparse.ArgumentParser:
         help="Print what would be sent without actually sending.")
     p.add_argument("--user-email", type=str, default=None,
         help="If set, only deliver to this subscriber (one-off send).")
+    p.add_argument("--label", type=str, default=None,
+        help="Override the week label and email headline (e.g. 'ASTRO 2026').")
+    p.add_argument("--subject", type=str, default=None,
+        help="Override the email subject line entirely.")
     return p
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_argparser().parse_args(argv)
     cfg  = Config.from_env()
-    run_delivery(cfg, days=args.days, dry_run=args.dry_run, user_email=args.user_email)
+    run_delivery(cfg, days=args.days, dry_run=args.dry_run, user_email=args.user_email, label=args.label, subject_override=args.subject)
     return 0
 
 

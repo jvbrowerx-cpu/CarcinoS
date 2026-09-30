@@ -381,6 +381,69 @@
   .comment-submit:disabled { opacity: 0.4; cursor: not-allowed; }
   .comment-empty { font-size: 12px; color: #888888; font-style: italic; margin-bottom: 8px; }
 
+  /* ── LIKE BUTTONS (👍) ── */
+  .like-btn {
+    position: relative;
+    font-size: 13px; color: var(--grey-dim);
+    cursor: pointer; transition: color 0.15s;
+    border: none; background: none; padding: 0;
+    font-family: inherit; display: inline-flex;
+    align-items: center; gap: 3px; line-height: 1;
+  }
+  .card.inc .like-btn, .card.hor .like-btn { color: #999999; }
+  .like-btn:hover { color: var(--green); }
+  .card.inc .like-btn:hover, .card.hor .like-btn:hover { color: #3a7a3a; }
+  .like-btn.liked { color: var(--green); }
+  .card.inc .like-btn.liked, .card.hor .like-btn.liked { color: #3a7a3a; }
+  .like-count { font-size: 12px; font-variant-numeric: tabular-nums; }
+  /* Tooltip — only shown when data-tip attribute is set (count > 0) */
+  .like-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 7px); left: 50%;
+    transform: translateX(-50%);
+    background: #1a2a1a; color: #ffffff;
+    font-size: 11px; padding: 4px 9px;
+    border-radius: 5px; white-space: nowrap;
+    pointer-events: none; z-index: 20;
+  }
+  .like-btn[data-tip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px); left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: #1a2a1a;
+    pointer-events: none; z-index: 20;
+  }
+  /* Comment-level like button */
+  .comment-like-btn {
+    position: relative;
+    font-size: 11px; color: #cccccc;
+    cursor: pointer; transition: color 0.15s;
+    border: none; background: none; padding: 0;
+    font-family: inherit; float: right; line-height: 1;
+  }
+  .comment-like-btn:hover { color: #3a7a3a; }
+  .comment-like-btn.liked { color: #3a7a3a; }
+  .comment-like-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 7px); right: 0;
+    background: #1a2a1a; color: #ffffff;
+    font-size: 11px; padding: 4px 9px;
+    border-radius: 5px; white-space: nowrap;
+    pointer-events: none; z-index: 20;
+  }
+  .comment-like-btn[data-tip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 3px); right: 8px;
+    border: 4px solid transparent;
+    border-top-color: #1a2a1a;
+    pointer-events: none; z-index: 20;
+  }
+
   @media (max-width: 640px) {
     .container { padding: 28px 18px 64px; }
     nav { padding: 12px 18px; }
@@ -802,6 +865,12 @@ function renderCard(c, tier) {
     ? `<button class="comment-teaser" id="ct-${escHtml(c.id)}" onclick="showAuthModal('login')" style="display:none;"></button>`
     : '';
 
+  // Like button — visible always; anon clicks → login modal, auth → toggle
+  const likeHtml = AUTH_ENABLED
+    ? `<button class="like-btn" id="lb-${escHtml(c.id)}"
+        onclick="handleLikeClick('${escHtml(c.id)}', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg><span class="like-count" id="lc-${escHtml(c.id)}"></span></button>`
+    : '';
+
   // Comment section placeholder (logged-in, AUTH_ENABLED)
   const commentSectionHtml = AUTH_ENABLED
     ? `<div class="comments-section" id="cs-${escHtml(c.id)}"></div>`
@@ -824,6 +893,7 @@ function renderCard(c, tier) {
           <span class="tag ${evidenceClass}">Evidence ${escHtml(c.evidence_strength || '?')}</span>
         </div>
         <div style="display:flex;align-items:center;gap:14px;">
+          ${likeHtml}
           ${teaserHtml}
           ${c.source_url ? `<a class="card-source-link" href="${escHtml(c.source_url)}" target="_blank" rel="noopener">↗ Read paper</a>` : ''}
           <span class="card-signal">${TIER_SIGNAL[tier]}</span>
@@ -950,6 +1020,7 @@ function renderGatedDigest(alerts, pi, inc, hor) {
 
   // Load comment count teasers (anon-accessible via function)
   loadCommentCounts(alerts.map(a => a.id));
+  loadAlertLikeCounts(alerts.map(a => a.id));
 }
 
 // ─────────────────────────────────────────────
@@ -988,16 +1059,24 @@ async function loadAllComments(alerts) {
       byAlert[c.alert_id].push(c);
     });
 
+    const allComments = [];
     alerts.forEach(a => {
       const el = document.getElementById(`cs-${a.id}`);
       if (!el) return;
       const comments = byAlert[a.id] || [];
+      allComments.push(...comments);
       el.innerHTML = buildCommentSection(a.id, comments, a.tier);
 
       // Hide the logged-out teaser since we now show full section
       const teaser = document.getElementById(`ct-${a.id}`);
       if (teaser) teaser.style.display = 'none';
     });
+
+    // Load like state for auth users
+    await Promise.all([
+      loadAuthAlertLikes(alerts),
+      loadAuthCommentLikes(allComments),
+    ]);
   } catch (e) { console.error('loadAllComments:', e); }
 }
 
@@ -1007,8 +1086,11 @@ function buildCommentSection(alertId, comments, tier) {
     : comments.map(c => {
         const name = escHtml(c.display_name || 'Physician');
         const time = timeAgo(new Date(c.created_at));
-        return `<div class="comment-item">
-          <div class="comment-author">${name} <span class="comment-time">${time}</span></div>
+        return `<div class="comment-item" id="ci-${escHtml(c.id)}">
+          <div class="comment-author">${name} <span class="comment-time">${time}</span>
+            <button class="comment-like-btn" id="clb-${escHtml(c.id)}"
+              onclick="handleCommentLikeClick('${escHtml(c.id)}', this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;vertical-align:middle" aria-hidden="true"><path d="M2 20h2a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2H2v12zM21.5 10H15l1.2-4.5A1.5 1.5 0 0 0 14.77 4L9 10v10h9.6a2 2 0 0 0 1.96-1.6l1.4-7A2 2 0 0 0 21.5 10z"/></svg><span id="clc-${escHtml(c.id)}"></span></button>
+          </div>
           <div class="comment-content">${escHtml(c.content)}</div>
         </div>`;
       }).join('');
@@ -1052,6 +1134,178 @@ async function submitComment(alertId) {
     return;
   }
   if (btn) { btn.disabled = false; btn.textContent = 'Post comment'; }
+}
+
+// ─────────────────────────────────────────────
+// LIKES (👍)
+// ─────────────────────────────────────────────
+
+function _likeTip(count) {
+  if (!count) return null; // no tooltip at 0
+  return count === 1 ? 'Liked by 1 colleague' : `Liked by ${count} colleagues`;
+}
+
+function _applyLikeTip(btn, count) {
+  const tip = _likeTip(count);
+  if (tip) btn.dataset.tip = tip;
+  else delete btn.dataset.tip;
+}
+
+// Anon: counts via SECURITY DEFINER function (no user identity exposed)
+async function loadAlertLikeCounts(alertIds) {
+  if (!sbClient || !AUTH_ENABLED || !alertIds.length) return;
+  try {
+    const { data } = await sbClient.rpc('get_alert_like_counts', { p_alert_ids: alertIds });
+    if (!data) return;
+    const countMap = {};
+    data.forEach(r => { countMap[r.alert_id] = parseInt(r.like_count) || 0; });
+    alertIds.forEach(id => {
+      const count = countMap[id] || 0;
+      const countEl = document.getElementById(`lc-${id}`);
+      if (countEl) countEl.textContent = count || '';
+      const btn = document.getElementById(`lb-${id}`);
+      if (btn) _applyLikeTip(btn, count);
+    });
+  } catch (e) { /* non-critical */ }
+}
+
+// Auth: direct table query — counts + which ones this user liked
+async function loadAuthAlertLikes(alerts) {
+  if (!sbClient || !currentUser || !AUTH_ENABLED) return;
+  try {
+    const alertIds = alerts.map(a => a.id);
+    const { data } = await sbClient
+      .from('alert_likes')
+      .select('alert_id, user_id')
+      .in('alert_id', alertIds);
+    if (!data) return;
+
+    const countMap = {};
+    const myLikes = new Set();
+    data.forEach(r => {
+      countMap[r.alert_id] = (countMap[r.alert_id] || 0) + 1;
+      if (r.user_id === currentUser.id) myLikes.add(r.alert_id);
+    });
+
+    alertIds.forEach(id => {
+      const count = countMap[id] || 0;
+      const countEl = document.getElementById(`lc-${id}`);
+      if (countEl) countEl.textContent = count || '';
+      const btn = document.getElementById(`lb-${id}`);
+      if (!btn) return;
+      btn.classList.toggle('liked', myLikes.has(id));
+      _applyLikeTip(btn, count);
+    });
+  } catch (e) { console.error('loadAuthAlertLikes:', e); }
+}
+
+// Auth: comment likes — counts + which ones this user liked
+async function loadAuthCommentLikes(comments) {
+  if (!sbClient || !currentUser || !comments.length) return;
+  try {
+    const commentIds = comments.map(c => c.id);
+    const { data } = await sbClient
+      .from('comment_likes')
+      .select('comment_id, user_id')
+      .in('comment_id', commentIds);
+    if (!data) return;
+
+    const countMap = {};
+    const myLikes = new Set();
+    data.forEach(r => {
+      countMap[r.comment_id] = (countMap[r.comment_id] || 0) + 1;
+      if (r.user_id === currentUser.id) myLikes.add(r.comment_id);
+    });
+
+    commentIds.forEach(id => {
+      const count = countMap[id] || 0;
+      const countEl = document.getElementById(`clc-${id}`);
+      if (countEl) countEl.textContent = count || '';
+      const btn = document.getElementById(`clb-${id}`);
+      if (!btn) return;
+      btn.classList.toggle('liked', myLikes.has(id));
+      _applyLikeTip(btn, count);
+    });
+  } catch (e) { console.error('loadAuthCommentLikes:', e); }
+}
+
+// Click handlers — branch on auth state
+function handleLikeClick(alertId, btn) {
+  if (!currentUser) { showAuthModal('login'); return; }
+  toggleAlertLike(alertId, btn);
+}
+
+function handleCommentLikeClick(commentId, btn) {
+  if (!currentUser) { showAuthModal('login'); return; }
+  toggleCommentLike(commentId, btn);
+}
+
+// Toggle article like with optimistic update + rollback
+async function toggleAlertLike(alertId, btn) {
+  if (!sbClient || !currentUser || btn.disabled) return;
+  const wasLiked = btn.classList.contains('liked');
+  const countEl = document.getElementById(`lc-${alertId}`);
+  const prev = parseInt(countEl?.textContent) || 0;
+  const next = wasLiked ? Math.max(0, prev - 1) : prev + 1;
+
+  btn.classList.toggle('liked', !wasLiked);
+  if (countEl) countEl.textContent = next || '';
+  _applyLikeTip(btn, next);
+  btn.disabled = true;
+
+  try {
+    if (wasLiked) {
+      const { error } = await sbClient.from('alert_likes').delete()
+        .eq('alert_id', alertId).eq('user_id', currentUser.id);
+      if (error) throw error;
+    } else {
+      const { error } = await sbClient.from('alert_likes')
+        .insert({ alert_id: alertId, user_id: currentUser.id });
+      if (error) throw error;
+    }
+  } catch (e) {
+    // Rollback optimistic update
+    btn.classList.toggle('liked', wasLiked);
+    if (countEl) countEl.textContent = prev || '';
+    _applyLikeTip(btn, prev);
+    console.error('toggleAlertLike:', e);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Toggle comment like with optimistic update + rollback
+async function toggleCommentLike(commentId, btn) {
+  if (!sbClient || !currentUser || btn.disabled) return;
+  const wasLiked = btn.classList.contains('liked');
+  const countEl = document.getElementById(`clc-${commentId}`);
+  const prev = parseInt(countEl?.textContent) || 0;
+  const next = wasLiked ? Math.max(0, prev - 1) : prev + 1;
+
+  btn.classList.toggle('liked', !wasLiked);
+  if (countEl) countEl.textContent = next || '';
+  _applyLikeTip(btn, next);
+  btn.disabled = true;
+
+  try {
+    if (wasLiked) {
+      const { error } = await sbClient.from('comment_likes').delete()
+        .eq('comment_id', commentId).eq('user_id', currentUser.id);
+      if (error) throw error;
+    } else {
+      const { error } = await sbClient.from('comment_likes')
+        .insert({ comment_id: commentId, user_id: currentUser.id });
+      if (error) throw error;
+    }
+  } catch (e) {
+    // Rollback optimistic update
+    btn.classList.toggle('liked', wasLiked);
+    if (countEl) countEl.textContent = prev || '';
+    _applyLikeTip(btn, prev);
+    console.error('toggleCommentLike:', e);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 // ─────────────────────────────────────────────

@@ -154,6 +154,12 @@ def build_email_html(
                 <p style="margin:0;font-size:13px;color:{text_mid};font-family:Helvetica,Arial,sans-serif;line-height:1.6;"><strong style="color:{text_dark};">So what (clinical implication):</strong> {one_liner_display}</p>
               </td></tr>"""
 
+        # "Discuss on CarcinoS" deep-link
+        discuss_row = f"""
+              <tr><td style="padding-bottom:12px;">
+                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="font-size:12px;font-weight:700;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">&#128172; Discuss on CarcinoS &#8599;</a>
+              </td></tr>"""
+
         # Divider + bottom row
         evidence_cell = ""
         if a.evidence_strength:
@@ -183,6 +189,7 @@ def build_email_html(
               {study_row}
               {findings_row}
               {one_liner_row}
+              {discuss_row}
               {bottom_row}
             </table>
           </td></tr>

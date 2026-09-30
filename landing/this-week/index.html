@@ -882,7 +882,7 @@ function renderCard(c, tier) {
     : '';
 
   return `
-    <div class="card ${tierClass}">
+    <div class="card ${tierClass}" id="card-${escHtml(c.id)}">
       <div class="card-meta">
         ${c.journal ? `<strong>Journal:</strong> <em>${escHtml(c.journal)}</em>` : ''}
         ${c.journal && c.pub_date ? '<span class="dot">·</span>' : ''}
@@ -949,6 +949,7 @@ function renderDigest(alerts) {
   // Full render
   document.getElementById('digestRoot').innerHTML =
     renderSection('A', pi) + renderSection('B', inc) + renderSection('C', hor);
+  scrollToHash();
 
   // Load comments if auth is on and user is logged in
   if (AUTH_ENABLED && currentUser) {
@@ -1022,10 +1023,18 @@ function renderGatedDigest(alerts, pi, inc, hor) {
   }
 
   document.getElementById('digestRoot').innerHTML = html;
+  scrollToHash();
 
   // Load comment count teasers (anon-accessible via function)
   loadCommentCounts(alerts.map(a => a.id));
   loadAlertLikeCounts(alerts.map(a => a.id));
+}
+
+function scrollToHash() {
+  const hash = window.location.hash; // e.g. "#card-<uuid>"
+  if (!hash) return;
+  const el = document.getElementById(hash.slice(1));
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ─────────────────────────────────────────────

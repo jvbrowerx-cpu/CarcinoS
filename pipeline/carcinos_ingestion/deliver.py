@@ -529,17 +529,25 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_emai
             stats["errors"] += 1
             continue
 
-        # NOTE: we do NOT filter by a.pub_date here.
-        # Delivery eligibility for the current digest window is determined
-        # entirely by the Supabase RPC anchor:
-        #   get_user_feed_for_digest(p_since = Monday of this week)
-        # which filters on alerts.published_at (the CarcinoS approval
-        # timestamp), NOT on the journal publication date.
-        #
-        # Filtering by pub_date here would incorrectly discard delayed-indexed
-        # PubMed papers: a JCO article published 5 weeks ago but first indexed
-        # by PubMed 3 days ago has a stale pub_date but a current published_at.
-        # pub_date is display-only metadata; it does not govern delivery timing.
+        # Drop any alert whose journal publication date is more than 10 days old.
+        # The pipeline looks back 7 days; delivery runs up to 2 days later (Tuesday
+        # after Monday pipeline). 10 days gives a 1-day safety margin without
+        # letting articles from the prior week bleed into the current digest.
+        pub_cutoff = as_of - timedelta(days=10)
+        def _recent_enough(a) -> bool:
+            if not a.pub_date:
+                return True  # no date → keep (don't silently drop)
+            try:
+                from datetime import date as _date
+                pd = _date.fromisoformat(str(a.pub_date)[:10])
+                return pd >= pub_cutoff
+            except ValueError:
+                return True  # unparseable → keep
+        before = len(alerts)
+        alerts = [a for a in alerts if _recent_enough(a)]
+        dropped = before - len(alerts)
+        if dropped:
+            print(f"    Dropped {dropped} alert(s) with pub_date older than {pub_cutoff}")
 
         # Deduplicate: drop alerts already sent to this user in a previous digest.
         # digest_deliveries holds one row per (user_id, alert_id); presence means

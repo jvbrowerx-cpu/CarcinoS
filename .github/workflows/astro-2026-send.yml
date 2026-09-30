@@ -1,0 +1,63 @@
+name: ASTRO 2026 Meeting Highlights Send
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — print recipients without sending'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      user_email:
+        description: 'Send to this email only (leave blank for all subscribers)'
+        required: false
+        default: ''
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          cd pipeline
+          pip install -r carcinos_ingestion/requirements.txt
+
+      - name: Run ASTRO 2026 delivery
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:            ${{ secrets.RESEND_API_KEY }}
+          CARCINOS_FROM_EMAIL:       ${{ secrets.CARCINOS_FROM_EMAIL }}
+        run: |
+          cd pipeline
+
+          DRY="${{ github.event.inputs.dry_run }}"
+          if [ "$DRY" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          else
+            DRY_FLAG=""
+          fi
+
+          USER_EMAIL="${{ github.event.inputs.user_email }}"
+          if [ -n "$USER_EMAIL" ]; then
+            USER_FLAG="--user-email $USER_EMAIL"
+          else
+            USER_FLAG=""
+          fi
+
+          python -m carcinos_ingestion.deliver \
+            --label "ASTRO 2026" \
+            --subject "CarcinoS | ASTRO 2026 Meeting Highlights" \
+            $DRY_FLAG $USER_FLAG

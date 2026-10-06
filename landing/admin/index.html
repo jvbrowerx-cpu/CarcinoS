@@ -618,6 +618,7 @@
           <option value="cutaneous">Cutaneous</option>
           <option value="sarcoma">Sarcoma</option>
           <option value="pediatric">Pediatric</option>
+          <option value="benign">Benign</option>
         </select>
       </div>
     </div>
@@ -723,6 +724,7 @@
         <option value="cutaneous">Cutaneous</option>
         <option value="sarcoma">Sarcoma</option>
         <option value="pediatric">Pediatric</option>
+        <option value="benign">Benign</option>
       </select>
     </div>
 
@@ -1464,6 +1466,7 @@ function renderFDAAddForm() {
           <option value="head_neck">Head &amp; Neck</option>
           <option value="sarcoma">Sarcoma / Bone</option>
           <option value="pediatric">Pediatric</option>
+          <option value="benign">Benign</option>
         </select>
       </div>
       <div class="fda-form-actions">
@@ -1724,6 +1727,7 @@ function renderCard(c) {
             <option value="cutaneous"      ${c.disease_site_code === 'cutaneous'      ? 'selected' : ''}>Cutaneous</option>
             <option value="sarcoma"        ${c.disease_site_code === 'sarcoma'        ? 'selected' : ''}>Sarcoma</option>
             <option value="pediatric"      ${c.disease_site_code === 'pediatric'      ? 'selected' : ''}>Pediatric</option>
+            <option value="benign"         ${c.disease_site_code === 'benign'         ? 'selected' : ''}>Benign</option>
           </select>
         </div>
         <div class="edit-row">
@@ -2066,7 +2070,7 @@ function formatSite(site) {
     breast: 'Breast', thoracic: 'Thoracic', gastrointestinal: 'GI',
     gu: 'GU', gynecologic: 'Gynecologic', hematologic: 'Hematology',
     cns: 'CNS', head_neck: 'Head & Neck', cutaneous: 'Cutaneous', sarcoma: 'Sarcoma',
-    pediatric: 'Pediatric'
+    pediatric: 'Pediatric', benign: 'Benign'
   };
   return map[site] || site || '';
 }
@@ -2097,6 +2101,7 @@ const SITE_DISPLAY_NAMES = {
   breast: 'Breast', thoracic: 'Thoracic', gu: 'GU', head_neck: 'Head & Neck',
   gynecologic: 'Gynecologic', hematologic: 'Hematologic', pediatric: 'Pediatric',
   cns: 'CNS', sarcoma: 'Sarcoma', gastrointestinal: 'GI', cutaneous: 'Cutaneous',
+  benign: 'Benign',
 };
 
 function renderScopeLabel(c) {

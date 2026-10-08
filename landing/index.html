@@ -1926,7 +1926,10 @@
                 <a href="this-week/">This Week</a>
             </li>
             <li>
-                <a href="#framework">How It Works</a>
+                <a href="about/#framework">How It Works</a>
+            </li>
+            <li>
+                <a href="about/">About</a>
             </li>
             <li>
                 <a href="archive/">Archive</a>
@@ -1961,7 +1964,7 @@
                         Updates
                     </span>
                 </h1>
-                <p class="hero-sub">CarcinoS is not an <strong style="color:#72a37a">AI curation engine</strong>.<br><br>Oncology updates pass through a <strong style="color:#ffffff">deterministic ingestion and scoring pipeline</strong>, with AI used selectively where it adds value. Every practice-impacting update is ultimately reviewed by a <strong style="color:#ffffff">human editor</strong> before reaching clinicians.<br><br><strong style="color:#ffffff">Deterministic first. AI-assisted. Human reviewed.</strong></p>
+                <p class="hero-sub"><strong style="color:#ffffff;font-size:1.12em">Other AI tools answer the questions you ask.<br><span style="color:#72a37a">CarcinoS finds the ones you didn't know to ask.</span></strong><br><br>Not an AI summarizer: a <strong style="color:#ffffff">largely deterministic pipeline</strong>, with AI used only where it helps and <strong style="color:#ffffff">final adjudication by a physician editor</strong>.</p>
                 <p class="hero-credibility">Developed by a practicing Oncologist &nbsp;·&nbsp; <span style="color:#72a37a;">Free during early access</span></p>
             </div>
             <div class="phone-wrap">
@@ -2093,31 +2096,201 @@
                 </div>
             </div>
         </div>
-        <div class="feature-row">
-            <div class="feature-box">
-                <div class="feature-box-title">Practice-Impacting Updates</div>
-                <div class="feature-box-desc">Studies with immediate clinical impact for oncologists</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-box-title">Incremental Updates</div>
-                <div class="feature-box-desc">Important studies, not practice changing</div>
-            </div>
-            <div class="feature-box">
-                <div class="feature-box-title">Horizon Discoveries</div>
-                <div class="feature-box-desc">Emerging or early new concepts that may be impactful in the future</div>
-            </div>
-        </div>
     </section>
-    <!-- Founder statement -->
-    <section style="padding: 80px clamp(20px, 6vw, 80px) 60px; position: relative; z-index: 1;">
-        <div style="max-width: 680px; margin: 0 auto;">
-            <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #72a37a; margin-bottom: 24px;">Why We Built CarcinoS</p>
-            <p style="font-size: clamp(15px, 1.6vw, 17px); line-height: 1.8; color: rgba(240,244,241,0.95); font-weight: 500; margin-bottom: 22px;">We designed CarcinoS out of a passion for medical education and a desire to support clinicians already burdened by an increasingly complex healthcare system.</p>
-            <p style="font-size: clamp(15px, 1.6vw, 17px); line-height: 1.8; color: rgba(240,244,241,0.72); margin-bottom: 22px;">CarcinoS works quietly in the background—identifying and delivering the findings that truly matter without asking clinicians to continually search for them.</p>
-            <p style="font-size: clamp(15px, 1.6vw, 17px); line-height: 1.8; color: rgba(240,244,241,0.72); margin-bottom: 32px;">Our goal is to make <span style="color: #72a37a;">staying informed nearly effortless</span>, reduce information overload, and help clinicians committed to providing the best and most up-to-date care for their patients continue to do so.</p>
-            <p style="font-size: 13px; color: rgba(240,244,241,0.45); font-weight: 500; margin: 0;">Jeffrey Brower, MD, PhD<br><span style="font-weight: 400; color: rgba(240,244,241,0.3);">Founder, CarcinoS</span></p>
+    <section class="funnel" id="funnel">
+      <style>
+        .funnel{position:relative;z-index:1;padding:70px clamp(20px,5vw,72px) 10px}
+        .fn-inner{max-width:1180px;margin:0 auto}
+        .fn-row{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:stretch;gap:14px;margin-top:28px}
+        .fn{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025);border-radius:14px;padding:26px 24px}
+        .fn.hot{border-color:rgba(114,163,122,.6);background:rgba(114,163,122,.09)}
+        .fn .num{white-space:nowrap;font-size:clamp(38px,4.4vw,56px);font-weight:700;letter-spacing:-.02em;color:#f0f4f1;line-height:1}
+        .fn.hot .num{color:#72a37a}
+        .fn .lbl{font-size:14.5px;color:rgba(240,244,241,.65);margin-top:10px;line-height:1.5}
+        .fn-arrow{display:flex;align-items:center;color:rgba(114,163,122,.7);font-size:26px}
+        .fn-note{text-align:center;margin-top:22px;font-size:15px;color:rgba(240,244,241,.6)}
+        .fn-note b{color:#72a37a}
+        @media (max-width:860px){.fn-row{grid-template-columns:1fr;gap:6px}.fn{padding:16px 20px;display:flex;align-items:baseline;gap:14px}.fn .num{font-size:34px}.fn .lbl{margin-top:0}.fn-arrow{justify-content:center;transform:rotate(90deg);font-size:18px}}
+      </style>
+      <div class="fn-inner">
+        <div class="eyebrow">Every week</div>
+        <h2 class="sec-h">Over 1,000 new oncology papers. Only a few change practice.</h2>
+        <div class="fn-row">
+          <div class="fn"><div class="num">~800</div><div class="lbl">papers scanned by CarcinoS</div></div>
+          <div class="fn-arrow">→</div>
+          <div class="fn"><div class="num">~20</div><div class="lbl">make it through scoring</div></div>
+          <div class="fn-arrow">→</div>
+          <div class="fn hot"><div class="num">2–4</div><div class="lbl">practice-impacting findings emailed to you</div></div>
         </div>
+        <p class="fn-note">Less than <b>0.5%</b> of what we scan reaches your inbox. The rest stays searchable on the site.</p>
+
+      </div>
     </section>
+
+    <!-- ═══ MOCKUP: Anatomy of a CarcinoS card ═══ -->
+    <style>
+      .anat{position:relative;z-index:1;padding:90px clamp(20px,5vw,72px) 40px}
+      .anat-inner{max-width:1180px;margin:0 auto}
+      .eyebrow{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#72a37a;margin-bottom:14px}
+      .sec-h{font-family:Georgia,serif;font-weight:400;font-size:clamp(28px,3.4vw,42px);line-height:1.15;color:#f0f4f1;margin:0 0 12px}
+      .sec-sub{font-size:16px;line-height:1.7;color:rgba(240,244,241,.62);max-width:720px;margin:0 0 44px}
+      .anat-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:48px;align-items:start}
+      .cc{position:relative;margin-left:30px;background:#d4e1d4;color:#1d2a1f;border-radius:16px;padding:26px 28px 0;font-size:14.5px;line-height:1.6;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+      .cc .meta{font-size:12.5px;color:#4e6352}.cc .meta b{color:#3d5241}
+      .cc h4{font-size:17px;line-height:1.4;margin:10px 0 12px;color:#1a2a1d}
+      .cc p{margin:0 0 12px;color:#3d4d40}.cc p b{color:#1a2a1d}
+      .cc .kf{font-weight:600;color:#1a2a1d}
+      .cc .bar{display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(26,42,29,.18);padding:12px 0 14px;margin-top:4px}
+      .cc .badge{font-size:11px;font-weight:700;letter-spacing:.08em;background:#b5c9b6;color:#2d4632;border-radius:6px;padding:5px 10px}
+      .cc .acts{display:flex;gap:18px;align-items:center;font-size:13px;font-weight:600;color:#2d4632}
+      .cc .acts .like{color:#4c9a57}
+      .cc .disc{background:#fff;border-radius:12px 12px 0 0;padding:14px 18px 16px;margin:0 -10px}
+      .cc .disc .dh{font-size:11px;font-weight:700;letter-spacing:.12em;color:#4e6352;margin-bottom:8px}
+      .cc .disc .cm{background:#f3f4f3;border-radius:8px;padding:10px 12px;font-size:13px;color:#333}
+      .cc .disc .cm b{font-size:12px;color:#222}
+      .ar{position:relative}.ar .pin{top:0}.pin{position:absolute;width:24px;height:24px;border-radius:50%;background:#72a37a;color:#0b0f0c;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px rgba(114,163,122,.28);left:-41px}
+      .ip{display:inline-flex;align-items:center;gap:7px}.ipin{display:inline-flex;width:20px;height:20px;border-radius:50%;background:#72a37a;color:#0b0f0c;font-size:11px;font-weight:800;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(114,163,122,.3);vertical-align:middle;margin-right:2px}
+      .legend{list-style:none;margin:0;padding:24px 0 0;display:flex;flex-direction:column;gap:22px}
+      .legend li{display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+      .legend .n{width:26px;height:26px;border-radius:50%;background:#72a37a;color:#0b0f0c;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+      .legend .t{font-size:15px;font-weight:600;color:#f0f4f1;margin-bottom:2px}
+      .legend .d{font-size:13.5px;line-height:1.55;color:rgba(240,244,241,.6)}
+      .isnt{position:relative;z-index:1;padding:50px clamp(20px,5vw,72px) 70px}
+      .isnt-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+      .col{border-radius:14px;padding:28px 30px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.025)}
+      .col.is{border-color:rgba(114,163,122,.5);background:rgba(114,163,122,.06)}
+      .col h3{font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin:0 0 18px;color:#72a37a}
+      .col.not h3{color:rgba(240,244,241,.5)}
+      .col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+      .col li{font-size:15px;line-height:1.6;color:rgba(240,244,241,.82);padding-left:26px;position:relative}
+      .col li b{color:#f0f4f1}
+      .col.is li:before{content:"✓";position:absolute;left:0;color:#72a37a;font-weight:700}
+      .col.not li:before{content:"✕";position:absolute;left:0;color:rgba(240,244,241,.4)}
+      .pullq{max-width:1180px;margin:28px auto 0;text-align:center;font-family:Georgia,serif;font-size:clamp(19px,2vw,24px);color:#f0f4f1;line-height:1.5}
+      .pullq span{color:#72a37a}
+      .about{position:relative;z-index:1;padding:80px clamp(20px,5vw,72px)}
+      .about-inner{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:200px 1fr;gap:48px;align-items:start}
+      .avatar{width:180px;height:180px;border-radius:50%;border:2px solid rgba(114,163,122,.6);background:radial-gradient(circle at 30% 30%,#22322a,#0d130f);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:52px;color:#72a37a;position:relative}
+      .avatar small{position:absolute;bottom:-26px;font-family:inherit;font-size:11px;color:rgba(240,244,241,.4);letter-spacing:.05em}
+      .about p{font-size:16px;line-height:1.8;color:rgba(240,244,241,.75);margin:0 0 18px}
+      .about .name{font-size:20px;font-weight:600;color:#f0f4f1;margin-bottom:2px}
+      .about .role{font-size:13px;color:#72a37a;margin-bottom:22px;letter-spacing:.02em}
+      .creds{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 24px}
+      .creds span{font-size:12.5px;border:1px solid rgba(114,163,122,.4);color:rgba(240,244,241,.85);border-radius:20px;padding:6px 13px}
+      .ph{background:rgba(255,215,90,.12);color:#f2d27a;border-radius:4px;padding:0 4px}
+      @media (max-width:860px){.anat-grid,.isnt-grid,.about-inner{grid-template-columns:1fr}.about-inner{justify-items:start}}
+    </style>
+
+    <section class="anat" id="card-anatomy">
+      <div class="anat-inner">
+        <div class="eyebrow">What you receive</div>
+        <h2 class="sec-h">One card. Everything you need to decide if it matters.</h2>
+        <p class="sec-sub">A real example, annotated.</p>
+        <div class="anat-grid">
+          <div class="cc">
+            <div class="ar"><span class="pin">1</span><div class="meta"><b>Journal:</b> <i>ASTRO / IJROBP</i> &nbsp;·&nbsp; <b>Date:</b> 9/28/26</div></div>
+            <div class="ar"><span class="pin" style="top:12px">2</span><h4>NRG-CC009: A Phase III Trial of Stereotactic Radiosurgery vs Hippocampal-Avoidant Whole-Brain Radiotherapy for Brain Metastases From Small-Cell Lung Cancer</h4></div>
+            <div class="ar"><span class="pin">3</span><p><b>Study / regimen:</b> Patients with SCLC and brain metastases suitable for SRS (≤4 cm each, total volume ≤30 cm³, ≥5 mm from the hippocampi).</p></div>
+            <div class="ar"><span class="pin">4</span><p class="kf">Key findings: Neurocognitive failure was not significantly different with SRS vs HA-WBRT + memantine (adj. HR 0.83; P=0.39), while OS favored SRS (median 17.4 vs 8.6 mo; adj. HR 0.60; P=0.016).</p></div>
+            <div class="ar"><span class="pin">5</span><p><b>So what (clinical implication):</b> SRS can be considered a standard option for selected patients with SCLC brain metastases, a population historically excluded from SRS trials. The large OS difference warrants longer follow-up.</p></div>
+            <div class="bar">
+              <span class="ip"><span class="ipin">6</span><span class="badge">■■■ PRACTICE-IMPACTING</span></span>
+              <span class="acts"><span class="ip"><span class="ipin">7</span><span class="like">👍 4</span></span><span class="ip"><span class="ipin">8</span><span>↗ Read paper</span></span></span>
+            </div>
+            <div class="disc">
+              <div class="dh"><span class="ipin">9</span> DISCUSSION</div>
+              <div class="cm"><b>Radiation Oncologist · Academic Medical Center</b><br>Great to finally have level 1 evidence here. I had already moved to SRS for SCLC based on retrospective data, but this supports the change in my practice.</div>
+            </div>
+          </div>
+          <ol class="legend">
+            <li><span class="n">1</span><div><div class="t">Source &amp; date</div></div></li>
+            <li><span class="n">2</span><div><div class="t">The study, as published</div><div class="d">Always a real, identifiable paper</div></div></li>
+            <li><span class="n">3</span><div><div class="t">Study / regimen</div></div></li>
+            <li><span class="n">4</span><div><div class="t">Key findings</div><div class="d">Checked against the source text</div></div></li>
+            <li><span class="n">5</span><div><div class="t">So what</div><div class="d">Clinical implication, physician-approved</div></div></li>
+            <li><span class="n">6</span><div><div class="t">Tier</div><div class="d">Only Practice-Impacting is emailed</div></div></li>
+            <li><span class="n">7</span><div><div class="t">Like</div></div></li>
+            <li><span class="n">8</span><div><div class="t">Read paper</div><div class="d">One click to the original</div></div></li>
+            <li><span class="n">9</span><div><div class="t">Discussion with colleagues</div></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ MOCKUP: What CarcinoS is / isn't ═══ -->
+    <section class="isnt" id="what-it-is">
+      <div class="anat-inner" style="max-width:1180px;margin:0 auto">
+        <div class="eyebrow">Where CarcinoS fits</div>
+        <h2 class="sec-h">Not another AI tool. Not another newsletter.</h2>
+        
+      </div>
+      <div class="isnt-grid">
+        <div class="col is">
+          <h3>CarcinoS is</h3>
+          <ul>
+            <li><b>Proactive</b>: finds what you didn't know to look for</li>
+            <li><b>Mostly deterministic</b>: defined sources, the same rules and scoring every week</li>
+            <li><b>Physician adjudicated</b>: a practicing oncologist makes the final call</li>
+            <li><b>Quiet</b>: typically 2–4 alerts a week, not a firehose</li>
+          </ul>
+        </div>
+        <div class="col not">
+          <h3>CarcinoS isn't</h3>
+          <ul>
+            <li><b>A chatbot or AI summarizer</b></li>
+            <li><b>A replacement for OpenEvidence or UpToDate</b></li>
+            <li><b>Another daily newsletter</b></li>
+            <li><b>Patient-specific advice</b></li>
+          </ul>
+        </div>
+      </div>
+      <p class="pullq">Ask OpenEvidence when you have a question.<br><span>CarcinoS tells you what you didn't know to ask.</span></p>
+    </section>
+
+
+    <!-- ═══ MOCKUP: Tiers deck ═══ -->
+    <section class="tiers" id="tiers">
+      <style>
+        .tiers{position:relative;z-index:1;padding:40px clamp(20px,5vw,72px) 30px}
+        .tiers-inner{max-width:1180px;margin:0 auto}
+        .tiers-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:56px;margin-top:34px}
+        .deck,.tdesc{position:relative;height:400px}
+        .dk{position:absolute;left:0;right:0;min-height:170px;border-radius:14px;padding:16px 22px;box-shadow:0 -6px 24px rgba(0,0,0,.35),0 20px 50px rgba(0,0,0,.4)}
+        .dk .tl{font-size:11px;font-weight:800;letter-spacing:.12em;display:flex;justify-content:space-between}
+        .dk .tt{font-size:14.5px;font-weight:700;margin-top:8px;line-height:1.4}
+        .dk .tx{font-size:13px;line-height:1.55;margin-top:8px}
+        .dk.hor{top:0;transform:scale(.94);transform-origin:top center;background:#fbfbfa;color:#222}.dk.hor .tl{color:#666}
+        .dk.inc{top:84px;transform:scale(.97);transform-origin:top center;background:#c8c8c8;color:#1d1d1d}.dk.inc .tl{color:#444}
+        .dk.pi{top:172px;background:#d4e1d4;color:#1a2a1d;border:2px solid #72a37a}.dk.pi .tl{color:#3d6b45}
+        .dk.pi .mail{display:inline-block;margin-top:12px;font-size:11.5px;font-weight:700;background:#72a37a;color:#0b0f0c;border-radius:20px;padding:4px 11px}
+        .td{position:absolute;left:0;right:0}
+        .td .h{font-size:17px;font-weight:600;color:#f0f4f1;display:flex;align-items:center;gap:10px}
+        .td .sq{font-size:10px;letter-spacing:2px;color:#72a37a}
+        .td .p{font-size:14.5px;line-height:1.6;color:rgba(240,244,241,.62);margin-top:4px}
+        .td.pi .h{color:#72a37a}
+        .td .em{display:inline-block;margin-top:10px;font-size:13px;font-weight:700;color:#0b0f0c;background:#72a37a;border-radius:20px;padding:5px 12px}
+        @media (max-width:860px){.tiers-grid{grid-template-columns:1fr}.tdesc{height:auto;display:flex;flex-direction:column;gap:22px}.td{position:static}}
+      </style>
+      <div class="tiers-inner">
+        <div class="eyebrow">Three tiers</div>
+        <h2 class="sec-h">Only what changes practice reaches your inbox.</h2>
+        <div class="tiers-grid">
+          <div class="deck">
+            <div class="dk hor"><div class="tl"><span>■ HORIZON</span><span>Nature Medicine</span></div><div class="tt">Levetiracetam therapeutically targets GABAergic synapses in diffuse midline glioma</div></div>
+            <div class="dk inc"><div class="tl"><span>■■ INCREMENTAL</span><span>ASTRO abstract</span></div><div class="tt">Long-term data suggest low-dose RT may modify the course of early knee osteoarthritis</div></div>
+            <div class="dk pi"><div class="tl"><span>■■■ PRACTICE-IMPACTING</span><span>ASTRO / IJROBP</span></div><div class="tt">NRG-CC009: SRS vs hippocampal-avoidant WBRT for SCLC brain metastases</div><div class="tx"><b>So what:</b> SRS can be considered a standard option for selected patients with SCLC brain metastases.</div><span class="mail">✉ Emailed to you</span></div>
+          </div>
+          <div class="tdesc">
+            <div class="td" style="top:10px"><div class="h"><span class="sq">■</span>Horizon</div><div class="p">Early signals worth watching. On the site, not emailed.</div></div>
+            <div class="td" style="top:94px"><div class="h"><span class="sq">■■</span>Incremental</div><div class="p">Adds to the evidence but doesn't change practice yet. On the site, not emailed.</div></div>
+            <div class="td pi" style="top:184px"><div class="h"><span class="sq">■■■</span>Practice-Impacting</div><div class="p">Findings that should change how you treat patients now.</div><span class="em">✉ The only tier we email you</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
     <section style="position:relative;z-index:1;padding:0 clamp(20px,4vw,48px) 80px;">
         <div style="max-width:1000px;margin:0 auto;text-align:center;border:2px solid rgba(114,163,122,0.5);border-radius:14px;background:rgba(114,163,122,0.04);padding:36px clamp(20px,4vw,40px);">
             <p style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(114,163,122,0.7);margin-bottom:10px;">Live digest</p>
@@ -2148,53 +2321,22 @@
             </div>
         </div>
     </div>
-    <section class="stats-section">
-        <div class="stats-inner">
-            <div class="section-brand" style="justify-content:center;">
-                <div class="sb-box">
-                    <span>
-                        C
-                        <span style="color:#72a37a">S</span>
-                    </span>
-                </div>
-                <span class="sb-wordmark">
-                    Carcino
-                    <span class="s">S</span>
-                </span>
-            </div>
-            <h2 class="stats-headline">The oncology literature evolves daily</h2>
-            <p class="stats-subline">
-                Carcino
-                <span class="s">S</span>
-                 surfaces and curates what matters
-            </p>
-            <div class="stats-row">
-                <div class="stat-block">
-                    <div class="stat-num">3,000+</div>
-                    <div class="stat-label-top">
-                        Oncology papers
-                        <br>
-                        published monthly
-                        <br>
-                        worldwide
-                    </div>
-                </div>
-                <div class="stat-block">
-                    <div class="stat-num">50+</div>
-                    <div class="stat-label-top">Top journals and<br>conference proceedings<br>monitored</div>
-                </div>
-                <div class="stat-block">
-                    <div class="stat-num" style="letter-spacing:-1px;">Limited</div>
-                    <div class="stat-label-top">
-                        Practice-impacting updates
-                        <br>
-                        per year — the ones
-                        <br>
-                        worth acting on
-                    </div>
-                </div>
-            </div>
-            <div class="signal-extract">
+    
+    
+        <!-- ═══ MOCKUP: Editor strip ═══ -->
+    <section style="position:relative;z-index:1;padding:30px clamp(20px,5vw,72px) 60px">
+      <a href="about/" style="max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:22px;flex-wrap:wrap;text-decoration:none;border:1px solid rgba(114,163,122,.35);border-radius:14px;padding:18px 24px;background:rgba(114,163,122,.05)">
+        <img src="/jeff-brower.jpg" alt="Jeffrey Brower, MD, PhD" style="width:58px;height:58px;border-radius:50%;border:1.5px solid rgba(114,163,122,.6);object-fit:cover;flex:none">
+        <span style="flex:1;min-width:240px;font-size:15px;line-height:1.6;color:rgba(240,244,241,.75)"><b style="color:#f0f4f1">Founded by Jeffrey Brower, MD, PhD, with physician editorial oversight</b><br>Practicing oncologist · 10+ years as an editor for major oncology journals and educational resources</span>
+        <span style="font-size:14px;font-weight:600;color:#72a37a;white-space:nowrap">About the founder →</span>
+      </a>
+    </section>
+
+        <!-- ═══ MOCKUP: signal feed (desktop only) ═══ -->
+    <section class="feed-bottom" style="position:relative;z-index:1;padding:20px clamp(20px,5vw,72px) 70px">
+      <div style="max-width:1180px;margin:0 auto">
+        <div class="eyebrow" style="text-align:center">CarcinoS at work</div>
+        <div class="signal-extract">
                 <div class="se-feed">
                     <div class="se-feed-inner" id="seFeed">
                         <div class="se-row">
@@ -2408,7 +2550,7 @@
                         C
                         <span style="color:#72a37a">S</span>
                     </div>
-                    <div class="se-label">AI triage</div>
+                    <div class="se-label">Pipeline + editor</div>
                     <div class="se-arrows">
                         <div class="se-arrow-line"></div>
                         <div class="se-arrow-line"></div>
@@ -2448,244 +2590,21 @@
                     </div>
                 </div>
             </div>
-            <p class="composite-tagline">Rules-based pipeline. Human editorial judgment. No AI black boxes.</p>
-        </div>
+      </div>
     </section>
-    <section class="framework-section" id="framework">
-        <div class="framework-inner">
-            <div class="section-brand" style="justify-content:center;">
-                <div class="sb-box">
-                    <span>
-                        C
-                        <span style="color:#72a37a">S</span>
-                    </span>
-                </div>
-                <span class="sb-wordmark">
-                    Carcino
-                    <span class="s">S</span>
-                </span>
-            </div>
-            <h2 class="framework-headline">Editorial Framework</h2>
-            <p class="framework-sub">
-                Carcino
-                <span class="s">S</span>
-                 is built on a deterministic ingestion pipeline. AI assists with synthesis. A practicing oncologist holds final editorial authority over every alert.
-            </p>
-            <div class="framework-grid">
-                <div class="fw-card">
-                    <div class="fw-step">Step 01</div>
-                    <div class="fw-card-title">Continuous Surveillance</div>
-                    <div class="fw-card-desc">Automated monitoring across major oncology sources, updated continuously.</div>
-                    <div class="fw-divider"></div>
-                    <ul class="fw-list">
-                        <li>NEJM, Lancet, JCO, JAMA Oncology</li>
-                        <li>ASCO, ESMO, ASH proceedings</li>
-                        <li>FDA &amp; EMA regulatory releases</li>
-                        <li>Preprint &amp; early-access publications</li>
-                    </ul>
-                </div>
-                <div class="fw-card">
-                    <div class="fw-step">Step 02</div>
-                    <div class="fw-card-title">Impact Scoring</div>
-                    <div class="fw-card-desc">Each study is evaluated against a structured clinical relevance framework.</div>
-                    <div class="fw-divider"></div>
-                    <ul class="fw-list">
-                        <li>Overall survival benefit</li>
-                        <li>FDA / regulatory approval</li>
-                        <li>Phase III trial evidence</li>
-                        <li>Biomarker-defined populations</li>
-                        <li>Quality of life &amp; safety data</li>
-                    </ul>
-                </div>
-                <div class="fw-card">
-                    <div class="fw-step">Step 03</div>
-                    <div class="fw-card-title">Tier Assignment</div>
-                    <div class="fw-card-desc">Studies are classified into one of three clearly defined tiers.</div>
-                    <div class="fw-divider"></div>
-                    <div class="fw-tier-row">
-                        <div class="fw-tier-tag pi">
-                            <span style="color:rgba(26,46,26,0.5)">■■■</span>
-                        </div>
-                        <div class="fw-tier-info">
-                            <div class="fw-tier-info-title">Practice-Impacting</div>
-                            <div class="fw-tier-info-sub">Immediate clinical relevance</div>
-                        </div>
-                    </div>
-                    <div class="fw-tier-row">
-                        <div class="fw-tier-tag inc">
-                            <span style="color:#000">■■</span>
-                        </div>
-                        <div class="fw-tier-info">
-                            <div class="fw-tier-info-title">Incremental</div>
-                            <div class="fw-tier-info-sub">Important but not practice-changing</div>
-                        </div>
-                    </div>
-                    <div class="fw-tier-row">
-                        <div class="fw-tier-tag hor">
-                            <span style="color:#000">■</span>
-                        </div>
-                        <div class="fw-tier-info">
-                            <div class="fw-tier-info-title">Horizon</div>
-                            <div class="fw-tier-info-sub">Early signals worth monitoring</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="alert-section" style="padding-left:0;padding-right:0;padding-bottom:0;">
-                <div class="alert-inner">
-                    <div class="alert-left">
-                        <div class="section-brand">
-                            <div class="sb-box">
-                                <span>
-                                    C
-                                    <span style="color:#72a37a">S</span>
-                                </span>
-                            </div>
-                            <span class="sb-wordmark">
-                                Carcino
-                                <span class="s">S</span>
-                            </span>
-                        </div>
-                        <div class="alert-heading">
-                            <span class="alert-bell">🔔</span>
-                            <h3 class="alert-title">
-                                <span class="green">Alert</span>
-                                 Discipline
-                            </h3>
-                        </div>
-                        <div class="alert-rule"></div>
-                        <p class="alert-body">
-                            Notifications are reserved exclusively
-                            <br>
-                            for practice-impacting evidence
-                        </p>
-                        <div class="notification-card">
-                            <div class="notif-icon">
-                                <span>CS</span>
-                            </div>
-                            <div class="notif-body">
-                                <div class="notif-sender">
-                                    CarcinoS
-                                    <span class="notif-time" style="color:#999;font-size:12px;font-weight:400">now</span>
-                                </div>
-                                <div class="notif-title">Practice-Impacting Update:</div>
-                                <div class="notif-msg">New evidence alters clinical practice</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="alert-right">
-                        <div class="phone">
-                            <div class="phone-notch"></div>
-                            <div class="phone-screen">
-                                <div class="app-statusbar">
-                                    <span>4:01</span>
-                                    <div class="app-statusbar-icons">
-                                        <span>▋▋</span>
-                                        <span>&#x1F4F6;</span>
-                                        <span>▬</span>
-                                    </div>
-                                </div>
-                                <div class="app-topbar">
-                                    <div class="app-brand">
-                                        <div class="cs-box">
-                                            C
-                                            <span style="color:#72a37a">S</span>
-                                        </div>
-                                        <span>
-                                            Carcino
-                                            <span style="color:#72a37a">S</span>
-                                        </span>
-                                    </div>
-                                    <span class="app-week">Week of Apr 6</span>
-                                    <span class="app-search">&#x2315;</span>
-                                </div>
-                                <div class="app-status-row">
-                                    <span class="app-status-check">🔔</span>
-                                    <span class="app-status-bold">New alert</span>
-                                    <span>· Practice-impacting</span>
-                                </div>
-                                <div class="app-feed">
-                                    <div class="app-card">
-                                        <div class="app-card-header pi">
-                                            PRACTICE IMPACTING
-                                            <span style="color:rgba(26,46,26,0.5)">■■■</span>
-                                        </div>
-                                        <div class="app-card-entry">
-                                            <div class="ace-body">
-                                                <div class="ace-title">Osimertinib adjuvant in stage IB–IIIA EGFR+ NSCLC</div>
-                                                <div class="ace-meta">NEJM · ADAURA · FDA Approved</div>
-                                                <div class="ace-result green">5-yr OS 88% vs 78%</div>
-                                            </div>
-                                            <span class="ace-chevron">›</span>
-                                        </div>
-                                        <div class="app-card-entry">
-                                            <div class="ace-body">
-                                                <div class="ace-title">Pembrolizumab added to FOLFOX in MSS mCRC</div>
-                                                <div class="ace-meta">Lancet · KEYNOTE-651 · GI</div>
-                                                <div class="ace-result">OS HR 0.77 · 21.4 vs 15.9 mo</div>
-                                            </div>
-                                            <span class="ace-chevron">›</span>
-                                        </div>
-                                    </div>
-                                    <div class="app-card inc">
-                                        <div class="app-card-header inc">
-                                            <span>
-                                                INCREMENTAL
-                                                <span style="color:#000">■■</span>
-                                            </span>
-                                            <span class="app-card-header-count">1 update ›</span>
-                                        </div>
-                                        <div class="app-card-entry">
-                                            <div class="ace-body">
-                                                <div class="ace-title">Olaparib + cetuximab in BRCA-mutated HNSCC</div>
-                                                <div class="ace-meta">JCO · Phase II · Head &amp; Neck</div>
-                                                <div class="ace-result">ORR 41% vs 18%</div>
-                                            </div>
-                                            <span class="ace-chevron">›</span>
-                                        </div>
-                                    </div>
-                                    <div class="app-card hor">
-                                        <div class="app-card-header hor">
-                                            <span>
-                                                HORIZON
-                                                <span style="color:#000">■</span>
-                                            </span>
-                                            <span class="app-card-header-count">3 signals ›</span>
-                                        </div>
-                                        <div class="app-card-entry">
-                                            <div class="ace-body">
-                                                <div class="ace-title">CAR-T in relapsed AML: phase I results</div>
-                                                <div class="ace-meta">Blood · Phase I · Hematology</div>
-                                            </div>
-                                            <span class="ace-chevron">›</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="app-tabbar">
-                                    <div class="app-tab">
-                                        <span class="app-tab-icon">⌂</span>
-                                        <span>Home</span>
-                                    </div>
-                                    <div class="app-tab active">
-                                        <span class="app-tab-icon">🔔</span>
-                                        <span>Updates</span>
-                                    </div>
-                                    <div class="app-tab">
-                                        <span class="app-tab-icon">•••</span>
-                                        <span>More</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <style>@media (max-width:860px){.feed-bottom{display:none}}</style>
+
     <section class="faq-section">
         <div class="faq-inner">
             <h2 class="faq-headline">Common questions</h2>
             <p class="faq-sub">Everything you need to know before signing up.</p>
+            <details class="faq-item" open>
+                <summary class="faq-q">
+                    <span class="faq-q-text">How is CarcinoS different from OpenEvidence or ChatGPT?</span>
+                    <span class="faq-icon">+</span>
+                </summary>
+                <p class="faq-a">Those tools answer questions you already know to ask. CarcinoS works the other way: it monitors the literature continuously and tells you when something appears that could change your practice, before you know to look for it. Selection is done by a deterministic pipeline and a physician editor, not a prompt, and every card links to its original source.</p>
+            </details>
             <details class="faq-item">
                 <summary class="faq-q">
                     <span class="faq-q-text">How often will I receive updates?</span>
@@ -2907,6 +2826,7 @@
                 <div class="footer-links">
                     <a href="privacy/">Privacy Policy</a>
                     <a href="mailto:info@carcino-s.com">Contact us</a>
+                    <a href="join/">Get involved</a>
                     <a href="tos/">Terms of Service</a>
                     <a href="disclaimer/">Medical Disclaimer</a>
                 </div>

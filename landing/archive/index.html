@@ -666,7 +666,7 @@ async function loadArchive() {
     .from('alerts')
     .select('id, tier, title, summary_json, published_at')
     .in('status', ['PUBLISHED', 'CORRECTED'])
-    .order('published_at', { ascending: false });
+    .order('published_at', { ascending: false, nullsFirst: false });
 
   if (error) {
     document.getElementById('archiveRoot').innerHTML =
@@ -690,6 +690,13 @@ async function loadArchive() {
       journal: s.journal || src0.journal || '',
       pub_date: s.publication_date || src0.publication_date || '',
       published_at: row.published_at,
+      // Date used for sorting, week grouping and range filters. Falls back to the
+      // paper's publication date if published_at was never set, so an undated card
+      // can't jump to the top of the list.
+      sort_date: row.published_at || (s.publication_date || src0.publication_date
+        ? (isNaN(Date.parse(s.publication_date || src0.publication_date)) ? null
+           : new Date(s.publication_date || src0.publication_date).toISOString())
+        : null),
       evidence_strength: s.evidence_strength || res.evidence_strength || '',
       one_liner: s.carcinos_one_liner || '',
       population: s.population || '',
@@ -701,6 +708,14 @@ async function loadArchive() {
       toxicity_qol_signal: kr.toxicity_qol_signal || '',
       source_url: src0.url || (src0.pmid ? `https://pubmed.ncbi.nlm.nih.gov/${src0.pmid}/` : ''),
     };
+  });
+
+  // Newest first; anything with no usable date goes to the end.
+  allAlerts.sort((a, b) => {
+    if (!a.sort_date && !b.sort_date) return 0;
+    if (!a.sort_date) return 1;
+    if (!b.sort_date) return -1;
+    return new Date(b.sort_date) - new Date(a.sort_date);
   });
 
   applyFilters();
@@ -716,7 +731,7 @@ function applyFilters() {
 
   filteredAlerts = allAlerts.filter(a => {
     // Date range filter
-    if (rangeCutoff && a.published_at && new Date(a.published_at) < rangeCutoff) return false;
+    if (rangeCutoff && (!a.sort_date || new Date(a.sort_date) < rangeCutoff)) return false;
     // Tier filter
     if (activeTier !== 'all' && a.tier !== activeTier) return false;
     // Site filter — use only confirmed DB code, no keyword inference
@@ -767,7 +782,7 @@ function render() {
   const visible = filteredAlerts.slice(0, currentUser ? displayCount : Math.min(displayCount, total));
   const weeks = {};
   visible.forEach(a => {
-    const weekLabel = a.published_at ? `Week of ${getMondayOfWeek(a.published_at)}` : 'Earlier';
+    const weekLabel = a.sort_date ? `Week of ${getMondayOfWeek(a.sort_date)}` : 'Earlier';
     if (!weeks[weekLabel]) weeks[weekLabel] = [];
     weeks[weekLabel].push(a);
   });

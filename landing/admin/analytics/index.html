@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CarcinoS — Analytics</title>
+<style>
+  :root {
+    --green: #72a37a; --green-light: #9cc7a3; --green-pale: #c4e6cb;
+    --card: #0d0d10; --border: rgba(255,255,255,0.1);
+    --text-2: rgba(255,255,255,0.78); --text-3: rgba(255,255,255,0.6);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: #000; color: #fff;
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  a { color: var(--green-light); } a:hover { color: var(--green-pale); }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 20px 48px; display: flex; flex-direction: column; gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .h { font-size: 16px; font-weight: 700; margin: 0; }
+  .sub { font-size: 13px; color: var(--text-3); margin: 2px 0 0; }
+  .label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-3); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 40px; height: 40px; border-radius: 9px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-size: 16px; font-weight: 800; }
+  .pill { min-height: 40px; padding: 0 16px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.14); background: transparent;
+    color: var(--text-2); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .pill[aria-pressed="true"] { border-color: var(--green); background: rgba(114,163,122,0.18); color: var(--green-pale); font-weight: 700; }
+  .btn-link { background: none; border: none; color: var(--text-3); font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline; min-height: 40px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+  .kpi { display: flex; flex-direction: column; gap: 6px; }
+  .kpi .v { font-size: 32px; font-weight: 700; font-family: Georgia, serif; }
+  .kpi .s { font-size: 12px; color: var(--green-light); }
+  .chart { display: grid; gap: 10px; align-items: end; height: 220px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 2px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; }
+  .bars { width: 100%; display: flex; gap: 3px; align-items: flex-end; justify-content: center; }
+  .bar { width: 46%; border-radius: 4px 4px 0 0; }
+  .xl { display: grid; gap: 10px; }
+  .xl div { font-size: 11px; color: var(--text-3); text-align: center; }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--text-2); flex-wrap: wrap; }
+  .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 6px; vertical-align: -1px; }
+  .hbar { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .hbar .n { width: 36px; text-align: right; font-size: 13px; font-weight: 600; }
+  .hbar .lab { width: 104px; font-size: 13px; color: var(--text-2); }
+  .track { flex: 1; height: 13px; border-radius: 7px; background: rgba(255,255,255,0.06); overflow: hidden; }
+  .fill { height: 100%; border-radius: 7px; background: var(--green); }
+  .tbl-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { text-align: left; color: var(--text-3); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+       padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.12); white-space: nowrap; }
+  td { padding: 11px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  td.num, th.num { text-align: right; }
+  .muted { color: var(--text-2); }
+  .tier { padding: 3px 9px; border-radius: 10px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .tier-a { background: rgba(114,163,122,0.22); color: var(--green-pale); }
+  .tier-b { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+  .tier-c { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+  .study-btn { background: none; border: none; padding: 0; color: var(--green-light); font: inherit; font-weight: 600; text-align: left; cursor: pointer; }
+  .study-btn:hover { color: var(--green-pale); text-decoration: underline; }
+  input[type=text], input[type=email], input[type=password] { min-height: 40px; padding: 0 12px; border-radius: 9px;
+    border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); color: #fff; font: inherit; font-size: 13px; }
+  .defs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px 24px; font-size: 13px; color: var(--text-2); line-height: 1.5; margin-top: 10px; }
+  .defs strong { color: #fff; }
+  .notice { padding: 12px 14px; border-radius: 10px; font-size: 13px; }
+  .notice.err { border: 1px solid rgba(224,92,92,0.5); background: rgba(224,92,92,0.1); color: #f2a3a3; }
+  .notice.info { border: 1px solid var(--border); background: var(--card); color: var(--text-2); }
+  .login { max-width: 380px; margin: 12vh auto 0; display: flex; flex-direction: column; gap: 12px; }
+  .login label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--text-3); }
+  .primary { min-height: 44px; border: none; border-radius: 10px; background: var(--green); color: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+  dialog { background: var(--card); color: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; width: min(640px, 92vw); }
+  dialog::backdrop { background: rgba(0,0,0,0.7); }
+  .empty { color: var(--text-3); font-size: 13px; padding: 12px 0; }
+</style>
+</head>
+<body>
+
+<div id="loginView" class="login" hidden>
+  <div class="brand"><div class="logo">C<span style="color:var(--green)">S</span></div><div class="h">CarcinoS Analytics</div></div>
+  <label>Email <input type="email" id="loginEmail" autocomplete="username"></label>
+  <label>Password <input type="password" id="loginPassword" autocomplete="current-password"></label>
+  <button class="primary" id="loginBtn" type="button">Sign in</button>
+  <div id="loginError" class="notice err" hidden></div>
+</div>
+
+<div id="appView" class="wrap" hidden>
+  <div class="top">
+    <div class="brand">
+      <div class="logo">C<span style="color:var(--green)">S</span></div>
+      <div><div style="font-size:20px;font-weight:700;">CarcinoS Analytics</div>
+        <div class="sub">Admin only · signed-in member activity · <a href="/admin/">Back to editor</a></div></div>
+    </div>
+    <div class="row" role="group" aria-label="Date range" id="rangeGroup" style="gap:6px;">
+      <button class="pill" data-days="7" type="button">7 days</button>
+      <button class="pill" data-days="30" type="button" aria-pressed="true">30 days</button>
+      <button class="pill" data-days="90" type="button">90 days</button>
+      <button class="pill" data-days="" type="button">All time</button>
+    </div>
+  </div>
+
+  <div id="statusMsg" class="notice info" hidden></div>
+
+  <div class="kpis">
+    <div class="card kpi"><div class="label">Registered members</div><div class="v" id="kRegistered">—</div><div class="s">Total accounts</div></div>
+    <div class="card kpi"><div class="label">Active, last 7 days</div><div class="v" id="kActive">—</div><div class="s" id="kActiveSub">&nbsp;</div></div>
+    <div class="card kpi"><div class="label">Returning</div><div class="v" id="kReturning">—</div><div class="s">Active last 7 days and the 7 before</div></div>
+    <div class="card kpi"><div class="label">Read-paper clicks</div><div class="v" id="kRead">—</div><div class="s" id="kReadSub">&nbsp;</div></div>
+    <div class="card kpi"><div class="label">Likes</div><div class="v" id="kLikes">—</div><div class="s" id="kLikesSub">&nbsp;</div></div>
+    <div class="card kpi"><div class="label">Comments</div><div class="v" id="kComments">—</div><div class="s" id="kCommentsSub">&nbsp;</div></div>
+  </div>
+
+  <div class="row">
+    <div class="card" style="flex: 999 1 560px; min-width: 0; display:flex; flex-direction:column; gap:14px;">
+      <div class="top" style="gap:8px;">
+        <h2 class="h">Weekly active members</h2>
+        <div class="legend"><span><span class="sw" style="background:var(--green)"></span>Active members</span>
+          <span><span class="sw" style="background:rgba(255,255,255,0.35)"></span>Returning (active the week before too)</span></div>
+      </div>
+      <div class="chart" id="weekChart" role="img" aria-label="Weekly active and returning members"></div>
+      <div class="xl" id="weekLabels"></div>
+    </div>
+    <div class="card" style="flex: 1 1 340px; min-width: 0;">
+      <h2 class="h">4-week retention</h2>
+      <div style="display:flex;align-items:baseline;gap:10px;margin-top:12px;">
+        <div id="retPct" style="font-size:40px;font-weight:700;font-family:Georgia,serif;color:var(--green-light);">—</div>
+        <div class="sub" id="retText" style="margin:0;">of members active 4 weeks ago were active again this week</div>
+      </div>
+      <div class="label" style="margin-top:14px;">Weeks active, of the last 4</div>
+      <div id="habitBars"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top">
+      <div><h2 class="h">Members</h2><p class="sub">Name from their profile, or email if no name was entered</p></div>
+      <label class="label" style="display:flex;flex-direction:column;gap:4px;text-transform:none;letter-spacing:0;font-weight:400;">Search members
+        <input type="text" id="memberSearch" placeholder="Name or email" style="width:240px;"></label>
+    </div>
+    <div class="tbl-wrap"><table style="min-width:760px;">
+      <thead><tr><th>Member</th><th>Last active</th><th class="num">Visits</th><th class="num">Weeks active (of 4)</th>
+        <th class="num">Read-paper clicks</th><th class="num">Likes</th><th class="num">Comments</th><th>Most-engaged site</th></tr></thead>
+      <tbody id="memberRows"></tbody>
+    </table></div>
+  </div>
+
+  <div class="row">
+    <div class="card" style="flex: 999 1 640px; min-width: 0;">
+      <h2 class="h">Studies</h2><p class="sub">Select a study to see who read, liked or commented on it</p>
+      <div class="tbl-wrap"><table style="min-width:680px;">
+        <thead><tr><th>Study</th><th>Tier</th><th>Site</th><th class="num">Emailed to</th><th class="num">Read-paper clicks</th><th class="num">Likes</th><th class="num">Comments</th></tr></thead>
+        <tbody id="studyRows"></tbody>
+      </table></div>
+    </div>
+    <div class="card" style="flex: 1 1 320px; min-width: 0;">
+      <h2 class="h">Read-paper clicks by disease site</h2>
+      <div id="siteBars"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="h">How each number is counted</h2>
+    <div class="defs">
+      <div><strong>Visit:</strong> a signed-in member opening This Week or the Archive. Repeat page loads within 30 minutes count as one visit.</div>
+      <div><strong>Active:</strong> at least one visit, read-paper click, like or comment in that period.</div>
+      <div><strong>Returning:</strong> active in this period and the one before it.</div>
+      <div><strong>Read-paper click:</strong> a click on a card's "Read paper" link.</div>
+      <div><strong>Likes and comments:</strong> read from the tables CarcinoS already keeps, so history from before tracking started is included.</div>
+      <div><strong>Emailed to:</strong> from the existing digest delivery records. Signed-out visitors are not tracked. Times are Eastern.</div>
+    </div>
+  </div>
+
+  <div style="text-align:right;"><button class="btn-link" id="signOutBtn" type="button">Sign out</button></div>
+</div>
+
+<dialog id="studyDialog" aria-labelledby="studyDialogTitle">
+  <div class="top" style="align-items:flex-start;">
+    <h2 class="h" id="studyDialogTitle" style="max-width:85%;">Study</h2>
+    <button class="btn-link" id="studyDialogClose" type="button" aria-label="Close">Close</button>
+  </div>
+  <div class="tbl-wrap" style="max-height:60vh;overflow-y:auto;margin-top:10px;">
+    <table><thead><tr><th>Member</th><th>Action</th><th>When</th></tr></thead><tbody id="studyPeople"></tbody></table>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  'use strict';
+  var SUPABASE_URL = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
+  var TZ = 'America/New_York';
+  var sb = null;
+  var days = 30;
+  var members = [];
+
+  function $(id) { return document.getElementById(id); }
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function n(v) { return (Number(v) || 0).toLocaleString('en-US'); }
+  function fmtTime(ts) {
+    if (!ts) return 'No activity yet';
+    var d = new Date(ts);
+    return d.toLocaleString('en-US', { timeZone: TZ, month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+  function fmtWeek(dateStr) {
+    var p = String(dateStr).split('-');
+    var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 12));
+    return d.toLocaleDateString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' });
+  }
+  function rangeText() { return days ? days + ' days' : 'all time'; }
+  function showStatus(msg, isErr) {
+    var el = $('statusMsg');
+    if (!msg) { el.hidden = true; return; }
+    el.textContent = msg; el.className = 'notice ' + (isErr ? 'err' : 'info'); el.hidden = false;
+  }
+  function rpc(name, args) {
+    return sb.rpc(name, args || {}).then(function (r) {
+      if (r.error) throw r.error;
+      return r.data;
+    });
+  }
+  function hbars(list, labelKey, valueKey) {
+    var max = Math.max.apply(null, list.map(function (x) { return Number(x[valueKey]) || 0; }).concat([1]));
+    return list.map(function (x) {
+      var v = Number(x[valueKey]) || 0;
+      return '<div class="hbar"><div class="lab">' + esc(x[labelKey]) + '</div><div class="track"><div class="fill" style="width:' +
+        Math.round(v / max * 100) + '%"></div></div><div class="n">' + n(v) + '</div></div>';
+    }).join('');
+  }
+
+  function renderOverview(o) {
+    $('kRegistered').textContent = n(o.registered);
+    $('kActive').textContent = n(o.active_7d);
+    $('kActiveSub').textContent = o.registered ? Math.round(o.active_7d / o.registered * 100) + '% of members' : '';
+    $('kReturning').textContent = n(o.returning_7d);
+    $('kRead').textContent = n(o.read_paper);
+    $('kReadSub').textContent = 'Last ' + rangeText();
+    $('kLikes').textContent = n(o.likes);
+    $('kLikesSub').textContent = 'Across ' + n(o.likes_studies) + ' studies';
+    $('kComments').textContent = n(o.comments);
+    $('kCommentsSub').textContent = 'Across ' + n(o.comments_studies) + ' studies';
+  }
+  function renderWeekly(rows) {
+    var max = Math.max.apply(null, rows.map(function (r) { return r.active; }).concat([1]));
+    var cols = 'repeat(' + rows.length + ', minmax(0, 1fr))';
+    $('weekChart').style.gridTemplateColumns = cols;
+    $('weekLabels').style.gridTemplateColumns = cols;
+    $('weekChart').innerHTML = rows.map(function (r) {
+      return '<div class="bar-col"><div style="font-size:11px;color:var(--text-2)">' + n(r.active) + '</div><div class="bars">' +
+        '<div class="bar" style="background:var(--green);height:' + Math.round(r.active / max * 190) + 'px"></div>' +
+        '<div class="bar" style="background:rgba(255,255,255,0.35);height:' + Math.round(r.returning_count / max * 190) + 'px"></div></div></div>';
+    }).join('');
+    $('weekLabels').innerHTML = rows.map(function (r) { return '<div>' + esc(fmtWeek(r.week_start)) + '</div>'; }).join('');
+  }
+  function renderRetention(r) {
+    if (!r.base_count) { $('retPct').textContent = '—'; $('retText').textContent = 'Not enough history yet (needs members active 4 weeks ago)'; }
+    else { $('retPct').textContent = Math.round(r.kept_count / r.base_count * 100) + '%';
+           $('retText').textContent = 'of the ' + n(r.base_count) + ' members active 4 weeks ago were active again this week'; }
+    $('habitBars').innerHTML = hbars([
+      { l: '4 of 4 weeks', v: r.weeks_4 }, { l: '3 of 4', v: r.weeks_3 }, { l: '2 of 4', v: r.weeks_2 }, { l: '1 of 4', v: r.weeks_1 }
+    ], 'l', 'v');
+  }
+  function renderMembers() {
+    var q = ($('memberSearch').value || '').trim().toLowerCase();
+    var list = members.filter(function (m) { return !q || String(m.display_name || '').toLowerCase().indexOf(q) !== -1; });
+    $('memberRows').innerHTML = list.length ? list.map(function (m) {
+      return '<tr><td style="font-weight:600">' + esc(m.display_name) + '</td><td class="muted">' + esc(fmtTime(m.last_active)) + '</td>' +
+        '<td class="num">' + n(m.visits) + '</td><td class="num">' + n(m.weeks_active) + '</td><td class="num">' + n(m.read_paper) + '</td>' +
+        '<td class="num">' + n(m.likes) + '</td><td class="num">' + n(m.comments) + '</td><td class="muted">' + esc(m.top_site || '—') + '</td></tr>';
+    }).join('') : '<tr><td colspan="8" class="empty">No members match.</td></tr>';
+  }
+  function tierClass(t) { return t === 'Practice-Impacting' ? 'tier-a' : t === 'Incremental' ? 'tier-b' : 'tier-c'; }
+  function renderStudies(rows) {
+    $('studyRows').innerHTML = rows.length ? rows.map(function (s) {
+      return '<tr><td><button type="button" class="study-btn" data-id="' + esc(s.alert_id) + '" data-title="' + esc(s.title) + '">' + esc(s.title) + '</button></td>' +
+        '<td><span class="tier ' + tierClass(s.tier) + '">' + esc(s.tier) + '</span></td><td class="muted">' + esc(s.site || '—') + '</td>' +
+        '<td class="num">' + n(s.emailed) + '</td><td class="num">' + n(s.read_paper) + '</td><td class="num">' + n(s.likes) + '</td><td class="num">' + n(s.comments) + '</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">No studies with activity in this period.</td></tr>';
+  }
+  function renderSites(rows) {
+    $('siteBars').innerHTML = rows.length ? hbars(rows, 'site', 'clicks') : '<div class="empty">No read-paper clicks in this period yet.</div>';
+  }
+
+  function loadAll() {
+    showStatus('Loading…');
+    var d = days || null;
+    return Promise.all([
+      rpc('analytics_overview', { p_days: d }),
+      rpc('analytics_weekly', { p_weeks: 8 }),
+      rpc('analytics_retention'),
+      rpc('analytics_members', { p_days: d }),
+      rpc('analytics_studies', { p_days: d, p_limit: 50 }),
+      rpc('analytics_sites', { p_days: d })
+    ]).then(function (res) {
+      renderOverview(res[0]); renderWeekly(res[1] || []); renderRetention(res[2]);
+      members = res[3] || []; renderMembers(); renderStudies(res[4] || []); renderSites(res[5] || []);
+      showStatus('');
+    }).catch(function (e) {
+      var msg = (e && e.message) || String(e);
+      if (/admin only/i.test(msg)) showStatus('This account does not have admin access.', true);
+      else if (/does not exist|could not find/i.test(msg)) showStatus('Analytics database setup not found. Run CarcinoS_analytics_setup.sql in Supabase first.', true);
+      else showStatus('Could not load analytics: ' + msg, true);
+    });
+  }
+
+  function openStudy(id, title) {
+    $('studyDialogTitle').textContent = title;
+    $('studyPeople').innerHTML = '<tr><td colspan="3" class="empty">Loading…</td></tr>';
+    $('studyDialog').showModal();
+    rpc('analytics_study_people', { p_alert_id: id }).then(function (rows) {
+      $('studyPeople').innerHTML = (rows && rows.length) ? rows.map(function (r) {
+        return '<tr><td>' + esc(r.display_name) + '</td><td class="muted">' + esc(r.action) + '</td><td class="muted">' + esc(fmtTime(r.at)) + '</td></tr>';
+      }).join('') : '<tr><td colspan="3" class="empty">No member activity on this study yet.</td></tr>';
+    }).catch(function (e) {
+      $('studyPeople').innerHTML = '<tr><td colspan="3" class="empty">' + esc((e && e.message) || 'Error') + '</td></tr>';
+    });
+  }
+
+  function showApp() { $('loginView').hidden = true; $('appView').hidden = false; loadAll(); }
+  function showLogin() { $('appView').hidden = true; $('loginView').hidden = false; }
+
+  function init() {
+    // Same client settings as the editor page, so the editor's sign-in is shared.
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(function (r) { if (r.data && r.data.session) showApp(); else showLogin(); });
+
+    $('loginBtn').addEventListener('click', function () {
+      var err = $('loginError'); err.hidden = true;
+      sb.auth.signInWithPassword({ email: $('loginEmail').value.trim(), password: $('loginPassword').value })
+        .then(function (r) { if (r.error) { err.textContent = r.error.message; err.hidden = false; } else showApp(); });
+    });
+    $('signOutBtn').addEventListener('click', function () { sb.auth.signOut().then(showLogin); });
+    $('rangeGroup').addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-days]'); if (!b) return;
+      Array.prototype.forEach.call(this.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      days = b.getAttribute('data-days') ? parseInt(b.getAttribute('data-days'), 10) : null;
+      loadAll();
+    });
+    $('memberSearch').addEventListener('input', renderMembers);
+    $('studyRows').addEventListener('click', function (e) {
+      var b = e.target.closest('.study-btn'); if (b) openStudy(b.getAttribute('data-id'), b.getAttribute('data-title'));
+    });
+    $('studyDialogClose').addEventListener('click', function () { $('studyDialog').close(); });
+  }
+
+  var s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  s.onload = init;
+  s.onerror = function () { showLogin(); $('loginError').textContent = 'Could not load Supabase.'; $('loginError').hidden = false; };
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>CarcinoS — Education Builder</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root {
+    --green: #3f6b48; --green-2: #72a37a; --green-pale: #e6efe7; --green-tint: #f2f6f2;
+    --ink: #161816; --ink-2: #3d413d; --ink-3: #6b706b; --line: #dfe5df; --bg: #f6f7f5; --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; }
+  a { color: var(--green); }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .mark { width: 40px; height: 40px; border-radius: 9px; background: #141414; color: #fff; display: flex; align-items: center;
+    justify-content: center; font-family: Georgia, serif; font-size: 18px; }
+  .mark span { color: var(--green-2); }
+  .h1 { font-size: 20px; font-weight: 700; margin: 0; }
+  .sub { font-size: 13px; color: var(--ink-3); margin: 2px 0 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
+  .grid > * { min-width: 0; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { #addEditorForm { grid-template-columns: 1fr !important; } }
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px; }
+  .sec + .sec { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-height: 36px; padding: 0 13px; border-radius: 18px; border: 1px solid var(--line); background: #fff; color: var(--ink-2);
+    font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .chip[aria-pressed="true"] { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+  input[type=text], input[type=email], input[type=password], input[type=date], select, textarea {
+    width: 100%; min-height: 40px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; font: inherit; font-size: 14px;
+    background: #fff; color: var(--ink); }
+  textarea { min-height: 76px; resize: vertical; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { min-height: 42px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--green); background: var(--green); color: #fff;
+    font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn.ghost { background: #fff; color: var(--green); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-link { background: none; border: none; color: var(--ink-3); font: inherit; font-size: 13px; cursor: pointer; text-decoration: underline;
+    min-height: 36px; padding: 0 4px; }
+  .check { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); min-height: 32px; }
+  .check input { width: 18px; height: 18px; accent-color: var(--green); }
+  .results-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .count { font-size: 14px; color: var(--ink-2); }
+  .count b { color: var(--ink); }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: grid; grid-template-columns: 26px 1fr auto; gap: 10px; align-items: start; border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 10px 10px 12px; background: #fff; }
+  .item.off { opacity: 0.5; }
+  .item input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--green); }
+  .item .t { font-weight: 700; font-size: 14px; line-height: 1.3; }
+  .item .m { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
+  .item .one { font-size: 13px; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
+  .tier { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; margin-right: 6px; }
+  .tier-A { background: var(--green); color: #fff; } .tier-B { background: #d9e6db; color: #2d5233; } .tier-C { background: #eceeec; color: #555; }
+  .move { display: flex; flex-direction: column; gap: 4px; }
+  .move button { width: 32px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; color: var(--ink-2); }
+  .empty { padding: 28px 10px; text-align: center; color: var(--ink-3); font-size: 14px; }
+  .logo-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .logo-prev { width: 120px; height: 64px; border: 1px dashed var(--line); border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; background: #fafbfa; overflow: hidden; font-size: 12px; color: var(--ink-3); }
+  .logo-prev img { max-width: 100%; max-height: 100%; }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .status { font-size: 14px; padding: 12px 14px; border-radius: 10px; background: #fff7e6; border: 1px solid #f0d9a8; color: #6b4e12; }
+  .ok { background: var(--green-tint); border-color: #cfe0d2; color: var(--green); }
+  .note { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
+  .login { max-width: 420px; margin: 40px auto; }
+  .login .field { margin-top: 12px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th { text-align: left; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .tbl-wrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">
+      <div class="mark">C<span>S</span></div>
+      <div>
+        <p class="h1">Education Builder</p>
+        <p class="sub" id="whoLine">Turn reviewed CarcinoS findings into a shareable PDF or newsletter section.</p>
+      </div>
+    </div>
+    <button class="btn-link" id="signOutBtn" hidden>Sign out</button>
+  </div>
+
+  <div id="statusMsg" class="status" hidden></div>
+
+  <!-- Sign in -->
+  <div id="loginView" class="card login" hidden>
+    <p class="h1" style="font-size:17px">Sign in</p>
+    <p class="sub">Use your CarcinoS account. Builder access is set up by CarcinoS.</p>
+    <form id="loginForm">
+      <div class="field"><input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required></div>
+      <div class="field"><input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required></div>
+      <div class="field"><button class="btn" type="submit" style="width:100%">Sign in</button></div>
+      <p class="note" id="loginErr" style="color:#a33;margin-top:10px"></p>
+    </form>
+  </div>
+
+  <!-- Builder -->
+  <div id="appView" hidden>
+    <div class="grid">
+      <!-- Left: filters and options -->
+      <div class="stack">
+        <div class="card">
+          <div class="sec">
+            <p class="label">Disease sites</p>
+            <div class="chips" id="siteChips"></div>
+          </div>
+          <div class="sec">
+            <p class="label">Tiers</p>
+            <label class="check"><input type="checkbox" class="tierBox" value="A" checked> Practice-Impacting</label>
+            <label class="check"><input type="checkbox" class="tierBox" value="B"> Incremental</label>
+            <label class="check"><input type="checkbox" class="tierBox" value="C"> Horizon</label>
+          </div>
+          <div class="sec">
+            <p class="label">Date range</p>
+            <div class="chips" id="rangeChips">
+              <button class="chip" data-months="1">Last month</button>
+              <button class="chip" data-months="3">3 months</button>
+              <button class="chip" data-months="6" aria-pressed="true">6 months</button>
+              <button class="chip" data-months="12">12 months</button>
+              <button class="chip" data-months="custom">Custom</button>
+            </div>
+            <div class="two" id="customDates" style="margin-top:10px" hidden>
+              <input type="date" id="dateFrom" aria-label="From">
+              <input type="date" id="dateTo" aria-label="To">
+            </div>
+          </div>
+          <div class="sec">
+            <p class="label">Audience</p>
+            <select id="audience">
+              <option value="all">All oncology</option>
+              <option value="radiation_oncology">Radiation oncology only</option>
+            </select>
+          </div>
+          <div class="sec">
+            <p class="label">Keyword (optional)</p>
+            <input type="text" id="keyword" placeholder="e.g. hypofractionation, ADC, SBRT">
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sec">
+            <p class="label">Document</p>
+            <input type="text" id="docTitle" aria-label="Title">
+            <p class="note" style="margin:6px 0 0">Fills in automatically; edit to override.</p>
+          </div>
+          <div class="sec">
+            <p class="label">Prepared for</p>
+            <input type="text" id="preparedFor" placeholder="Group or institution name">
+          </div>
+          <div class="sec">
+            <p class="label">Introduction (optional)</p>
+            <textarea id="intro" placeholder="A short note from the editor that appears on the cover."></textarea>
+          </div>
+          <div class="sec">
+            <p class="label">Group logo</p>
+            <div class="logo-row">
+              <div class="logo-prev" id="logoPrev">No logo</div>
+              <div class="stack" style="gap:6px">
+                <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">
+                  Upload logo<input type="file" id="logoFile" accept="image/png,image/jpeg,image/svg+xml" hidden>
+                </label>
+                <button class="btn-link" id="logoClear" hidden>Remove</button>
+                <button class="btn-link" id="logoSave" hidden>Save as our group logo</button>
+              </div>
+            </div>
+            <label class="check" style="margin-top:8px"><input type="checkbox" id="logoBg" checked> Remove white background</label>
+            <p class="note" style="margin:4px 0 0">The CarcinoS mark and footer always appear alongside your logo.</p>
+          </div>
+          <div class="sec">
+            <p class="label">Group cards by</p>
+            <select id="groupBy">
+              <option value="site">Disease site</option>
+              <option value="month">Month</option>
+              <option value="none">No grouping (newest first)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: results and export -->
+      <div class="stack">
+        <div class="card">
+          <p class="label">Export</p>
+          <div class="actions">
+            <button class="btn" id="pdfBtn" disabled>Download PDF</button>
+            <button class="btn ghost" id="htmlBtn" disabled>Copy for newsletter</button>
+            <button class="btn-link" id="htmlDl" disabled>Download newsletter HTML</button>
+          </div>
+          <p class="note" id="exportNote" style="margin:10px 0 0">Every finding includes a link to the paper and is credited to CarcinoS.</p>
+        </div>
+
+        <div class="card">
+          <div class="results-head">
+            <div class="count" id="countLine">Loading the archive…</div>
+            <div class="actions">
+              <button class="btn-link" id="selAll">Select all</button>
+              <button class="btn-link" id="selNone">Select none</button>
+            </div>
+          </div>
+          <div class="list" id="resultList"></div>
+        </div>
+        <div class="card" id="editorsCard" hidden>
+          <p class="label">Institutional editors</p>
+          <p class="note" style="margin:0 0 12px">Give someone at a partner institution access to this builder. They need a CarcinoS account first; they will not see the editor portal or analytics.</p>
+          <form id="addEditorForm" class="two" style="grid-template-columns:1.2fr 1fr auto">
+            <input type="email" id="edEmail" placeholder="Their CarcinoS email" required>
+            <input type="text" id="edInst" placeholder="Institution (e.g. SERO)" required>
+            <button class="btn" type="submit">Add</button>
+          </form>
+          <p class="note" id="edMsg" style="margin:8px 0 0"></p>
+          <div class="tbl-wrap" style="margin-top:10px">
+            <table>
+              <thead><tr><th>Email</th><th>Institution</th><th>Logo</th><th>Added</th><th></th></tr></thead>
+              <tbody id="edRows"></tbody>
+            </table>
+          </div>
+          <input type="file" id="edLogoFile" accept="image/png,image/jpeg,image/svg+xml" hidden>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const SUPABASE_URL = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
+
+const SITE_LABEL = {
+  breast: 'Breast', thoracic: 'Thoracic', gu: 'Genitourinary', gastrointestinal: 'Gastrointestinal',
+  gynecologic: 'Gynecologic', head_neck: 'Head & Neck', cns: 'CNS', hematologic: 'Hematologic',
+  sarcoma: 'Sarcoma', cutaneous: 'Cutaneous', pediatric: 'Pediatric', benign: 'Benign',
+};
+const TIER_LABEL = { A: 'Practice-Impacting', B: 'Incremental', C: 'Horizon' };
+const TIER_ORDER = { A: 0, B: 1, C: 2 };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clean = v => (v && v !== 'not_reported' && v !== 'NOT_REPORTED') ? String(v).trim() : '';
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u.trim())) ? u.trim() : '';
+
+let sb = null, access = null, all = [], view = [], selected = new Set(), order = [];
+let state = { sites: new Set(), months: 6, from: '', to: '' };
+let logoData = null, titleEdited = false, editors = [], edLogoTarget = null;
+
+function show(id, on) { $(id).hidden = !on; }
+function status(msg, ok) { const el = $('statusMsg'); el.textContent = msg || ''; el.className = 'status' + (ok ? ' ok' : ''); el.hidden = !msg; }
+
+// ── Start ────────────────────────────────────────────
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+}
+async function boot() {
+  try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js'); }
+  catch (e) { status('Could not load. Check your connection and refresh.'); return; }
+  // Same session key as the member site, so a signed-in member is signed in here too.
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { storageKey: 'carcinos-auth', persistSession: true, autoRefreshToken: true } });
+  const { data } = await sb.auth.getSession();
+  if (data && data.session) await enter(); else showLogin();
+}
+function showLogin() { show('loginView', true); show('appView', false); show('signOutBtn', false); }
+
+$('loginForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('loginErr').textContent = '';
+  const { error } = await sb.auth.signInWithPassword({ email: $('loginEmail').value.trim(), password: $('loginPassword').value });
+  if (error) { $('loginErr').textContent = error.message || 'Could not sign in.'; return; }
+  await enter();
+});
+$('signOutBtn').addEventListener('click', async () => { await sb.auth.signOut(); location.reload(); });
+
+async function enter() {
+  show('loginView', false); show('signOutBtn', true); status('');
+  const { data, error } = await sb.rpc('education_access');
+  if (error) {
+    const m = (error.message || '').toLowerCase();
+    if (m.includes('education_access') && (m.includes('could not find') || m.includes('does not exist'))) status('Setup needed: run CarcinoS_education_setup.sql in Supabase.');
+    else status('Could not check access: ' + error.message);
+    return;
+  }
+  access = data || {};
+  if (!access.role) { status('This account does not have Education Builder access. Contact CarcinoS at info@carcino-s.com to set it up for your institution.'); return; }
+  show('appView', true);
+  if (access.role === 'editor') {
+    $('whoLine').textContent = 'Education Builder for ' + (access.institution || 'your institution');
+    $('preparedFor').value = access.institution || '';
+    if (access.logo) setLogo(access.logo);
+    show('logoSave', true);
+  } else {
+    $('whoLine').textContent = 'Admin · build materials and manage institutional editors';
+    show('editorsCard', true); loadEditors();
+  }
+  buildSiteChips();
+  await loadArchive();
+}
+
+// ── Archive data ─────────────────────────────────────
+function shortName(title, s) {
+  const t = s.trial || {}; title = title || '';
+  const named = clean(t.acronym) || clean(t.short_name) || clean(s.trial_acronym) || clean(s.trial_name);
+  if (named && named.length <= 60) return named;
+  const lead = title.match(/^([A-Z][A-Z0-9]{2,}(?:[-\/][A-Za-z0-9]+)*)\b/);            // "ENZARAD (ANZUP 1303): ..."
+  if (lead && lead[1].length >= 4) return lead[1];
+  const the = title.match(/\bThe ([A-Z][A-Za-z0-9]*[A-Z][A-Za-z0-9\-]{2,}) (?:Randomized|Trial|Phase|Study|Clinical)/); // "The HORIZON-Breast06 Randomized..."
+  if (the) return the[1];
+  const paren = title.match(/\(([A-Z][A-Za-z0-9\-\/ ]{2,30})\)/);                       // "(HypoMast-IMNI)"
+  if (paren && /[A-Z].*[A-Z]/.test(paren[1])) return paren[1].trim();
+  return title.length > 90 ? title.slice(0, 87).replace(/\s+\S*$/, '') + '…' : (title || 'Untitled');
+}
+function mapRow(row) {
+  const s = row.summary_json || {}, res = s.results || {}, cls = s.classification || {};
+  const kr = s.key_results || res.key_results || {};
+  const src0 = Array.isArray(s.sources) && s.sources[0] ? s.sources[0] : {};
+  let regimen = clean(s.regimen_description);
+  if (!regimen) {
+    const p = [];
+    if (clean(s.study_design || cls.study_design)) p.push(clean(s.study_design || cls.study_design).replace(/_/g, ' '));
+    if (clean(s.intervention)) p.push(clean(s.intervention));
+    if (clean(s.comparator)) p.push('vs ' + clean(s.comparator));
+    regimen = p.join('; ');
+  }
+  const findings = [clean(kr.effect_size), clean(kr.p_value_or_ci), clean(kr.absolute_difference)].filter(Boolean).join(' · ');
+  const tox = clean(kr.toxicity_qol_signal);
+  const pmid = clean(src0.pmid);
+  const doi = clean((s.trial || {}).doi) || clean(src0.doi);
+  const paper = safeUrl(src0.url) || (doi ? 'https://doi.org/' + doi.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '') : '') || (pmid ? 'https://pubmed.ncbi.nlm.nih.gov/' + encodeURIComponent(pmid) + '/' : '');
+  const pubmed = pmid ? 'https://pubmed.ncbi.nlm.nih.gov/' + encodeURIComponent(pmid) + '/' : '';
+  const pubDate = s.publication_date || src0.publication_date || '';
+  const sortDate = row.published_at || (pubDate && !isNaN(Date.parse(pubDate)) ? new Date(pubDate).toISOString() : null);
+  const site = (row.disease_sites && row.disease_sites.code) || s.disease_site_code || '';
+  return {
+    id: row.id, tier: row.tier, title: row.title || '', short: shortName(row.title, s), site,
+    siteLabel: SITE_LABEL[site] || (row.disease_sites && row.disease_sites.name) || 'Other',
+    audience: Array.isArray(row.audience) ? row.audience : [],
+    journal: clean(s.journal || src0.journal), pubDate: clean(pubDate), sortDate,
+    evidence: clean(s.evidence_strength || res.evidence_strength),
+    population: clean(s.population), regimen, findings: [findings.replace(/[.;\s]+$/, ''), tox].filter(Boolean).join('. '),
+    soWhat: clean(s.carcinos_one_liner), paper, pubmed,
+  };
+}
+async function loadArchive() {
+  const rows = []; const PAGE = 1000;
+  for (let from = 0; from < 20000; from += PAGE) {
+    const { data, error } = await sb.from('alerts')
+      .select('id, tier, title, summary_json, published_at, audience, disease_sites(code, name)')
+      .in('status', ['PUBLISHED', 'CORRECTED'])
+      .order('published_at', { ascending: false, nullsFirst: false })
+      .range(from, from + PAGE - 1);
+    if (error) { $('countLine').textContent = 'Could not load the archive: ' + error.message; return; }
+    rows.push(...(data || []));
+    if (!data || data.length < PAGE) break;
+  }
+  all = rows.map(mapRow).sort((x, y) => (y.sortDate ? Date.parse(y.sortDate) : 0) - (x.sortDate ? Date.parse(x.sortDate) : 0));
+  applyFilters();
+}
+
+// ── Filters ──────────────────────────────────────────
+function buildSiteChips() {
+  const box = $('siteChips'); box.innerHTML = '';
+  const mk = (code, label) => {
+    const b = document.createElement('button'); b.className = 'chip'; b.textContent = label; b.dataset.site = code;
+    b.setAttribute('aria-pressed', code === 'all' ? 'true' : 'false');
+    b.addEventListener('click', () => {
+      if (code === 'all') state.sites.clear();
+      else state.sites.has(code) ? state.sites.delete(code) : state.sites.add(code);
+      box.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed',
+        c.dataset.site === 'all' ? String(state.sites.size === 0) : String(state.sites.has(c.dataset.site))));
+      applyFilters();
+    });
+    box.appendChild(b);
+  };
+  mk('all', 'All sites');
+  Object.entries(SITE_LABEL).forEach(([k, v]) => mk(k, v));
+}
+$('rangeChips').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  $('rangeChips').querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === b)));
+  state.months = b.dataset.months === 'custom' ? 'custom' : Number(b.dataset.months);
+  show('customDates', state.months === 'custom');
+  if (state.months === 'custom' && !$('dateFrom').value) {
+    const d = new Date(); $('dateTo').value = isoDay(d); d.setMonth(d.getMonth() - 6); $('dateFrom').value = isoDay(d);
+  }
+  applyFilters();
+});
+['dateFrom', 'dateTo', 'audience'].forEach(id => $(id).addEventListener('change', applyFilters));
+$('keyword').addEventListener('input', applyFilters);
+document.querySelectorAll('.tierBox').forEach(b => b.addEventListener('change', applyFilters));
+$('docTitle').addEventListener('input', () => { titleEdited = $('docTitle').value.trim() !== ''; });
+
+function isoDay(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function range() {
+  if (state.months === 'custom') {
+    const f = $('dateFrom').value ? new Date($('dateFrom').value + 'T00:00:00') : null;
+    const t = $('dateTo').value ? new Date($('dateTo').value + 'T23:59:59') : new Date();
+    return { from: f, to: t };
+  }
+  const f = new Date(); f.setMonth(f.getMonth() - state.months); f.setHours(0, 0, 0, 0);
+  return { from: f, to: new Date() };
+}
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function fmtDay(d) { return MON[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+function fmtRange(r) {
+  const to = r.to || new Date();
+  if (!r.from) return 'Through ' + fmtDay(to);
+  if (r.from.getFullYear() === to.getFullYear()) return MON[r.from.getMonth()] + ' ' + r.from.getDate() + ' – ' + fmtDay(to);
+  return fmtDay(r.from) + ' – ' + fmtDay(to);
+}
+
+function applyFilters() {
+  const tiers = new Set([...document.querySelectorAll('.tierBox:checked')].map(b => b.value));
+  const r = range(); const q = $('keyword').value.trim().toLowerCase(); const aud = $('audience').value;
+  view = all.filter(c => {
+    if (!tiers.has(c.tier)) return false;
+    if (state.sites.size && !state.sites.has(c.site)) return false;
+    if (!c.sortDate) return false;
+    const d = new Date(c.sortDate);
+    if (r.from && d < r.from) return false;
+    if (r.to && d > r.to) return false;
+    if (aud === 'radiation_oncology' && !c.audience.includes('radiation_oncology')) return false;
+    if (q && !(c.title + ' ' + c.soWhat + ' ' + c.population + ' ' + c.regimen).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  // Newest first; findings not seen before start out selected. Changing filters resets manual ordering.
+  view.forEach(c => { if (!seen.has(c.id)) { seen.add(c.id); selected.add(c.id); } });
+  order = view.map(c => c.id);
+  if (!titleEdited) $('docTitle').value = autoTitle(tiers);
+  render();
+}
+const seen = new Set();
+function autoTitle(tiers) {
+  const siteNames = [...state.sites].map(s => SITE_LABEL[s] || s);
+  const where = siteNames.length === 0 ? 'Oncology' : siteNames.length <= 2 ? siteNames.join(' & ') : 'Multi-site';
+  const tl = tiers.size === 1 ? TIER_LABEL[[...tiers][0]] : (tiers.has('A') ? 'Practice-Impacting and Notable' : 'Notable');
+  return where + ': ' + tl + ' Updates';
+}
+function byId(id) { return all.find(c => c.id === id); }
+function chosen() { return order.filter(id => selected.has(id)).map(byId).filter(Boolean); }
+
+function render() {
+  const list = $('resultList'); const n = chosen().length;
+  $('countLine').innerHTML = '<b>' + view.length + '</b> finding' + (view.length === 1 ? '' : 's') + ' match · <b>' + n + '</b> selected';
+  $('pdfBtn').disabled = $('htmlBtn').disabled = $('htmlDl').disabled = n === 0;
+  if (!view.length) { list.innerHTML = '<div class="empty">No reviewed findings match these filters. Try a longer date range or more tiers.</div>'; return; }
+  list.innerHTML = order.map((id, i) => {
+    const c = byId(id); const on = selected.has(id);
+    return '<div class="item' + (on ? '' : ' off') + '" data-id="' + esc(id) + '">' +
+      '<input type="checkbox" ' + (on ? 'checked' : '') + ' aria-label="Include ' + esc(c.short) + '">' +
+      '<div><div class="t">' + esc(c.short) + '</div>' +
+      '<div class="m"><span class="tier tier-' + esc(c.tier) + '">' + esc((TIER_LABEL[c.tier] || '').toUpperCase()) + '</span>' +
+      esc(c.siteLabel) + ' · ' + esc(c.journal || 'Source') + ' · ' + esc(fmtDay(new Date(c.sortDate))) + '</div>' +
+      (c.soWhat ? '<div class="one">' + esc(c.soWhat.length > 220 ? c.soWhat.slice(0, 217) + '…' : c.soWhat) + '</div>' : '') + '</div>' +
+      '<div class="move"><button data-dir="-1" aria-label="Move up"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button data-dir="1" aria-label="Move down"' + (i === order.length - 1 ? ' disabled' : '') + '>↓</button></div></div>';
+  }).join('');
+}
+$('resultList').addEventListener('click', e => {
+  const item = e.target.closest('.item'); if (!item) return; const id = item.dataset.id;
+  if (e.target.matches('input[type=checkbox]')) { e.target.checked ? selected.add(id) : selected.delete(id); render(); return; }
+  const mv = e.target.closest('button[data-dir]');
+  if (mv) {
+    const i = order.indexOf(id), j = i + Number(mv.dataset.dir);
+    if (j < 0 || j >= order.length) return;
+    [order[i], order[j]] = [order[j], order[i]];
+    if ($('groupBy').value !== 'none') { $('groupBy').value = 'none'; $('exportNote').textContent = 'Grouping set to “No grouping” so your custom order is kept.'; } render();
+  }
+});
+$('selAll').addEventListener('click', () => { view.forEach(c => selected.add(c.id)); render(); });
+$('selNone').addEventListener('click', () => { view.forEach(c => selected.delete(c.id)); render(); });
+
+// ── Logos ────────────────────────────────────────────
+function readImage(file, removeBg) {
+  return new Promise((resolve, reject) => {
+    if (!file || !/^image\/(png|jpeg|svg\+xml)$/.test(file.type)) return reject(new Error('Please choose a PNG, JPG or SVG image.'));
+    if (file.size > 5 * 1024 * 1024) return reject(new Error('That image is larger than 5 MB.'));
+    const fr = new FileReader();
+    fr.onerror = () => reject(new Error('Could not read that file.'));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not open that image.'));
+      img.onload = () => {
+        const max = 600, w0 = img.naturalWidth || 600, h0 = img.naturalHeight || 300;
+        const k = Math.min(1, max / Math.max(w0, h0)); const w = Math.max(1, Math.round(w0 * k)), h = Math.max(1, Math.round(h0 * k));
+        const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0, w, h);
+        const id = cx.getImageData(0, 0, w, h); const px = id.data;
+        if (removeBg) {
+          // clear near-white pixels connected to the edges (keeps white inside the logo)
+          const seen = new Uint8Array(w * h), stack = [];
+          const white = i => px[i * 4 + 3] > 0 && px[i * 4] > 235 && px[i * 4 + 1] > 235 && px[i * 4 + 2] > 235;
+          for (let x = 0; x < w; x++) { stack.push(x, (h - 1) * w + x); }
+          for (let y = 0; y < h; y++) { stack.push(y * w, y * w + w - 1); }
+          while (stack.length) {
+            const i = stack.pop(); if (seen[i]) continue; seen[i] = 1;
+            if (!white(i)) continue; px[i * 4 + 3] = 0;
+            const x = i % w, y = (i / w) | 0;
+            if (x > 0) stack.push(i - 1); if (x < w - 1) stack.push(i + 1); if (y > 0) stack.push(i - w); if (y < h - 1) stack.push(i + w);
+          }
+        }
+        // trim transparent edges
+        let x0 = w, y0 = h, x1 = -1, y1 = -1;
+        for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (px[(y * w + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+        cx.putImageData(id, 0, 0);
+        if (x1 < 0) return reject(new Error('That image looks empty.'));
+        const out = document.createElement('canvas'); out.width = x1 - x0 + 1; out.height = y1 - y0 + 1;
+        out.getContext('2d').drawImage(cv, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+        resolve(out.toDataURL('image/png'));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function setLogo(d) {
+  logoData = d || null;
+  $('logoPrev').innerHTML = logoData ? '<img alt="Group logo">' : 'No logo';
+  if (logoData) $('logoPrev').querySelector('img').src = logoData;
+  show('logoClear', !!logoData);
+}
+$('logoFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  try { setLogo(await readImage(f, $('logoBg').checked)); $('exportNote').textContent = 'Logo added. It appears on the cover and in the footer.'; }
+  catch (err) { $('exportNote').textContent = err.message; }
+});
+$('logoClear').addEventListener('click', () => setLogo(null));
+$('logoSave').addEventListener('click', async () => {
+  const { error } = await sb.rpc('education_save_logo', { p_logo: logoData, p_user_id: null });
+  $('exportNote').textContent = error ? 'Could not save the logo: ' + error.message : (logoData ? 'Saved. Your logo will load automatically next time.' : 'Saved logo removed.');
+});
+
+// ── CarcinoS mark (drawn, so no image file is needed) ─
+function carcinosMark(size) {
+  const cv = document.createElement('canvas'); cv.width = cv.height = size; const cx = cv.getContext('2d');
+  const r = size * 0.2; cx.fillStyle = '#141414'; cx.beginPath();
+  cx.moveTo(r, 0); cx.arcTo(size, 0, size, size, r); cx.arcTo(size, size, 0, size, r); cx.arcTo(0, size, 0, 0, r); cx.arcTo(0, 0, size, 0, r); cx.fill();
+  cx.font = (size * 0.46) + 'px Georgia, "Times New Roman", serif'; cx.textBaseline = 'middle';
+  const wc = cx.measureText('C').width, ws = cx.measureText('S').width, x = (size - wc - ws) / 2;
+  cx.fillStyle = '#ffffff'; cx.fillText('C', x, size * 0.53); cx.fillStyle = '#72a37a'; cx.fillText('S', x + wc, size * 0.53);
+  return cv.toDataURL('image/png');
+}
+
+// ── Grouping shared by PDF and HTML ──────────────────
+function groups(items) {
+  const g = $('groupBy').value;
+  if (g === 'none') return [{ name: null, items }];
+  const map = new Map();
+  const sorted = g === 'month' ? [...items].sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate)) : items;
+  sorted.forEach(c => {
+    const d = new Date(c.sortDate);
+    const key = g === 'site' ? c.siteLabel : MONTH_FULL[d.getMonth()] + ' ' + d.getFullYear();
+    if (!map.has(key)) map.set(key, []); map.get(key).push(c);
+  });
+  let out = [...map.entries()].map(([name, items]) => ({ name, items }));
+  if (g === 'site') out.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+function subtitleLine(items) {
+  const sites = new Set(items.map(c => c.siteLabel));
+  return fmtRange(range()) + ' · ' + items.length + ' finding' + (items.length === 1 ? '' : 's') +
+    (sites.size === 1 ? ' · ' + [...sites][0] : ' across ' + sites.size + ' disease sites');
+}
+
+// ── PDF ──────────────────────────────────────────────
+function cardNode(c, idx) {
+  const G = '#3f6b48';
+  const row = (label, text) => text ? {
+    columns: [{ width: 82, text: label.toUpperCase(), fontSize: 7, bold: true, color: G, characterSpacing: 0.5, margin: [0, 1.5, 0, 0] },
+              { width: '*', text, fontSize: 8.6, lineHeight: 1.25, color: '#2a2a2a' }],
+    columnGap: 8, margin: [0, 3, 0, 0] } : null;
+  const links = [];
+  if (c.paper) links.push({ text: 'Read paper', link: c.paper, color: G, bold: true });
+  if (c.pubmed && c.pubmed !== c.paper) links.push({ text: '   ·   ', color: '#9aa09a' }, { text: 'PubMed', link: c.pubmed, color: G, bold: true });
+  if (links.length) links.push({ text: '   ·   ', color: '#9aa09a' });
+  links.push({ text: 'CarcinoS archive', link: 'https://carcino-s.com/archive/', color: G, bold: true });
+  const meta = [c.siteLabel, c.journal, c.pubDate || fmtDay(new Date(c.sortDate)), c.evidence ? 'Evidence ' + c.evidence : ''].filter(Boolean).join('  ·  ');
+  const inner = [
+    { columns: [
+        { width: 'auto', table: { body: [[{ text: (TIER_LABEL[c.tier] || '').toUpperCase(), fontSize: 6.5, bold: true, color: c.tier === 'A' ? '#ffffff' : '#2d5233', characterSpacing: 0.6, margin: [4, 1, 4, 0] }]] },
+          layout: { fillColor: () => c.tier === 'A' ? G : '#d9e6db', hLineWidth: () => 0, vLineWidth: () => 0, paddingTop: () => 2, paddingBottom: () => 1.5 } },
+        { width: '*', text: meta, fontSize: 7.5, color: '#6b706b', margin: [8, 2, 0, 0] }] },
+    { text: c.title, id: 'card-' + idx, bold: true, fontSize: 11, lineHeight: 1.15, color: '#161816', margin: [0, 7, 0, 4] },
+    row('Population', c.population), row('Study', c.regimen), row('Key findings', c.findings),
+    c.soWhat ? { table: { widths: ['*'], body: [[{ stack: [
+        { text: 'WHY IT MATTERS', fontSize: 7, bold: true, color: G, characterSpacing: 0.5, margin: [0, 0, 0, 2] },
+        { text: c.soWhat, fontSize: 8.6, lineHeight: 1.25, color: '#2a2a2a' }] }]] },
+      layout: { fillColor: () => '#f2f6f2', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
+      margin: [0, 7, 0, 0] } : null,
+    { text: links, fontSize: 8, margin: [0, 7, 0, 0] },
+  ].filter(Boolean);
+  return { table: { widths: ['*'], dontBreakRows: true, body: [[{ stack: inner }]] }, unbreakable: true,
+    layout: { hLineColor: () => '#d9e3da', vLineColor: () => '#d9e3da', hLineWidth: () => 0.8, vLineWidth: () => 0.8,
+      paddingLeft: () => 11, paddingRight: () => 11, paddingTop: () => 10, paddingBottom: () => 10 },
+    margin: [0, 0, 0, 10] };
+}
+function buildPdf() {
+  const items = chosen(); const gs = groups(items); const mark = carcinosMark(160);
+  const prepared = $('preparedFor').value.trim(); const intro = $('intro').value.trim(); const title = $('docTitle').value.trim() || 'Oncology Updates';
+  let idx = 0; const toc = []; const body = [];
+  gs.forEach((g, gi) => {
+    if (g.name) {
+      toc.push({ text: g.name.toUpperCase(), fontSize: 7.5, bold: true, color: '#3f6b48', characterSpacing: 0.6, margin: [0, gi ? 9 : 0, 0, 3] });
+      body.push({ text: [{ text: g.name, fontSize: 15, bold: true }, { text: '   ' + g.items.length + ' finding' + (g.items.length === 1 ? '' : 's'), fontSize: 8, color: '#6b706b' }],
+        margin: [0, gi ? 8 : 0, 0, 8], pageBreak: gi === 0 ? 'before' : undefined, headlineLevel: 1 });
+    } else if (gi === 0) body.push({ text: '', pageBreak: 'before' });
+    g.items.forEach(c => {
+      const i = idx++;
+      toc.push({ columns: [
+        { width: '*', text: [{ text: c.short, bold: true }, { text: '   ' + fmtDay(new Date(c.sortDate)), color: '#6b706b', fontSize: 7.5 }], linkToDestination: 'card-' + i, fontSize: 9 },
+        { width: 24, pageReference: 'card-' + i, alignment: 'right', fontSize: 8.5, color: '#6b706b', linkToDestination: 'card-' + i }],
+        margin: [0, 2.5, 0, 2.5] });
+      body.push(cardNode(c, i));
+    });
+  });
+  const cover = [
+    { columns: [
+        logoData ? { image: logoData, fit: [170, 78], width: 200 } : { text: '', width: 200 },
+        { width: '*', alignment: 'right', stack: [
+          { text: 'CURATED BY', fontSize: 7, color: '#6b706b', characterSpacing: 1, margin: [0, 6, 0, 5] },
+          { columns: [{ width: '*', text: '' }, { image: mark, width: 26 },
+            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#72a37a' }], fontSize: 16, margin: [7, 4, 0, 0] }] }] }] },
+    { text: title, fontSize: 28, bold: true, color: '#161816', lineHeight: 1.1, margin: [0, 56, 0, 8] },
+    { text: subtitleLine(items), fontSize: 11, color: '#3d413d' },
+    { table: { body: [[{ text: 'PHYSICIAN-REVIEWED  ·  CURATED BY CARCINOS', fontSize: 7.5, bold: true, color: '#2d5233', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
+      layout: { fillColor: () => '#e6efe7', hLineWidth: () => 0, vLineWidth: () => 0 }, margin: [0, 14, 0, 0] },
+    intro ? { text: intro, fontSize: 10, lineHeight: 1.3, color: '#2a2a2a', margin: [0, 16, 0, 0] } : null,
+    { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b706b', characterSpacing: 1, margin: [0, 22, 0, 6] },
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#d9e3da' }], margin: [0, 0, 0, 6] },
+    ...toc,
+    { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'Curated by CarcinoS  ·  carcino-s.com  ·  Licensed for internal education'],
+      fontSize: 8, color: '#6b706b', margin: [0, 22, 0, 4] },
+    { text: 'Each finding was selected and summarized by the CarcinoS pipeline and approved by a practicing radiation oncologist. Summaries support clinician education and do not replace the primary source.',
+      fontSize: 7, color: '#8a8f8a', lineHeight: 1.25 },
+  ].filter(Boolean);
+  return {
+    pageSize: 'LETTER', pageMargins: [54, 50, 54, 52],
+    info: { title, author: 'CarcinoS', subject: 'CarcinoS education export' },
+    defaultStyle: { font: 'Roboto', fontSize: 9, color: '#161816' },
+    content: [...cover, ...body],
+    footer: (page, pages) => ({ margin: [54, 16, 54, 0], columns: [
+      { width: '*', columns: [logoData ? { image: logoData, fit: [40, 12], width: 46 } : { text: '', width: 0 },
+        { text: (prepared ? prepared + '  ·  ' : '') + 'Curated by CarcinoS  ·  carcino-s.com', fontSize: 7, color: '#7a7f7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
+      { width: 60, text: page + ' / ' + pages, alignment: 'right', fontSize: 7, color: '#7a7f7a', margin: [0, 2, 0, 0] }] }),
+    pageBreakBefore: (node, following) => node.headlineLevel === 1 && following.length === 0,
+  };
+}
+function fileBase() {
+  const t = ($('docTitle').value || 'CarcinoS export').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_').slice(0, 60);
+  return 'CarcinoS_' + (t || 'export') + '_' + isoDay(new Date());
+}
+let pdfLoaded = null;
+function ensurePdfMake() {
+  if (window.pdfMake && window.pdfMake.vfs) return Promise.resolve();
+  if (!pdfLoaded) pdfLoaded = loadScript('https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/pdfmake.min.js')
+    .then(() => loadScript('https://cdn.jsdelivr.net/npm/pdfmake@0.2.10/build/vfs_fonts.js'));
+  return pdfLoaded;
+}
+$('pdfBtn').addEventListener('click', async () => {
+  $('pdfBtn').disabled = true; $('exportNote').textContent = 'Building the PDF…';
+  try {
+    await ensurePdfMake();
+    const def = buildPdf(); window.__lastPdfDef = def;
+    pdfMake.createPdf(def).download(fileBase() + '.pdf');
+    $('exportNote').textContent = 'PDF downloaded: ' + chosen().length + ' findings.';
+  } catch (e) { pdfLoaded = null; $('exportNote').textContent = 'Could not build the PDF: ' + (e && e.message ? e.message : e); }
+  $('pdfBtn').disabled = chosen().length === 0;
+});
+
+// ── Newsletter HTML (inline styles so it survives email tools) ─
+function buildHtml() {
+  const items = chosen(); const gs = groups(items); const prepared = $('preparedFor').value.trim();
+  const title = $('docTitle').value.trim() || 'Oncology Updates'; const intro = $('intro').value.trim();
+  const G = '#3f6b48'; const font = 'font-family:Arial,Helvetica,sans-serif;';
+  let h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;' + font + 'color:#161816">';
+  h += '<tr><td style="padding:0 0 6px"><div style="font-size:22px;font-weight:bold;line-height:1.25">' + esc(title) + '</div>' +
+       '<div style="font-size:13px;color:#3d413d;margin-top:4px">' + esc(subtitleLine(items)) + '</div>' +
+       (intro ? '<div style="font-size:14px;line-height:1.5;margin-top:12px">' + esc(intro) + '</div>' : '') + '</td></tr>';
+  gs.forEach(g => {
+    if (g.name) h += '<tr><td style="padding:18px 0 6px;font-size:16px;font-weight:bold;color:#161816">' + esc(g.name) + '</td></tr>';
+    g.items.forEach(c => {
+      const field = (l, t) => t ? '<div style="font-size:13px;line-height:1.45;margin-top:5px"><b style="color:' + G + '">' + l + ':</b> ' + esc(t) + '</div>' : '';
+      const links = [c.paper ? '<a href="' + esc(c.paper) + '" style="color:' + G + ';font-weight:bold">Read paper</a>' : '',
+        c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+      h += '<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9e3da;border-radius:8px"><tr><td style="padding:12px 14px">' +
+        '<div style="font-size:11px;color:#6b706b"><span style="background:' + (c.tier === 'A' ? G : '#d9e6db') + ';color:' + (c.tier === 'A' ? '#fff' : '#2d5233') + ';font-weight:bold;font-size:10px;padding:2px 6px;border-radius:3px">' +
+        esc((TIER_LABEL[c.tier] || '').toUpperCase()) + '</span> &nbsp;' + esc([c.siteLabel, c.journal, c.pubDate].filter(Boolean).join(' · ')) + '</div>' +
+        '<div style="font-size:15px;font-weight:bold;line-height:1.3;margin-top:8px">' + esc(c.title) + '</div>' +
+        field('Population', c.population) + field('Study', c.regimen) + field('Key findings', c.findings) +
+        (c.soWhat ? '<div style="font-size:13px;line-height:1.45;margin-top:8px;background:#f2f6f2;padding:8px 10px;border-radius:6px"><b style="color:' + G + '">Why it matters:</b> ' + esc(c.soWhat) + '</div>' : '') +
+        (links ? '<div style="font-size:13px;margin-top:8px">' + links + '</div>' : '') + '</td></tr></table></td></tr>';
+    });
+  });
+  h += '<tr><td style="padding:6px 0 0;font-size:12px;color:#6b706b">' + (prepared ? esc(prepared) + ' · ' : '') +
+       'Curated by <a href="https://carcino-s.com" style="color:' + G + ';font-weight:bold">CarcinoS</a> · physician-reviewed oncology evidence. ' +
+       '<a href="https://carcino-s.com" style="color:' + G + '">Create a free account</a> for weekly practice-impacting alerts.</td></tr></table>';
+  return h;
+}
+$('htmlBtn').addEventListener('click', async () => {
+  const html = buildHtml(); window.__lastHtml = html;
+  try {
+    if (navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([html], { type: 'text/plain' }) })]);
+    } else { await navigator.clipboard.writeText(html); }
+    $('exportNote').textContent = 'Copied. Paste into your newsletter or email tool.';
+  } catch (e) { $('exportNote').textContent = 'Copy was blocked by the browser. Use “Download newsletter HTML” instead.'; }
+});
+$('htmlDl').addEventListener('click', () => {
+  const html = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc($('docTitle').value) + '</title></head><body style="margin:24px">' + buildHtml() + '</body></html>';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html' })); a.download = fileBase() + '.html';
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+});
+
+// ── Institutional editors (admin only) ───────────────
+async function loadEditors() {
+  const { data, error } = await sb.rpc('education_editors_list');
+  if (error) { $('edMsg').textContent = 'Could not load editors: ' + error.message; return; }
+  editors = data || [];
+  $('edRows').innerHTML = editors.length ? editors.map(e =>
+    '<tr data-uid="' + esc(e.user_id) + '"><td>' + esc(e.email) + '</td><td>' + esc(e.institution) + '</td>' +
+    '<td>' + (e.has_logo ? 'Saved' : '—') + ' <button class="btn-link ed-logo">' + (e.has_logo ? 'Replace' : 'Upload') + '</button></td>' +
+    '<td>' + esc(e.added_at ? fmtDay(new Date(e.added_at)) : '') + '</td>' +
+    '<td><button class="btn-link ed-remove">Remove</button></td></tr>').join('')
+    : '<tr><td colspan="5" class="note">No institutional editors yet.</td></tr>';
+}
+$('addEditorForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('edMsg').textContent = '';
+  const { error } = await sb.rpc('education_editor_add', { p_email: $('edEmail').value.trim(), p_institution: $('edInst').value.trim() });
+  if (error) { $('edMsg').textContent = error.message; return; }
+  $('edMsg').textContent = 'Added. They can sign in at carcino-s.com/education with their CarcinoS account.';
+  $('edEmail').value = ''; $('edInst').value = ''; loadEditors();
+});
+$('edRows').addEventListener('click', async e => {
+  const tr = e.target.closest('tr[data-uid]'); if (!tr) return; const uid = tr.dataset.uid;
+  if (e.target.classList.contains('ed-remove')) {
+    const ed = editors.find(x => x.user_id === uid);
+    tr.querySelector('.ed-remove').textContent = 'Removing…';
+    const { error } = await sb.rpc('education_editor_remove', { p_user_id: uid });
+    $('edMsg').textContent = error ? error.message : 'Removed builder access for ' + (ed ? ed.email : 'that editor') + '. Their CarcinoS account is unchanged.';
+    loadEditors();
+  }
+  if (e.target.classList.contains('ed-logo')) { edLogoTarget = uid; $('edLogoFile').click(); }
+});
+$('edLogoFile').addEventListener('change', async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!edLogoTarget) return;
+  try {
+    const d = await readImage(f, true);
+    const { error } = await sb.rpc('education_save_logo', { p_logo: d, p_user_id: edLogoTarget });
+    $('edMsg').textContent = error ? error.message : 'Logo saved for that institution.';
+    loadEditors();
+  } catch (err) { $('edMsg').textContent = err.message; }
+});
+
+boot();
+</script>
+</body>
+</html>

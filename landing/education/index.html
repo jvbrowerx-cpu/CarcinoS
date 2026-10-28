@@ -91,7 +91,8 @@
         <p class="sub" id="whoLine">Turn reviewed CarcinoS findings into a shareable PDF or newsletter section.</p>
       </div>
     </div>
-    <button class="btn-link" id="signOutBtn" hidden>Sign out</button>
+    <div><a class="btn-link" id="adminLink" href="/admin/" hidden>← Admin portal</a>
+    <button class="btn-link" id="signOutBtn" hidden>Sign out</button></div>
   </div>
 
   <div id="statusMsg" class="status" hidden></div>
@@ -301,6 +302,7 @@ async function enter() {
     show('logoSave', true);
   } else {
     $('whoLine').textContent = 'Admin · build materials and manage institutional editors';
+    show('adminLink', true);
     show('editorsCard', true); loadEditors();
   }
   buildSiteChips();

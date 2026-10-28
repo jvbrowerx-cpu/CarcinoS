@@ -91,8 +91,7 @@
         <p class="sub" id="whoLine">Turn reviewed CarcinoS findings into a shareable PDF or newsletter section.</p>
       </div>
     </div>
-    <div><a class="btn-link" id="adminLink" href="/admin/" hidden>← Admin portal</a>
-    <button class="btn-link" id="signOutBtn" hidden>Sign out</button></div>
+    <button class="btn-link" id="signOutBtn" hidden>Sign out</button>
   </div>
 
   <div id="statusMsg" class="status" hidden></div>
@@ -302,7 +301,6 @@ async function enter() {
     show('logoSave', true);
   } else {
     $('whoLine').textContent = 'Admin · build materials and manage institutional editors';
-    show('adminLink', true);
     show('editorsCard', true); loadEditors();
   }
   buildSiteChips();
@@ -576,6 +574,7 @@ function subtitleLine(items) {
 }
 
 // ── PDF ──────────────────────────────────────────────
+function cardUrl(c) { return 'https://carcino-s.com/archive/?card=' + encodeURIComponent(c.id); }
 function cardNode(c, idx) {
   const G = '#3f6b48';
   const row = (label, text) => text ? {
@@ -586,7 +585,7 @@ function cardNode(c, idx) {
   if (c.paper) links.push({ text: 'Read paper', link: c.paper, color: G, bold: true });
   if (c.pubmed && c.pubmed !== c.paper) links.push({ text: '   ·   ', color: '#9aa09a' }, { text: 'PubMed', link: c.pubmed, color: G, bold: true });
   if (links.length) links.push({ text: '   ·   ', color: '#9aa09a' });
-  links.push({ text: 'CarcinoS archive', link: 'https://carcino-s.com/archive/', color: G, bold: true });
+  links.push({ text: 'CarcinoS card', link: cardUrl(c), color: G, bold: true });
   const meta = [c.siteLabel, c.journal, c.pubDate || fmtDay(new Date(c.sortDate)), c.evidence ? 'Evidence ' + c.evidence : ''].filter(Boolean).join('  ·  ');
   const inner = [
     { columns: [
@@ -694,7 +693,8 @@ function buildHtml() {
     g.items.forEach(c => {
       const field = (l, t) => t ? '<div style="font-size:13px;line-height:1.45;margin-top:5px"><b style="color:' + G + '">' + l + ':</b> ' + esc(t) + '</div>' : '';
       const links = [c.paper ? '<a href="' + esc(c.paper) + '" style="color:' + G + ';font-weight:bold">Read paper</a>' : '',
-        c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+        c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : '',
+        '<a href="' + esc(cardUrl(c)) + '" style="color:' + G + ';font-weight:bold">CarcinoS card</a>'].filter(Boolean).join(' &nbsp;·&nbsp; ');
       h += '<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9e3da;border-radius:8px"><tr><td style="padding:12px 14px">' +
         '<div style="font-size:11px;color:#6b706b"><span style="background:' + (c.tier === 'A' ? G : '#d9e6db') + ';color:' + (c.tier === 'A' ? '#fff' : '#2d5233') + ';font-weight:bold;font-size:10px;padding:2px 6px;border-radius:3px">' +
         esc((TIER_LABEL[c.tier] || '').toUpperCase()) + '</span> &nbsp;' + esc([c.siteLabel, c.journal, c.pubDate].filter(Boolean).join(' · ')) + '</div>' +

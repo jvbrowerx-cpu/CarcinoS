@@ -574,7 +574,6 @@ function subtitleLine(items) {
 }
 
 // ── PDF ──────────────────────────────────────────────
-function cardUrl(c) { return 'https://carcino-s.com/archive/?card=' + encodeURIComponent(c.id); }
 function cardNode(c, idx) {
   const G = '#3f6b48';
   const row = (label, text) => text ? {
@@ -584,8 +583,7 @@ function cardNode(c, idx) {
   const links = [];
   if (c.paper) links.push({ text: 'Read paper', link: c.paper, color: G, bold: true });
   if (c.pubmed && c.pubmed !== c.paper) links.push({ text: '   ·   ', color: '#9aa09a' }, { text: 'PubMed', link: c.pubmed, color: G, bold: true });
-  if (links.length) links.push({ text: '   ·   ', color: '#9aa09a' });
-  links.push({ text: 'CarcinoS card', link: cardUrl(c), color: G, bold: true });
+
   const meta = [c.siteLabel, c.journal, c.pubDate || fmtDay(new Date(c.sortDate)), c.evidence ? 'Evidence ' + c.evidence : ''].filter(Boolean).join('  ·  ');
   const inner = [
     { columns: [
@@ -599,7 +597,7 @@ function cardNode(c, idx) {
         { text: c.soWhat, fontSize: 8.6, lineHeight: 1.25, color: '#2a2a2a' }] }]] },
       layout: { fillColor: () => '#f2f6f2', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
       margin: [0, 7, 0, 0] } : null,
-    { text: links, fontSize: 8, margin: [0, 7, 0, 0] },
+    links.length ? { text: links, fontSize: 8, margin: [0, 7, 0, 0] } : null,
   ].filter(Boolean);
   return { table: { widths: ['*'], dontBreakRows: true, body: [[{ stack: inner }]] }, unbreakable: true,
     layout: { hLineColor: () => '#d9e3da', vLineColor: () => '#d9e3da', hLineWidth: () => 0.8, vLineWidth: () => 0.8,
@@ -693,8 +691,7 @@ function buildHtml() {
     g.items.forEach(c => {
       const field = (l, t) => t ? '<div style="font-size:13px;line-height:1.45;margin-top:5px"><b style="color:' + G + '">' + l + ':</b> ' + esc(t) + '</div>' : '';
       const links = [c.paper ? '<a href="' + esc(c.paper) + '" style="color:' + G + ';font-weight:bold">Read paper</a>' : '',
-        c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : '',
-        '<a href="' + esc(cardUrl(c)) + '" style="color:' + G + ';font-weight:bold">CarcinoS card</a>'].filter(Boolean).join(' &nbsp;·&nbsp; ');
+        c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
       h += '<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9e3da;border-radius:8px"><tr><td style="padding:12px 14px">' +
         '<div style="font-size:11px;color:#6b706b"><span style="background:' + (c.tier === 'A' ? G : '#d9e6db') + ';color:' + (c.tier === 'A' ? '#fff' : '#2d5233') + ';font-weight:bold;font-size:10px;padding:2px 6px;border-radius:3px">' +
         esc((TIER_LABEL[c.tier] || '').toUpperCase()) + '</span> &nbsp;' + esc([c.siteLabel, c.journal, c.pubDate].filter(Boolean).join(' · ')) + '</div>' +

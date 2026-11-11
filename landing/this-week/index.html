@@ -151,6 +151,9 @@
   .stat-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.1px; color: var(--grey-dim); margin-bottom: 5px; }
   .stat-value { font-size: 24px; font-weight: 800; color: var(--white); letter-spacing: -0.6px; }
   .stat-value.green { color: var(--green); }
+  .stat-link { cursor: pointer; transition: border-color .15s, background .15s; }
+  .stat-link:hover, .stat-link:focus-visible { border-color: var(--green); background: rgba(255,255,255,0.06); outline: none; }
+  .section-header { scroll-margin-top: 80px; }
 
   /* ── section headers ── */
   .section-header { margin: 36px 0 18px; padding: 14px 18px; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; border: none; }
@@ -636,15 +639,15 @@
       <div class="stat-label">Findings</div>
       <div class="stat-value" id="statFindings">—</div>
     </div>
-    <div class="stat">
+    <div class="stat stat-link" data-jump="pi" role="button" tabindex="0" aria-label="Jump to Practice Impacting">
       <div class="stat-label">Practice Impacting</div>
       <div class="stat-value green" id="statPI">—</div>
     </div>
-    <div class="stat">
+    <div class="stat stat-link" data-jump="inc" role="button" tabindex="0" aria-label="Jump to Incremental">
       <div class="stat-label">Incremental</div>
       <div class="stat-value" id="statInc">—</div>
     </div>
-    <div class="stat">
+    <div class="stat stat-link" data-jump="hor" role="button" tabindex="0" aria-label="Jump to Horizon">
       <div class="stat-label">Horizon</div>
       <div class="stat-value" id="statHor">—</div>
     </div>
@@ -1924,6 +1927,22 @@ async function start() {
 }
 
 start();
+</script>
+
+<script>
+// Stat boxes (Practice Impacting / Incremental / Horizon) jump to their section.
+(function () {
+  function jump(el) {
+    var target = document.querySelector('.section-header.' + el.dataset.jump);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  document.querySelectorAll('.stat-link').forEach(function (el) {
+    el.addEventListener('click', function () { jump(el); });
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(el); }
+    });
+  });
+})();
 </script>
 
 <script src="/carcinos-track.js" defer></script>

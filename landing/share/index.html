@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>CarcinoS — Share with a colleague</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #060908; min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; color: #e6e8e6; -webkit-font-smoothing: antialiased; }
+  body { display: flex; justify-content: center; align-items: flex-start; padding: 28px 16px 48px; }
+  .card { width: 100%; max-width: 460px; background: #0b120e; border: 2px solid #79ad86; border-radius: 4px; padding: 26px 22px; }
+  .brand { font-family: 'Libre Baskerville', Georgia, serif; font-size: 22px; color: #e6e8e6; margin-bottom: 4px; }
+  .brand span { color: #72b07f; }
+  .sub { color: #728075; font-size: 13px; margin-bottom: 20px; }
+  label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #72b07f; margin-bottom: 8px; }
+  textarea { width: 100%; min-height: 200px; background: #060908; color: #e6e8e6; border: 1px solid #213329; border-radius: 4px; padding: 12px; font: 15px/1.45 'Inter', system-ui, sans-serif; resize: vertical; }
+  .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .btn { display: block; width: 100%; text-align: center; padding: 14px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none; cursor: pointer; border: 1px solid #72b07f; background: transparent; color: #72b07f; font-family: inherit; }
+  .btn.primary { background: #72b07f; color: #060908; border-color: #72b07f; }
+  .hint { color: #728075; font-size: 12px; margin-top: 14px; line-height: 1.5; }
+  .ok { color: #72b07f; font-size: 13px; text-align: center; min-height: 18px; margin-top: 8px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Carcino<span>S</span></div>
+  <div class="sub">Share a paper with a colleague</div>
+
+  <label for="msg">Your message (you can edit it)</label>
+  <textarea id="msg"></textarea>
+
+  <div class="btns">
+    <a id="sms" class="btn primary" href="#">Open in Messages</a>
+    <button id="native" class="btn" type="button" hidden>Share another way…</button>
+    <button id="copy" class="btn" type="button">Copy message</button>
+  </div>
+  <div id="ok" class="ok" aria-live="polite"></div>
+  <p class="hint">Nothing is sent until you press send in your messaging app. On a computer without Messages, copy the message and paste it wherever you like.</p>
+</div>
+
+<script>
+(function () {
+  var INVITE = 'https://carcino-s.com/invite/';
+  var p = new URLSearchParams(location.search);
+  function clean(s, max) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, max); }
+  var title = clean(p.get('t'), 200);
+  var url = clean(p.get('u'), 500);
+  if (!/^https:\/\//i.test(url)) url = '';   // only show real https links
+
+  var msg = document.getElementById('msg');
+  msg.value = (title ? 'Worth a look: ' + title : 'Worth a look') +
+              (url ? '\n' + url : '') +
+              '\n\nShared from CarcinoS, a free weekly oncology digest: ' + INVITE;
+
+  // iPhone/iPad/Mac use "sms:&body=", Android uses "sms:?body=".
+  var apple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
+  var sms = document.getElementById('sms');
+  function updateSms() {
+    sms.href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(msg.value);
+  }
+  updateSms();
+  msg.addEventListener('input', updateSms);
+
+  var ok = document.getElementById('ok');
+  if (navigator.share) {
+    var nat = document.getElementById('native');
+    nat.hidden = false;
+    nat.addEventListener('click', function () {
+      navigator.share({ text: msg.value }).catch(function () {});
+    });
+  }
+  document.getElementById('copy').addEventListener('click', function () {
+    var done = function () { ok.textContent = 'Copied. Paste it into any message.'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg.value).then(done, function () { msg.select(); document.execCommand('copy'); done(); });
+    } else { msg.select(); document.execCommand('copy'); done(); }
+  });
+})();
+</script>
+</body>
+</html>

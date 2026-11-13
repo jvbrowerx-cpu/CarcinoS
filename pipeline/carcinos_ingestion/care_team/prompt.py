@@ -180,8 +180,10 @@ Returning nothing is a good outcome. CarcinoS values restraint. Never pad.
 """
 
 DISCLAIMER = (
-    "Summarizes the trial publication and FDA labeling; not a substitute for "
-    "prescribing information or institutional protocols."
+    "AI-assisted summary of the trial publication and FDA labeling, which may "
+    "contain errors. Verify all information independently against the full "
+    "prescribing information and primary sources. Not medical advice and not a "
+    "substitute for clinical judgment or institutional protocols."
 )
 
 ROWS_USER_TEMPLATE = """CARD

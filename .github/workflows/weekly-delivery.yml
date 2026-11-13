@@ -23,6 +23,14 @@ on:
         description: 'Send to this email only (leave blank for all subscribers)'
         required: false
         default: ''
+      care_team:
+        description: 'Include the Care team line (before launch: only use with "Send to this email only")'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   deliver:
@@ -48,6 +56,10 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           RESEND_API_KEY:            ${{ secrets.RESEND_API_KEY }}
           CARCINOS_FROM_EMAIL:       ${{ secrets.CARCINOS_FROM_EMAIL }}
+          # Care team line in the email. Scheduled sends use the fallback ('false' = hidden).
+          # At launch: change the 'false' at the end of this line to 'true', and the
+          # care_team input's default above to 'true'.
+          CARE_TEAM_PUBLIC:          ${{ github.event.inputs.care_team || 'false' }}
         run: |
           cd pipeline
 

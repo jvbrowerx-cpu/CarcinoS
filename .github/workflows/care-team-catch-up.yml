@@ -1,0 +1,44 @@
+name: Care Team catch-up
+
+# Adds Care team rows to Practice-Impacting cards that are awaiting review or
+# approved but not yet sent, and don't have them yet — mainly FDA approvals added by hand in the admin portal
+# after the weekly pipeline has run. Runs every 2 hours; finishes in seconds when
+# there is nothing to do. Never touches published cards. Readers see nothing until
+# CARE_TEAM_PUBLIC is switched on.
+#
+# Run it now: Actions → "Care Team catch-up" → Run workflow.
+# Turn it off: Actions → "Care Team catch-up" → ··· → Disable workflow.
+
+on:
+  schedule:
+    - cron: '20 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  care-team:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: pipeline/carcinos_ingestion/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd pipeline
+          pip install -r carcinos_ingestion/requirements.txt
+
+      - name: Add Care team rows to new cards
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          cd pipeline
+          python -m carcinos_ingestion.care_team.run_care_team --write --since-days 10

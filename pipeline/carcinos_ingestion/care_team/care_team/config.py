@@ -35,3 +35,7 @@ class CareTeamSettings:
     finder_model: str = field(default_factory=lambda: os.getenv("CARE_TEAM_FINDER_MODEL", os.getenv("CARE_TEAM_MODEL", "gpt-6-astra")))
     # Look up official FDA labels (openFDA) for approved drugs.
     use_fda_labels: bool = field(default_factory=lambda: os.getenv("CARE_TEAM_FDA_LABELS", "true").lower() == "true")
+    # "generate" (default): the model writes every row from what it finds, citing
+    # sources; numbers it can't match to downloaded text are flagged for the editor.
+    # "verbatim": the stricter original mode (every row backed by exact quotes).
+    mode: str = field(default_factory=lambda: os.getenv("CARE_TEAM_MODE", "generate").lower())

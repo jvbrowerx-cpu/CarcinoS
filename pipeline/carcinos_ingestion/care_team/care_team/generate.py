@@ -25,6 +25,7 @@ from .prompt import (
 from .sources import fetch_registry, nct_ids_for
 from .text import clean_source_text, normalize
 from .validate import validate
+from .write_free import build_prompt, default_writer, parse_rows, validate_free
 
 log = logging.getLogger("carcinos.care_team")
 
@@ -73,6 +74,7 @@ def generate_for_alert(
     label_getter: Optional[Callable] = None,
     page_getter: Optional[Callable] = None,
     searcher: Optional[Callable[[str], str]] = None,
+    writer: Optional[Callable[[str], str]] = None,
     force: bool = False,
 ) -> dict:
     """Return a care_team result dict. Never raises for a single bad card.
@@ -125,35 +127,57 @@ def generate_for_alert(
                 doc = fetch_registry(nct, page_getter)
                 if doc:
                     external[doc.url] = doc
-        if settings.use_web_finder:
+        generate_mode = settings.mode != "verbatim"
+        if settings.use_web_finder and not generate_mode:
             excerpts, pages, finder_rejected = find_verified_excerpts(
                 alert, ncts, searcher or default_searcher(settings.finder_model, settings.fallback_model), page_getter)
             external.update(pages)
 
-        # 3. Extract rows with quotes.
-        per_label = LABEL_PROMPT_BUDGET // max(1, len(labels))
-        blocks = "\n\n".join(l.prompt_block(per_label) for l in labels) if labels else NO_LABELS_BLOCK
-        ext_parts = [registry_block(d) for d in external.values() if d.kind == "registry"]
-        if excerpts:
-            ext_parts.append(excerpts_block(excerpts))
-        ext_blocks = "\n\n".join(ext_parts) if ext_parts else NO_EXTERNAL_BLOCK
-        user = ROWS_USER_TEMPLATE.format(
-            title=alert.get("title") or "",
-            journal=s.get("journal") or "",
-            population=s.get("population") or "",
-            regimen=s.get("regimen_description") or "",
-            so_what=s.get("carcinos_one_liner") or "",
-            paper_text=paper_text or "(none stored for this card — use the FDA label and other sources below)",
-            label_blocks=blocks,
-            external_blocks=ext_blocks,
-        )
-        res, model_used = _structured(client, settings, settings.model,
-                                      system=ROWS_SYSTEM, user=user, schema=ROWS_SCHEMA)
-        base["model"] = model_used
-        tokens += (res.usage or {}).get("total_tokens", 0)
+        if generate_mode:
+            # 3g. The model writes the rows itself (web search + the text above).
+            per_label = (LABEL_PROMPT_BUDGET // 2) // max(1, len(labels))
+            src_parts = [l.prompt_block(per_label) for l in labels]
+            src_parts += [registry_block(d) for d in external.values() if d.kind == "registry"]
+            if paper_text:
+                src_parts.append(f"PAPER TEXT (stored by CarcinoS)\n<<<\n{paper_text}\n>>>")
+            prompt = build_prompt(alert, ncts, "\n\n".join(src_parts))
+            raw = (writer or default_writer(settings.model, settings.fallback_model))(prompt)
+            parsed = parse_rows(raw)
+            known = " ".join([paper_text] + [" ".join(l.sections.values()) for l in labels]
+                             + [d.text for d in external.values()])
+            check = validate_free(parsed, known, labels)
+            log.info("care-team: %s labels=%s registry=%s proposed=%d passed=%d",
+                     alert.get("id"), [l.display_brand for l in labels],
+                     [d.name for d in external.values() if d.kind == "registry"],
+                     len(check["rows"]), len(check["display_rows"]))
+            for r in check["rows"]:
+                log.info("  %s %s: %s %s", "OK " if r["passed"] else "REMOVED", r.get("field"),
+                         (r.get("text") or "")[:90], "; ".join(r["issues"] + r["warnings"])[:200])
+        else:
+            # 3. Extract rows with quotes.
+            per_label = LABEL_PROMPT_BUDGET // max(1, len(labels))
+            blocks = "\n\n".join(l.prompt_block(per_label) for l in labels) if labels else NO_LABELS_BLOCK
+            ext_parts = [registry_block(d) for d in external.values() if d.kind == "registry"]
+            if excerpts:
+                ext_parts.append(excerpts_block(excerpts))
+            ext_blocks = "\n\n".join(ext_parts) if ext_parts else NO_EXTERNAL_BLOCK
+            user = ROWS_USER_TEMPLATE.format(
+                title=alert.get("title") or "",
+                journal=s.get("journal") or "",
+                population=s.get("population") or "",
+                regimen=s.get("regimen_description") or "",
+                so_what=s.get("carcinos_one_liner") or "",
+                paper_text=paper_text or "(none stored for this card — use the FDA label and other sources below)",
+                label_blocks=blocks,
+                external_blocks=ext_blocks,
+            )
+            res, model_used = _structured(client, settings, settings.model,
+                                          system=ROWS_SYSTEM, user=user, schema=ROWS_SCHEMA)
+            base["model"] = model_used
+            tokens += (res.usage or {}).get("total_tokens", 0)
 
-        # 4. Code checks (web/registry quotes are re-checked against the downloaded pages).
-        check = validate(res.parsed, paper_text, labels, external)
+            # 4. Code checks (web/registry quotes are re-checked against the downloaded pages).
+            check = validate(res.parsed, paper_text, labels, external)
     except Exception as e:  # one card failing must never stop the run
         log.warning("care-team generation failed for %s: %s", alert.get("id"), e)
         return {**base, "status": "error", "reason": str(e)[:300]}
@@ -177,6 +201,7 @@ def generate_for_alert(
         "proposed_display": check["display_rows"],
         "tokens": tokens,
         "disclaimer": DISCLAIMER,
+        "mode": "generate" if settings.mode != "verbatim" else "verbatim",
     }
     if check["status"] == "omitted":
         out["reason"] = check["omit_reason"]

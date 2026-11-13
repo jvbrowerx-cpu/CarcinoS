@@ -42,7 +42,7 @@ def check_eligibility(
     # FDA label and ClinicalTrials.gov are their sources. Hand-added cards may
     # also use those external sources. Everything else needs the paper text.
     has_text = bool(paper_text) and len(paper_text) >= 200
-    if not has_text and not (is_fda_card(alert) or s.get("is_manually_added")):
+    if not has_text and settings.mode == "verbatim" and not (is_fda_card(alert) or s.get("is_manually_added")):
         return False, "no stored source text to ground claims"
 
     if s.get("care_team") and not force:

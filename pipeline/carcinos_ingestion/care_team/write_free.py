@@ -35,17 +35,24 @@ from .text import normalize, numbers_in
 log = logging.getLogger("carcinos.care_team.write_free")
 
 GEN_MAX_ROWS = 6
-GEN_MAX_CHARS = 240
+GEN_MAX_CHARS = 200
+
+# Display order for nurses/APPs: what the visit looks like, then side effects,
+# then the label warnings and monitoring, then the rest.
+GEN_ORDER = ["schedule", "toxicity", "warnings", "monitoring", "sequencing", "interactions", "patient_reported"]
 
 FIELD_GUIDE = {
-    "toxicity": "Toxicity in the trial: the adverse events that matter most for care, with rates; "
-                "serious ones (e.g. ILD, CRS, severe rash, ocular, cardiac) named; both arms when compared.",
-    "warnings": "Label warnings: the conditions the FDA label warns about, boxed warning first.",
-    "monitoring": "Label monitoring: tests or assessments the label or trial specifies, and when.",
-    "schedule": "Schedule in the trial: route, how often, loading or step-up phase, cycle length, "
-                "duration, combination partners; RT fractionation. No drug doses.",
-    "sequencing": "Sequencing in the trial: timing relative to surgery, radiation or other therapy.",
-    "interactions": "Label interactions: drugs, classes or foods the label lists.",
+    "schedule": "Schedule: route, how often, loading phase, cycle length, duration, partners; "
+                "RT fractionation. No drug doses. e.g. \"SC injection weekly ×3 (cycle 1), then q3w until progression\"",
+    "toxicity": "Side effects in the trial: most common with rates; serious ones named; grade ≥3 rate when "
+                "notable; both arms when compared. e.g. \"Rash 81% (grade ≥3 ~12%); fatigue, nail changes, "
+                "stomatitis, edema each ≥20%\"",
+    "warnings": "Label warnings, boxed first, as short condition names joined by ' · '. e.g. "
+                "\"Injection reactions · ILD/pneumonitis · severe skin reactions · eye toxicity · embryo-fetal toxicity\"",
+    "monitoring": "Label monitoring: what is assessed and when. e.g. \"Observation during and 2–4 h after first "
+                  "injection; ILD symptoms; pregnancy status before starting\"",
+    "sequencing": "Sequencing: timing relative to surgery, radiation or other therapy.",
+    "interactions": "Label interactions: drugs, classes or foods, joined by ' · '.",
     "patient_reported": "Patient-reported outcomes: quality-of-life or symptom results as reported.",
 }
 
@@ -66,21 +73,26 @@ Study / regimen: {regimen}
 So what (do not repeat): {so_what}
 Trial IDs: {ncts}
 
-ROW TYPES (fill every one the sources support, most important first, up to {max_rows}):
+ROW TYPES (fill every one the sources support, up to {max_rows}, in this order):
 {guide}
 
+The examples show STYLE only (from a different drug); never reuse their content or numbers.
 Priorities: serious or common toxicities with rates; label warnings (boxed
 first); monitoring; schedule including any loading phase; then the rest.
 Radiation, surgery and de-escalation trials have no label rows.
 
 WORDING RULES (strict; a row that breaks them is removed):
-  • A factual fragment that reports, e.g. "Rash 78%, nail toxicity 49%, stomatitis 40%;
-    grade 3 rash 15%" or "Interstitial lung disease, dermatologic reactions, ocular toxicity".
+  • Clipped clinic shorthand a busy nurse can scan in 2 seconds: about 100
+    characters per row (hard limit {max_chars}). Fragments, not sentences.
+    Use ×, q3w, ≥, ~, "SC", "IV", and ' · ' or ';' between items. No final period.
+  • Keep only what changes care: no sample sizes (n=), no cohort names, no
+    grade 4 or rare-percentage detail, no trial name, no "per the label".
+  • Plain clinic terms over label phrasing ("injection reactions", "severe skin
+    reactions", "eye toxicity"); common abbreviations are fine (ILD, CRS, AE).
   • Never instruct: no imperatives (monitor, check, give, hold, avoid, consider,
     watch...), no "should", "must", "need to", "you", "patients should".
   • No drug doses or dose changes (no mg, mg/kg, mg/m2, units, dose reductions,
     premedication). Schedule words and radiation Gy/fractions are fine.
-  • At most {max_chars} characters per row.
   • Each row names its source(s): for FDA label rows use "FDA label" with the
     DailyMed link if known; for trial rows give the page you used (journal,
     PubMed, ClinicalTrials.gov, meeting abstract).
@@ -115,7 +127,7 @@ def default_writer(model: str, fallback: str = "") -> Callable[[str], str]:
 
 def build_prompt(alert: dict, ncts: list[str], source_blocks: str) -> str:
     s = alert.get("summary_json") or {}
-    guide = "\n".join(f"  • {k}: {v}" for k, v in FIELD_GUIDE.items())
+    guide = "\n".join(f"  • {k}: {FIELD_GUIDE[k]}" for k in GEN_ORDER)
     return GEN_PROMPT.format(
         title=alert.get("title") or "", journal=s.get("journal") or "",
         population=s.get("population") or "",
@@ -142,7 +154,7 @@ def validate_free(parsed: dict, known_text: str, labels: list[DrugLabel]) -> dic
     label_map = {normalize(l.drug): l for l in labels}
     label_by_base = {normalize(l.drug).split(" and ")[0]: l for l in labels}
     known_numbers = numbers_in(known_text)
-    order = {k: i for i, k in enumerate(FIELDS)}
+    order = {k: i for i, k in enumerate(GEN_ORDER)}
     seen: set[str] = set()
     rows_out: list[dict] = []
 
@@ -160,6 +172,8 @@ def validate_free(parsed: dict, known_text: str, labels: list[DrugLabel]) -> dic
             issues.append("empty text")
         if len(text) > GEN_MAX_CHARS:
             issues.append(f"longer than {GEN_MAX_CHARS} characters")
+        elif len(text) > 140:
+            warnings.append(f"long for a quick scan ({len(text)} characters)")
         issues.extend(style_issues(text))
 
         srcs = [s for s in (row.get("sources") or []) if isinstance(s, dict) and (s.get("name") or s.get("url"))]

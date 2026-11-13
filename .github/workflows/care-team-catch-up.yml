@@ -1,18 +1,26 @@
 name: Care Team catch-up
 
+# Runs only when you start it (no schedule, so no background GitHub minutes).
 # Adds Care team rows to Practice-Impacting cards that are awaiting review or
-# approved but not yet sent, and don't have them yet — mainly FDA approvals added by hand in the admin portal
-# after the weekly pipeline has run. Runs every 2 hours; finishes in seconds when
-# there is nothing to do. Never touches published cards. Readers see nothing until
-# CARE_TEAM_PUBLIC is switched on.
+# approved but not yet sent and don't have rows yet — mainly FDA approvals added
+# by hand in the admin portal after the weekly pipeline has run. Cards that
+# already have rows are skipped. Never touches published cards. Readers see
+# nothing until CARE_TEAM_PUBLIC is switched on.
 #
-# Run it now: Actions → "Care Team catch-up" → Run workflow.
-# Turn it off: Actions → "Care Team catch-up" → ··· → Disable workflow.
+# Start it: admin portal "Generate now" link, or Actions → "Care Team catch-up" → Run workflow.
+# Redo: set "Redo cards..." to true to refresh rows on cards you haven't edited or approved.
 
 on:
-  schedule:
-    - cron: '20 */2 * * *'
   workflow_dispatch:
+    inputs:
+      redo:
+        description: 'Redo cards that already have Care team rows (never ones you edited or approved)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
 
 jobs:
   care-team:
@@ -41,4 +49,6 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           cd pipeline
-          python -m carcinos_ingestion.care_team.run_care_team --write --since-days 10
+          REDO_FLAG=""
+          if [ "${{ github.event.inputs.redo }}" = "true" ]; then REDO_FLAG="--force"; fi
+          python -m carcinos_ingestion.care_team.run_care_team --write --since-days 10 $REDO_FLAG

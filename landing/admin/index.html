@@ -1648,6 +1648,17 @@ function ctSecLabel(sec) {
             warnings_and_cautions: 'Label · Warnings & Precautions', drug_interactions: 'Label · Drug Interactions',
             registry: 'ClinicalTrials.gov', web: 'Web page (downloaded and checked)' })[sec] || sec;
 }
+function ctSourcesLine(ct) {
+  const su = ct && ct.sources_used;
+  if (!su) return '';
+  const used = [];
+  (su.labels || []).forEach(l => used.push(`${l} FDA label`));
+  (su.registry_found || []).forEach(r => used.push(r));
+  if (su.web_passages) used.push(`${su.web_passages} verified web passage${su.web_passages === 1 ? '' : 's'}`);
+  const missingReg = (su.nct_ids || []).filter(n => !(su.registry_found || []).some(r => r.includes(n)));
+  const misses = (su.label_misses || []).concat(missingReg.map(n => `${n} (no ClinicalTrials.gov record read)`));
+  return `<div class="ct-hint"><strong>Sources used:</strong> ${used.length ? escHtml(used.join(' · ')) : 'stored paper text only'}${misses.length ? ` &nbsp;<span style="color:#8a6200">Not found: ${escHtml(misses.join('; '))}</span>` : ''}</div>`;
+}
 function renderCareTeam(c) {
   const ct = c.care_team;
   const shown = Array.isArray(c.care_team_rows) ? c.care_team_rows : [];
@@ -1671,16 +1682,16 @@ function renderCareTeam(c) {
     const rows = shown.map(r => `<div class="ct-rowp"><div class="k">${escHtml(r.label)}</div><div>${escHtml(r.text)}</div></div>`).join('');
     const removed = proposed.filter(r => !r.passed).length;
     const lateChip = (ct && ct.added_after_approval && !ct.editor_status) ? '<span class="ct-chip held">Added after you approved — check, then Edit → Save to confirm</span>' : '';
-    return `<div class="ct-box"><div class="ct-head"><strong>Care team</strong>${chip}${CARE_TEAM_PUBLIC ? '' : '<span class="ct-chip held">Hidden from readers until launch</span>'}${removed ? `<span class="ct-chip held">${removed} row${removed === 1 ? '' : 's'} removed by checks</span>` : ''}${lateChip}</div><div class="ct-rows-prev">${rows}</div>${evidence}<div class="ct-hint">After launch, readers see this collapsed under one “Care team” line, marked with a green dot. At most 4 rows are shown. To refresh these rows: <a href="${CT_CATCHUP_URL}" target="_blank" rel="noopener">Redo ↗</a> (set “Redo” to true; skipped once you've edited or approved them).</div></div>`;
+    return `<div class="ct-box"><div class="ct-head"><strong>Care team</strong>${chip}${CARE_TEAM_PUBLIC ? '' : '<span class="ct-chip held">Hidden from readers until launch</span>'}${removed ? `<span class="ct-chip held">${removed} row${removed === 1 ? '' : 's'} removed by checks</span>` : ''}${lateChip}</div><div class="ct-rows-prev">${rows}</div>${ctSourcesLine(ct)}${evidence}<div class="ct-hint">After launch, readers see this collapsed under one “Care team” line, marked with a green dot. At most 4 rows are shown. To refresh these rows: <a href="${CT_CATCHUP_URL}" target="_blank" rel="noopener">Redo ↗</a> (set “Redo” to true; skipped once you've edited or approved them).</div></div>`;
   }
   if (ct && ct.editor_status === 'removed') {
     return `<div class="ct-box none"><strong>Care team:</strong> removed by editor.${evidence}</div>`;
   }
   if (ct && ct.status === 'needs_review') {
-    return `<div class="ct-box held"><div class="ct-head"><strong>Care team</strong><span class="ct-chip held">⚠ No row passed the checks — nothing shown to readers</span></div>${evidence}<div class="ct-hint">To use a row, open Edit, copy the proposed text into its box, fix it so it says only what the source says, and save.</div></div>`;
+    return `<div class="ct-box held"><div class="ct-head"><strong>Care team</strong><span class="ct-chip held">⚠ No row passed the checks — nothing shown to readers</span></div>${ctSourcesLine(ct)}${evidence}<div class="ct-hint">To use a row, open Edit, copy the proposed text into its box, fix it so it says only what the source says, and save.</div></div>`;
   }
   if (ct && ct.status === 'omitted') {
-    return `<div class="ct-box none"><strong>No care team section</strong> — ${escHtml(ct.reason || 'nothing practical in the sources')}</div>`;
+    return `<div class="ct-box none"><strong>No care team section</strong> — ${escHtml(ct.reason || 'nothing practical in the sources')}${ctSourcesLine(ct)}</div>`;
   }
   if (ct && ct.status === 'error') {
     return `<div class="ct-box none"><strong>Care team section</strong> could not be generated this run.</div>`;

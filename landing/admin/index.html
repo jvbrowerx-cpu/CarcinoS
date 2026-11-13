@@ -199,6 +199,31 @@
       font-size: 13px; color: #333; line-height: 1.6; margin-bottom: 8px;
     }
     .card-field strong { color: #111; font-weight: 700; }
+    /* Care Team Takeaway review */
+    .ct-box { border-left: 3px solid #4f8a5a; background: #f1f6f1; border-radius: 6px; padding: 9px 11px; margin: 4px 0 10px; font-size: 13px; color: #333; line-height: 1.55; }
+    .ct-box.held { border-left-color: #d69a00; background: #fff8e6; }
+    .ct-box.none { border-left-color: #bbb; background: #f6f6f6; color: #666; }
+    .ct-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 4px; }
+    .ct-head strong { color: #111; }
+    .ct-chip { font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 2px 8px; border: 1px solid; }
+    .ct-chip.ok { color: #2f6b3a; border-color: #9cc4a3; background: #e6f2e8; }
+    .ct-chip.held { color: #8a6200; border-color: #e5c370; background: #fff1c9; }
+    .ct-chip.edited { color: #2e4a8a; border-color: #a9b9de; background: #eaf0fb; }
+    .ct-box details { margin-top: 6px; font-size: 12px; }
+    .ct-box summary { cursor: pointer; color: #555; }
+    .ct-claims { margin: 6px 0 0; padding: 0; list-style: none; }
+    .ct-claims li { padding: 4px 0; border-top: 1px solid rgba(0,0,0,0.06); }
+    .ct-ok { color: #2f6b3a; font-weight: 700; } .ct-bad { color: #b3261e; font-weight: 700; }
+    .ct-issue { color: #8a6200; font-size: 12px; margin-top: 4px; }
+    .ct-hint { font-size: 11.5px; color: #777; margin-top: 4px; }
+    .ct-rows-prev { margin-top: 4px; }
+    .ct-rowp { display: grid; grid-template-columns: 150px 1fr; gap: 8px; padding: 3px 0; border-top: 1px solid rgba(0,0,0,0.06); }
+    .ct-rowp:first-child { border-top: none; }
+    .ct-rowp .k { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #3b5e3f; }
+    .ct-removed { color: #8a6200; }
+    .ct-field { display: grid; grid-template-columns: 170px 1fr; gap: 8px; align-items: start; margin-top: 6px; }
+    .ct-field label { font-size: 12px; font-weight: 600; color: #444; padding-top: 6px; }
+    .ct-usedraft { margin-top: 6px; font-size: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid #d69a00; background: #fff; color: #8a6200; cursor: pointer; }
     .card-meta { font-size: 12px; color: #666; margin-bottom: 8px; }
     .card-one-liner { font-size: 13px; color: #333; line-height: 1.5; margin-bottom: 10px; }
     .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
@@ -1077,6 +1102,8 @@ async function loadDashboard() {
         journal: s.journal || src0.journal || '',
         pub_date: s.publication_date || src0.publication_date || '',
         carcinos_one_liner: s.carcinos_one_liner || '',
+        care_team: s.care_team || null,
+        care_team_rows: Array.isArray(s.care_team_rows) ? s.care_team_rows : [],
         population: s.population || '',
         regimen_description: s.regimen_description || '',
         intervention: s.intervention || '',
@@ -1306,11 +1333,18 @@ function renderDashboard() {
   const rejectedPI = unpublished.filter(c =>
     editorStatus(c.status) === 'rejected' && c.tier === 'A'
   );
+  // Approved cards that got Care team rows AFTER approval stay visible until the
+  // editor has looked at them (saving the card clears the flag).
+  const ctLate = unpublished.filter(c =>
+    editorStatus(c.status) === 'approved' && c.care_team && c.care_team.added_after_approval &&
+    !c.care_team.editor_status && (c.care_team_rows || []).length
+  );
   const visible = showReviewed
     ? unpublished
     : [
         ...unpublished.filter(c => editorStatus(c.status) === 'pending'),
         ...rejectedPI,
+        ...ctLate,
       ];
 
   const pi  = visible.filter(c => c.tier === 'A');
@@ -1593,6 +1627,105 @@ function renderSection(label, tierClass, items, tierValue) {
   `;
 }
 
+// ── Care Team section ─────────────────────────────────────────────
+// Readers only ever see summary_json.care_team_rows (rows that passed every
+// code check, or rows the editor wrote/edited). Rows that failed a check are
+// listed here for the editor with the reason, and are never shown to readers.
+// Keep in step with CARE_TEAM_PUBLIC in this-week and archive (label only; admin always shows rows).
+const CARE_TEAM_PUBLIC = false;
+const CT_CATCHUP_URL = 'https://github.com/jvbrowerx-cpu/CarcinoS/actions/workflows/care-team-catch-up.yml';
+const CT_FIELDS = [
+  { key: 'schedule',       label: 'Schedule in the trial',   source: 'trial', hint: 'From the paper. RT fractionation OK; no drug doses.' },
+  { key: 'sequencing',     label: 'Sequencing in the trial', source: 'trial', hint: 'Timing relative to surgery, RT or systemic therapy.' },
+  { key: 'monitoring',     label: 'Label monitoring',        source: 'label', hint: 'Tests and timing the FDA label specifies.' },
+  { key: 'warnings',       label: 'Label warnings',          source: 'label', hint: 'Conditions the label warns about — not symptoms to watch for.' },
+  { key: 'interactions',   label: 'Label interactions',      source: 'label', hint: 'Drugs, classes or foods the label lists.' },
+  { key: 'toxicity',       label: 'Toxicity in the trial',   source: 'trial', hint: 'As reported in the paper; give both arms when compared.' },
+  { key: 'patient_reported', label: 'Patient-reported outcomes', source: 'trial', hint: 'QoL or symptom outcomes the trial measured.' },
+];
+function ctSecLabel(sec) {
+  return ({ paper: 'Paper', boxed_warning: 'Label · Boxed Warning', dosage_and_administration: 'Label · Dosage & Administration',
+            warnings_and_cautions: 'Label · Warnings & Precautions', drug_interactions: 'Label · Drug Interactions',
+            registry: 'ClinicalTrials.gov', web: 'Web page (downloaded and checked)' })[sec] || sec;
+}
+function renderCareTeam(c) {
+  const ct = c.care_team;
+  const shown = Array.isArray(c.care_team_rows) ? c.care_team_rows : [];
+  if (!ct && !shown.length) {
+    // New Practice-Impacting cards (e.g. FDA approvals added by hand) get rows when the editor
+    // runs the "Care Team catch-up" job (Generate now link).
+    return (c.tier === 'A' && ['EXTRACTED', 'EDITOR_REVIEW', 'APPROVED'].includes(c.status))
+      ? `<div class="ct-box none"><strong>Care team:</strong> not generated yet. <a href="${CT_CATCHUP_URL}" target="_blank" rel="noopener">Generate now ↗</a> <span class="ct-hint">(opens GitHub → click “Run workflow”; rows appear here in about a minute — refresh)</span></div>`
+      : '';
+  }
+  const proposed = (ct && Array.isArray(ct.rows)) ? ct.rows : [];
+  const evidence = proposed.length ? `<details><summary>Sources and checks (${proposed.length} proposed row${proposed.length === 1 ? '' : 's'})</summary><ul class="ct-claims">${proposed.map(r => {
+      const head = `<strong>${escHtml((CT_FIELDS.find(f => f.key === r.field) || {}).label || r.field)}</strong> ${r.passed ? '<span class="ct-ok">✓ passed</span>' : '<span class="ct-bad">✗ removed</span>'} — ${escHtml(r.text || '')}`;
+      const evs = (r.evidence || []).map(ev => `<div style="margin-left:12px"><span class="${ev.verified ? 'ct-ok' : 'ct-bad'}">${ev.verified ? '✓' : '✗'}</span> <em>${escHtml(ctSecLabel(ev.source))}${r.label_drug && !['paper','registry','web'].includes(ev.source) ? ' (' + escHtml(r.label_drug) + ')' : ''}</em>${ev.url && /^https:\/\//.test(ev.url) ? ` <a href="${escHtml(ev.url)}" target="_blank" rel="noopener">↗</a>` : ''} — “${escHtml(ev.quote || '')}”</div>`).join('');
+      const iss = (r.issues || []).map(x => `<div class="ct-issue" style="margin-left:12px">⚠ ${escHtml(x)}</div>`).join('');
+      return `<li>${head}${evs}${iss}</li>`;
+    }).join('')}</ul>${(ct.finder_rejected && ct.finder_rejected.length) ? `<div class="ct-hint">Web search: ${ct.finder_rejected.length} suggested passage${ct.finder_rejected.length === 1 ? '' : 's'} rejected (${escHtml([...new Set(ct.finder_rejected.map(x => x.reason))].join('; '))}).</div>` : ''}${(ct.labels || []).map(l => l.url ? `<div class="ct-hint">FDA label: <a href="${escHtml(l.url)}" target="_blank" rel="noopener">${escHtml(l.brand ? l.brand + ' (' + l.drug + ')' : l.drug)} on DailyMed ↗</a></div>` : '').join('')}</details>` : '';
+  if (shown.length) {
+    const edited = ct && ct.editor_status === 'edited';
+    const chip = edited ? '<span class="ct-chip edited">✎ Edited by editor</span>' : '<span class="ct-chip ok">✓ Quotes verified against source</span>';
+    const rows = shown.map(r => `<div class="ct-rowp"><div class="k">${escHtml(r.label)}</div><div>${escHtml(r.text)}</div></div>`).join('');
+    const removed = proposed.filter(r => !r.passed).length;
+    const lateChip = (ct && ct.added_after_approval && !ct.editor_status) ? '<span class="ct-chip held">Added after you approved — check, then Edit → Save to confirm</span>' : '';
+    return `<div class="ct-box"><div class="ct-head"><strong>Care team</strong>${chip}${CARE_TEAM_PUBLIC ? '' : '<span class="ct-chip held">Hidden from readers until launch</span>'}${removed ? `<span class="ct-chip held">${removed} row${removed === 1 ? '' : 's'} removed by checks</span>` : ''}${lateChip}</div><div class="ct-rows-prev">${rows}</div>${evidence}<div class="ct-hint">After launch, readers see this collapsed under one “Care team” line, marked with a green dot. At most 4 rows are shown.</div></div>`;
+  }
+  if (ct && ct.editor_status === 'removed') {
+    return `<div class="ct-box none"><strong>Care team:</strong> removed by editor.${evidence}</div>`;
+  }
+  if (ct && ct.status === 'needs_review') {
+    return `<div class="ct-box held"><div class="ct-head"><strong>Care team</strong><span class="ct-chip held">⚠ No row passed the checks — nothing shown to readers</span></div>${evidence}<div class="ct-hint">To use a row, open Edit, copy the proposed text into its box, fix it so it says only what the source says, and save.</div></div>`;
+  }
+  if (ct && ct.status === 'omitted') {
+    return `<div class="ct-box none"><strong>No care team section</strong> — ${escHtml(ct.reason || 'nothing practical in the sources')}</div>`;
+  }
+  if (ct && ct.status === 'error') {
+    return `<div class="ct-box none"><strong>Care team section</strong> could not be generated this run.</div>`;
+  }
+  return '';
+}
+
+// Soft wording check for editor-written rows (mirrors the pipeline's rules).
+function careTeamWarnings(text) {
+  if (!text) return [];
+  const w = [];
+  const verbs = /^(give|get|check|monitor|teach|educate|counsel|start|stop|hold|avoid|ensure|consider|obtain|order|administer|assess|screen|watch|tell|advise|instruct|remind|use|plan|schedule|arrange|refer|discontinue|continue|reduce|increase|prescribe|premedicate|warn|track|follow|make|be|keep|report|expect|anticipate|document|notify|call|contact|encourage|recommend|provide|offer|draw|prepare|verify|confirm|review|note|look|limit|minimize|correct|replace|measure|evaluate|perform)\b/i;
+  if (text.split(/[;.]\s*/).some(cl => verbs.test(cl.trim()))) w.push('reads as an instruction');
+  if (/\b(should|must|need(s)? to|you|your|watch for|look out for|do not|don't)\b/i.test(text)) w.push('directive wording');
+  if (/\d\s*(mg|mcg|µg|units?|ml)\b|mg\s*\/\s*(m2|m²|kg)|\bdosing\b|dose (reduction|adjustment|modification)/i.test(text)) w.push('contains dosing');
+  if (text.length > 170) w.push('longer than 170 characters');
+  return w;
+}
+
+// Build reader rows from the edit boxes, keeping source metadata.
+function ctRowsFromEditor(c, id) {
+  const ct = c.care_team || {};
+  const labels = Array.isArray(ct.labels) ? ct.labels : [];
+  const out = [];
+  CT_FIELDS.forEach(f => {
+    const text = (document.getElementById(`editct-${f.key}-${id}`)?.value || '').trim();
+    if (!text) return;
+    const prev = (c.care_team_rows || []).find(r => r.field === f.key)
+      || ((ct.proposed_display || []).find(r => r.field === f.key))
+      || null;
+    const prop = (ct.rows || []).find(r => r.field === f.key) || null;
+    let meta = prev ? { source: prev.source, drug: prev.drug, brand: prev.brand, url: prev.url, sections: prev.sections || [], links: prev.links || [] } : null;
+    if (!meta) {
+      if (f.source === 'label') {
+        const lab = labels.find(l => prop && l.drug === prop.label_drug) || labels[0] || {};
+        meta = { source: 'label', drug: lab.drug || null, brand: lab.brand || '', url: lab.url || null, sections: [], links: [] };
+      } else {
+        meta = { source: 'trial', drug: null, brand: '', url: null, sections: ['Trial publication'], links: [] };
+      }
+    }
+    out.push({ field: f.key, label: f.label, text, ...meta });
+  });
+  return out;
+}
+
 function renderCard(c) {
   const status = editorStatus(c.status);
   const tierClass = c.tier === 'A' ? 'pi' : c.tier === 'B' ? 'inc' : 'hor';
@@ -1659,6 +1792,7 @@ function renderCard(c) {
             ${toxicity ? `<br>${escHtml(toxicity)}` : ''}
           </div>` : ''}
           ${oneLiner ? `<div class="card-field"><strong>So what (clinical implication):</strong> ${escHtml(oneLiner)}</div>` : ''}
+          ${renderCareTeam(c)}
           <div class="card-tags">
             <span class="card-tag tag-evidence">Evidence ${c.evidence_strength || '?'}</span>
             ${renderSignalBadge(c.qualifying_signal)}
@@ -1704,6 +1838,19 @@ function renderCard(c) {
         <div class="edit-row">
           <div class="edit-label">Edit one-liner</div>
           <textarea class="edit-input" id="editliner-${c.id}" rows="2">${escHtml(oneLiner)}</textarea>
+        </div>
+        <div class="edit-row">
+          <div class="edit-label">Care team rows (shown to readers, collapsed; leave a box blank to hide that row)</div>
+          ${CT_FIELDS.map(f => {
+            const cur = (c.care_team_rows || []).find(r => r.field === f.key);
+            const prop = (c.care_team && c.care_team.rows || []).find(r => r.field === f.key);
+            const canUse = !cur && prop && prop.text;
+            return `<div class="ct-field"><label for="editct-${f.key}-${c.id}">${f.label}</label><div>
+              <input class="edit-input" id="editct-${f.key}-${c.id}" maxlength="170" value="${escHtml(cur ? cur.text : '')}" placeholder="${escHtml(f.hint)}">
+              ${canUse ? `<button type="button" class="ct-usedraft" data-id="${c.id}" data-field="${f.key}" data-action="use-ct-row">Use proposed text${prop.passed ? '' : ' (failed a check — fix before saving)'}</button>` : ''}
+            </div></div>`;
+          }).join('')}
+          <div class="ct-hint">Say only what the paper or FDA label says. No instructions (monitor, check, avoid, watch for…), no doses.</div>
         </div>
         <div class="edit-row">
           <div class="edit-label">Tier (overrides Claude's choice)</div>
@@ -1873,17 +2020,27 @@ function handleCardAction(e) {
     const regimenDescription = document.getElementById(`editregimen-${id}`).value.trim();
     const sourceUrl = document.getElementById(`editsource-${id}`).value.trim();
     const keyFindings = document.getElementById(`editfindings-${id}`).value.trim();
+    const cand = candidates.find(x => x.id === id);
+    const careTeamRows = cand ? ctRowsFromEditor(cand, id) : [];
+    const ctWarn = [];
+    careTeamRows.forEach(r => careTeamWarnings(r.text).forEach(w => ctWarn.push(`${r.label}: ${w}`)));
     const btn = e.currentTarget;
     btn.textContent = 'Saving…'; btn.disabled = true;
-    updateCandidateEdit(id, { carcinos_one_liner: oneLiner, tier, disease_site_code: diseaseSiteCode, audience, editor_notes: notes, population, regimen_description: regimenDescription, source_url: sourceUrl, key_findings: keyFindings })
+    updateCandidateEdit(id, { carcinos_one_liner: oneLiner, tier, disease_site_code: diseaseSiteCode, audience, editor_notes: notes, population, regimen_description: regimenDescription, source_url: sourceUrl, key_findings: keyFindings, care_team_rows: careTeamRows })
       .then(() => {
         renderDashboard();
-        showToast('Changes saved', 'success');
+        showToast(ctWarn.length ? `Saved — check care team wording: ${ctWarn.join('; ')}` : 'Changes saved', ctWarn.length ? '' : 'success');
       })
       .catch(err => {
         btn.textContent = 'Save changes'; btn.disabled = false;
         showToast(`Save failed: ${err.message || err}`, 'error');
       });
+  } else if (action === 'use-ct-row') {
+    const c = candidates.find(x => x.id === id);
+    const field = e.currentTarget.dataset.field;
+    const prop = c && c.care_team && (c.care_team.rows || []).find(r => r.field === field);
+    const box = document.getElementById(`editct-${field}-${id}`);
+    if (prop && box) { box.value = prop.text || ''; box.focus(); }
   } else if (action === 'cancel') {
     document.getElementById(`edit-${id}`).classList.remove('open');
   }
@@ -1959,6 +2116,8 @@ async function updateCandidateEdit(id, updates) {
   if ('audience' in updates) c.audience = updates.audience;
   if ('carcinos_one_liner' in updates) c.carcinos_one_liner = updates.carcinos_one_liner;
   if ('editor_notes' in updates) c.editor_notes = updates.editor_notes;
+  const prevCtRows = JSON.stringify(c.care_team_rows || []);
+  if ('care_team_rows' in updates) c.care_team_rows = updates.care_team_rows;
   if ('population' in updates) c.population = updates.population;
   if ('regimen_description' in updates) c.regimen_description = updates.regimen_description;
   if ('source_url' in updates) c.source_url = updates.source_url;
@@ -1976,6 +2135,24 @@ async function updateCandidateEdit(id, updates) {
     const merged_summary = { ...(c._summary_json || {}) };
     if ('carcinos_one_liner' in updates) merged_summary.carcinos_one_liner = updates.carcinos_one_liner;
     if ('editor_notes' in updates) merged_summary.editor_notes = updates.editor_notes;
+    if ('care_team_rows' in updates) {
+      const next = updates.care_team_rows || [];
+      const ctPrev = merged_summary.care_team || {};
+      if (JSON.stringify(next) === prevCtRows && ctPrev.added_after_approval && !ctPrev.editor_status) {
+        // Saved without changes: the editor has looked at rows added after approval.
+        const ct = { ...ctPrev, editor_status: 'approved', editor_updated_at: new Date().toISOString() };
+        merged_summary.care_team = ct;
+        c.care_team = ct;
+      } else if (JSON.stringify(next) !== prevCtRows) {
+        merged_summary.care_team_rows = next;
+        const ct = { ...(merged_summary.care_team || {}) };
+        const auto = JSON.stringify(ct.proposed_display || []);
+        ct.editor_status = !next.length ? 'removed' : (JSON.stringify(next) === auto ? 'approved' : 'edited');
+        ct.editor_updated_at = new Date().toISOString();
+        merged_summary.care_team = ct;
+        c.care_team = ct;
+      }
+    }
     if ('population' in updates) merged_summary.population = updates.population;
     if ('regimen_description' in updates) merged_summary.regimen_description = updates.regimen_description;
     if ('source_url' in updates && merged_summary.sources?.[0]) {

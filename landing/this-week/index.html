@@ -187,6 +187,25 @@
   .card-body strong { color: #1a2e1a; font-weight: 600; }
   .card-field { font-size: 13.5px; color: #2e4a2e; line-height: 1.55; margin-bottom: 10px; }
   .card-field strong { color: #1a2e1a; font-weight: 600; }
+
+  /* Care Team section — collapsed by default; shown only when editor-approved rows exist */
+  details.care-team { border-left: 3px solid #4f8a5a; background: rgba(255,255,255,0.45); border-radius: 6px; margin: 2px 0 10px; font-size: 13px; color: #2e4a2e; line-height: 1.5; }
+  details.care-team > summary { cursor: pointer; list-style: none; padding: 7px 12px; font-weight: 600; color: #1a2e1a; font-size: 12.5px; letter-spacing: .02em; }
+  details.care-team > summary::-webkit-details-marker { display: none; }
+  details.care-team > summary::after { content: " ▸"; color: #4f8a5a; }
+  details.care-team[open] > summary::after { content: " ▾"; }
+  details.care-team .ct-src-note { font-weight: 400; color: #5a7a5a; }
+  /* Filled dot = this card has care-team detail to expand (same green as a liked thumb) */
+  .ct-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #39ff6e; border: 1px solid #1db84a; margin-right: 6px; vertical-align: 0; box-shadow: 0 0 0 2px rgba(57,255,110,0.18); }
+  .ct-rows { padding: 0 12px 10px; }
+  .ct-row { display: grid; grid-template-columns: 150px 1fr; gap: 10px; padding: 4px 0; border-top: 1px solid rgba(79,138,90,0.15); }
+  .ct-row:first-child { border-top: none; }
+  .ct-k { font-size: 11.5px; font-weight: 700; color: #3b5e3f; text-transform: uppercase; letter-spacing: .04em; padding-top: 1px; }
+  .ct-sources { font-size: 11.5px; color: #5a7a5a; margin-top: 6px; }
+  .ct-sources a { color: #3b6e44; }
+  .ct-disc { font-size: 11px; color: #6a866a; margin-top: 3px; font-style: italic; }
+  @media (max-width: 560px) { .ct-row { grid-template-columns: 1fr; gap: 1px; } }
+  .card.inc details.care-team, .card.hor details.care-team { color: #333333; border-left-color: #777777; background: rgba(0,0,0,0.04); }
   .card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid rgba(90,130,90,0.2); padding-top: 10px; font-size: 12px; color: #5a7a5a; }
   .card-tags { display: flex; flex-wrap: wrap; gap: 6px; }
   .tag { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 7px; border-radius: 4px; background: rgba(90,130,90,0.15); color: #3a5e3a; }
@@ -831,6 +850,50 @@ function getMondayOfThisWeek(d = new Date()) {
 function formatWeek(monday) {
   return monday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
+// ── Care Team section (rows from summary_json.care_team_rows) ──────────────
+// Collapsed by default. Built only from the trial publication and FDA labeling.
+// LAUNCH SWITCH: false = readers never see the Care team section (rows are still
+// generated and shown to the editor in the admin portal). Set to true to launch.
+const CARE_TEAM_PUBLIC = false;
+const CT_DISCLAIMER = 'Summarizes the trial publication and FDA labeling; not a substitute for prescribing information or institutional protocols.';
+function ctSafeUrl(u) { return (typeof u === 'string' && /^https:\/\/dailymed\.nlm\.nih\.gov\//.test(u)) ? u : ''; }
+function renderCareTeamRows(rows) {
+  if (!CARE_TEAM_PUBLIC) return '';
+  if (!Array.isArray(rows) || !rows.length) return '';
+  rows = rows.filter(r => r && r.text && r.label);
+  if (!rows.length) return '';
+  const labels = {};
+  let hasTrial = false;
+  const trialLinks = {};
+  rows.forEach(r => {
+    (Array.isArray(r.links) ? r.links : []).forEach(l => {
+      const u = (l && typeof l.url === 'string' && /^https:\/\//.test(l.url)) ? l.url : '';
+      if (u && !trialLinks[u]) trialLinks[u] = l.name || u;
+    });
+    if (r.source === 'label' && r.drug) {
+      const key = r.drug;
+      if (!labels[key]) labels[key] = { name: r.brand ? `${r.brand} (${r.drug})` : r.drug, short: r.brand || r.drug, url: ctSafeUrl(r.url), sections: new Set() };
+      (r.sections || []).forEach(s => labels[key].sections.add(s));
+    } else if (r.source === 'trial') { hasTrial = true; }
+  });
+  const labelList = Object.values(labels);
+  const srcBits = [];
+  if (labelList.length) srcBits.push(labelList.map(l => l.short).join(', ') + ' FDA label');
+  if (hasTrial) srcBits.push('trial');
+  const rowHtml = rows.map(r => `<div class="ct-row"><div class="ct-k">${escHtml(r.label)}</div><div>${escHtml(r.text)}</div></div>`).join('');
+  const srcLinks = labelList.map(l => {
+    const secs = l.sections.size ? ` (${escHtml([...l.sections].join(', '))})` : '';
+    return l.url ? `<a href="${escHtml(l.url)}" target="_blank" rel="noopener">${escHtml(l.name)} prescribing information ↗</a>${secs}` : `${escHtml(l.name)} prescribing information${secs}`;
+  });
+  const usesPaper = rows.some(r => r.source === 'trial' && (r.sections || []).includes('Trial publication'));
+  if (usesPaper) srcLinks.push('trial publication');
+  Object.entries(trialLinks).forEach(([u, n]) => srcLinks.push(`<a href="${escHtml(u)}" target="_blank" rel="noopener">${escHtml(n)} ↗</a>`));
+  return `<details class="care-team"><summary><span class="ct-dot" aria-hidden="true"></span>Care team <span class="ct-src-note">· ${escHtml(srcBits.join(' + '))}</span></summary>
+    <div class="ct-rows">${rowHtml}
+      <div class="ct-sources">Sources: ${srcLinks.join(' · ')}</div>
+      <div class="ct-disc">${CT_DISCLAIMER}</div></div></details>`;
+}
+
 function escHtml(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -897,6 +960,7 @@ function renderCard(c, tier) {
       ${regimenText ? `<div class="card-field"><strong>Study / regimen:</strong> ${escHtml(regimenText)}</div>` : ''}
       ${keyFindings || toxicity ? `<div class="card-field"><strong>Key findings:</strong> ${keyFindings}${toxicity ? `<br>${toxicity}` : ''}</div>` : ''}
       ${c.one_liner ? `<div class="card-field"><strong>So what (clinical implication):</strong> ${c.one_liner}</div>` : ''}
+      ${renderCareTeamRows(c.care_team_rows)}
       <div class="card-footer">
         <div class="card-tags">
           <span class="tag ${evidenceClass}">Evidence ${escHtml(c.evidence_strength || '?')}</span>
@@ -1756,6 +1820,7 @@ async function loadLiveDigest(weekOffset = 0) {
       evidence_strength: s.evidence_strength || res.evidence_strength || '',
       tier_rationale: s.tier_rationale || res.tier_rationale || '',
       one_liner: s.carcinos_one_liner || '',
+      care_team_rows: Array.isArray(s.care_team_rows) ? s.care_team_rows : [],
       population: s.population || '',
       regimen_description: s.regimen_description || '',
       intervention: s.intervention || '',

@@ -455,6 +455,18 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as _pr_err:
             logging.warning("[pipeline_runs] failed to write coverage row: %s", _pr_err)
 
+    # ── Care Team Takeaway (add-on step) ─────────────────────────────────────
+    # Adds an optional nurse/APP takeaway to new Practice-Impacting cards that
+    # are still awaiting editor review. Never touches published cards, never
+    # changes tiers or existing fields, and can never stop the pipeline.
+    # Turn off with CARE_TEAM_ENABLED=false.
+    if persist:
+        try:
+            from .care_team.run_care_team import main as _care_team_main
+            _care_team_main(["--write", "--since-days", "2"])
+        except Exception as _ct_err:
+            logging.warning("[care_team] step skipped (non-fatal): %s", _ct_err)
+
     # ── Auto-backup Supabase tables ──────────────────────────────────────────
     if persist:
         try:

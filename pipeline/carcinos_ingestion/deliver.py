@@ -21,7 +21,10 @@ Usage:
 from __future__ import annotations
 import argparse
 import json
+import html
 import os
+import urllib.parse
+import re
 import sys
 import urllib.error
 import textwrap
@@ -30,6 +33,77 @@ from typing import Any, Optional
 
 from .config import Config
 from .digest import fetch_for_user, SITE_LABEL, TIER_LABEL, TIER_SIGNAL
+
+CARE_TEAM_DISCLAIMER = (
+    "Summarizes the trial publication and FDA labeling; not a substitute for "
+    "prescribing information or institutional protocols."
+)
+
+
+# LAUNCH SWITCH: the Care team line appears in emails only when the workflow sets
+# CARE_TEAM_PUBLIC=true. Default off, so rows can be reviewed in the admin portal
+# for a few weeks before readers see them.
+CARE_TEAM_PUBLIC = os.getenv("CARE_TEAM_PUBLIC", "false").lower() == "true"
+
+
+# Share links on each email card: open the reader's own email or text app with a
+# short message already written (title, So what, paper link, invite). Nothing is
+# sent unless the reader presses send. Turn off with SHARE_LINKS=false.
+SHARE_LINKS = os.getenv("SHARE_LINKS", "true").lower() != "false"
+INVITE_URL = "https://carcino-s.com/invite/"
+# Only real formatting tags; keeps text like "<65 years" or "HR <0.8" intact.
+_TAGS = re.compile(r"</?(?:b|i|u|em|strong|sup|sub|br|span|p|a|small|mark)\b[^>]*>", re.I)
+
+
+def _plain(s: str) -> str:
+    return " ".join(html.unescape(_TAGS.sub(" ", s or "")).split())
+
+
+def _share_links(a) -> tuple[str, str]:
+    """Return (mailto_href, sms_href) for one card, or ("", "") when off."""
+    if not SHARE_LINKS:
+        return "", ""
+    title = _plain(getattr(a, "title", "")) or "An oncology paper"
+    so_what = _plain(getattr(a, "one_liner", ""))
+    paper = (getattr(a, "source_url", "") or "").strip()
+    short_title = title if len(title) <= 110 else title[:107].rstrip() + "..."
+    subject = f"Worth a look: {short_title}"
+    body_parts = [title]
+    if so_what:
+        body_parts.append(f"So what: {so_what}")
+    if paper:
+        body_parts.append(f"Paper: {paper}")
+    body_parts.append("I get these through CarcinoS, a free weekly digest of practice-impacting "
+                      f"oncology papers for the disease sites you follow: {INVITE_URL}")
+    body = "\n\n".join(body_parts)
+    sms = f"Worth a look: {short_title}" + (f" {paper}" if paper else "") + f" (via CarcinoS, free: {INVITE_URL})"
+    q = lambda x: urllib.parse.quote(x, safe="")
+    return f"mailto:?subject={q(subject)}&body={q(body)}", f"sms:?&body={q(sms)}"
+
+
+def _care_team_sources(rows: list | None) -> str:
+    """'Kisqali FDA label + trial' — the one line shown in the email.
+
+    The rows themselves stay on the website card (collapsed), to keep the
+    email short.
+    """
+    if not CARE_TEAM_PUBLIC:
+        return ""
+    rows = [r for r in (rows or []) if isinstance(r, dict) and r.get("text")]
+    if not rows:
+        return ""
+    names: list[str] = []
+    for r in rows:
+        if r.get("source") == "label":
+            n = r.get("brand") or r.get("drug") or ""
+            if n and n not in names:
+                names.append(n)
+    bits = []
+    if names:
+        bits.append(", ".join(names) + " FDA label")
+    if any(r.get("source") == "trial" for r in rows):
+        bits.append("trial")
+    return " + ".join(bits) or "trial"
 
 
 # ---------------------------------------------------------------------------
@@ -154,10 +228,30 @@ def build_email_html(
                 <p style="margin:0;font-size:13px;color:{text_mid};font-family:Helvetica,Arial,sans-serif;line-height:1.6;"><strong style="color:{text_dark};">So what (clinical implication):</strong> {one_liner_display}</p>
               </td></tr>"""
 
-        # "Discuss on CarcinoS" deep-link
+        # Care Team — one line linking to the card (rows stay on the website)
+        care_team_row = ""
+        ct_sources = _care_team_sources(getattr(a, "care_team_rows", None))
+        if ct_sources:
+            care_team_row = f"""
+              <tr><td style="padding-bottom:12px;">
+                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="display:block;background:#eef4ee;border-left:3px solid #4f8a5a;border-radius:4px;padding:7px 12px;font-size:12.5px;color:{text_dark};text-decoration:none;font-family:Helvetica,Arial,sans-serif;"><span style="color:#1db84a;font-size:13px;">&#9679;</span> <strong>Care team</strong> <span style="color:{text_muted};">&middot; {_esc(ct_sources)} &mdash; details on the card &#8599;</span></a>
+              </td></tr>"""
+
+        # "Discuss on CarcinoS" deep-link, plus Share by email / text
+        mail_href, sms_href = _share_links(a)
+        share_html = ""
+        if mail_href:
+            link_style = "font-size:12px;font-weight:600;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;"
+            share_html = (
+                f'<span style="font-size:12px;color:{text_muted};font-family:Helvetica,Arial,sans-serif;">'
+                f'&nbsp;&nbsp;&middot;&nbsp;&nbsp;Share:&nbsp;</span>'
+                f'<a href="{_esc(mail_href)}" style="{link_style}">&#9993; Email</a>'
+                f'<span style="font-size:12px;color:{text_muted};">&nbsp;&middot;&nbsp;</span>'
+                f'<a href="{_esc(sms_href)}" style="{link_style}">&#128172; Text</a>'
+            )
         discuss_row = f"""
               <tr><td style="padding-bottom:12px;">
-                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="font-size:12px;font-weight:700;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">&#128172; Discuss on CarcinoS &#8599;</a>
+                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="font-size:12px;font-weight:700;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">&#128172; Discuss on CarcinoS &#8599;</a>{share_html}
               </td></tr>"""
 
         # Divider + bottom row
@@ -188,7 +282,7 @@ def build_email_html(
               {population_row}
               {study_row}
               {findings_row}
-              {one_liner_row}
+              {one_liner_row}{care_team_row}
               {discuss_row}
               {bottom_row}
             </table>
@@ -364,6 +458,9 @@ def build_email_text(alerts: list, scope: str, week_label: str, headline: str = 
                 out.append(f"  Key finding: {a.effect_size}")
             if a.one_liner:
                 out.append(f"  So what: {a.one_liner}")
+            _ct = _care_team_sources(getattr(a, "care_team_rows", None))
+            if _ct:
+                out.append(f"  Care team ({_ct}): https://carcino-s.com/this-week/#card-{a.id}")
             if a.source_url:
                 out.append(f"  Link: {a.source_url}")
             out.append("")

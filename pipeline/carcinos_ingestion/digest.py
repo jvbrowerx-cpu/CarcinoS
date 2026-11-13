@@ -68,6 +68,9 @@ class FlatAlert:
     # Conference source — set when this alert was manually added as a conference
     # abstract (e.g. "ASTRO 2026"). Empty string for regular pipeline alerts.
     conference_source: str = ""
+    # Care Team rows — editor-approved, built only from the trial and FDA label.
+    # Empty / None = not shown.
+    care_team_rows: list = None  # type: ignore[assignment]
 
     def __post_init__(self):
         if self.audience is None:
@@ -160,6 +163,7 @@ def _flatten_alert(row: dict[str, Any]) -> FlatAlert:
         source_url=_source_url(src0, trial),
         audience=row.get("audience") or ['broad_oncology', 'radiation_oncology'],
         conference_source=s.get("conference_source") or "",
+        care_team_rows=list(s.get("care_team_rows") or []),
     )
 
 
@@ -251,6 +255,7 @@ def fetch_for_user(
             tags=list(s.get("who_should_care") or []),
             source_url=_source_url(src0, trial),
             conference_source=s.get("conference_source") or "",
+            care_team_rows=list(s.get("care_team_rows") or []),
         )
 
     return [_flat(r) for r in rows], scope

@@ -1674,12 +1674,17 @@ function renderCareTeam(c) {
       const head = `<strong>${escHtml((CT_FIELDS.find(f => f.key === r.field) || {}).label || r.field)}</strong> ${r.passed ? '<span class="ct-ok">✓ passed</span>' : '<span class="ct-bad">✗ removed</span>'} — ${escHtml(r.text || '')}`;
       const evs = (r.evidence || []).map(ev => `<div style="margin-left:12px"><span class="${ev.verified ? 'ct-ok' : 'ct-bad'}">${ev.verified ? '✓' : '✗'}</span> <em>${escHtml(ctSecLabel(ev.source))}${r.label_drug && !['paper','registry','web'].includes(ev.source) ? ' (' + escHtml(r.label_drug) + ')' : ''}</em>${ev.url && /^https:\/\//.test(ev.url) ? ` <a href="${escHtml(ev.url)}" target="_blank" rel="noopener">↗</a>` : ''} — “${escHtml(ev.quote || '')}”</div>`).join('');
       const iss = (r.issues || []).map(x => `<div class="ct-issue" style="margin-left:12px">⚠ ${escHtml(x)}</div>`).join('');
-      return `<li>${head}${evs}${iss}</li>`;
+      const srcs = (r.sources || []).map(x => `<div style="margin-left:12px">Source: ${escHtml(x.name || '')}${x.url && /^https:\/\//.test(x.url) ? ` <a href="${escHtml(x.url)}" target="_blank" rel="noopener">${escHtml(x.url.slice(0, 70))} ↗</a>` : ''}</div>`).join('');
+      const warn = (r.warnings || []).map(x => `<div style="margin-left:12px;color:#a86a00">◐ ${escHtml(x)}</div>`).join('');
+      return `<li>${head}${evs}${srcs}${iss}${warn}</li>`;
     }).join('')}</ul>${(ct.finder_rejected && ct.finder_rejected.length) ? `<div class="ct-hint">Web search: ${ct.finder_rejected.length} suggested passage${ct.finder_rejected.length === 1 ? '' : 's'} rejected (${escHtml([...new Set(ct.finder_rejected.map(x => x.reason))].join('; '))}).</div>` : ''}${(ct.labels || []).map(l => l.url ? `<div class="ct-hint">FDA label: <a href="${escHtml(l.url)}" target="_blank" rel="noopener">${escHtml(l.brand ? l.brand + ' (' + l.drug + ')' : l.drug)} on DailyMed ↗</a></div>` : '').join('')}</details>` : '';
   if (shown.length) {
     const edited = ct && ct.editor_status === 'edited';
-    const chip = edited ? '<span class="ct-chip edited">✎ Edited by editor</span>' : '<span class="ct-chip ok">✓ Quotes verified against source</span>';
-    const rows = shown.map(r => `<div class="ct-rowp"><div class="k">${escHtml(r.label)}</div><div>${escHtml(r.text)}</div></div>`).join('');
+    const aiMode = ct && ct.mode === 'generate';
+    const chip = edited ? '<span class="ct-chip edited">✎ Edited by editor</span>' : (aiMode ? '<span class="ct-chip held">AI-written from label + web search — check before approving</span>' : '<span class="ct-chip ok">✓ Quotes verified against source</span>');
+    const warnFor = {};
+    proposed.forEach(r => { if (r.passed && (r.warnings || []).length) warnFor[r.field] = r.warnings; });
+    const rows = shown.map(r => `<div class="ct-rowp"><div class="k">${escHtml(r.label)}</div><div>${escHtml(r.text)}${(!edited && warnFor[r.field]) ? `<div style="font-size:11px;color:#a86a00">◐ ${escHtml(warnFor[r.field].join('; '))}</div>` : ''}</div></div>`).join('');
     const removed = proposed.filter(r => !r.passed).length;
     const lateChip = (ct && ct.added_after_approval && !ct.editor_status) ? '<span class="ct-chip held">Added after you approved — check, then Edit → Save to confirm</span>' : '';
     return `<div class="ct-box"><div class="ct-head"><strong>Care team</strong>${chip}${CARE_TEAM_PUBLIC ? '' : '<span class="ct-chip held">Hidden from readers until launch</span>'}${removed ? `<span class="ct-chip held">${removed} row${removed === 1 ? '' : 's'} removed by checks</span>` : ''}${lateChip}</div><div class="ct-rows-prev">${rows}</div>${ctSourcesLine(ct)}${evidence}<div class="ct-hint">After launch, readers see this collapsed under one “Care team” line, marked with a green dot. At most 4 rows are shown. To refresh these rows: <a href="${CT_CATCHUP_URL}" target="_blank" rel="noopener">Redo ↗</a> (set “Redo” to true; skipped once you've edited or approved them).</div></div>`;

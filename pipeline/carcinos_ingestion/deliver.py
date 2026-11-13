@@ -35,8 +35,10 @@ from .config import Config
 from .digest import fetch_for_user, SITE_LABEL, TIER_LABEL, TIER_SIGNAL
 
 CARE_TEAM_DISCLAIMER = (
-    "Summarizes the trial publication and FDA labeling; not a substitute for "
-    "prescribing information or institutional protocols."
+    "AI-assisted summary of the trial publication and FDA labeling, which may "
+    "contain errors. Verify all information independently against the full "
+    "prescribing information and primary sources. Not medical advice and not a "
+    "substitute for clinical judgment or institutional protocols."
 )
 
 
@@ -51,6 +53,7 @@ CARE_TEAM_PUBLIC = os.getenv("CARE_TEAM_PUBLIC", "false").lower() == "true"
 # sent unless the reader presses send. Turn off with SHARE_LINKS=false.
 SHARE_LINKS = os.getenv("SHARE_LINKS", "true").lower() != "false"
 INVITE_URL = "https://carcino-s.com/invite/"
+SHARE_PAGE_URL = "https://carcino-s.com/share/"
 # Only real formatting tags; keeps text like "<65 years" or "HR <0.8" intact.
 _TAGS = re.compile(r"</?(?:b|i|u|em|strong|sup|sub|br|span|p|a|small|mark)\b[^>]*>", re.I)
 
@@ -60,7 +63,13 @@ def _plain(s: str) -> str:
 
 
 def _share_links(a) -> tuple[str, str]:
-    """Return (mailto_href, sms_href) for one card, or ("", "") when off."""
+    """Return (mailto_href, text_href) for one card, or ("", "") when off.
+
+    Email: a mailto link with a short, clean message (subject + body).
+    Text: many email apps (Gmail, Outlook) block sms: links inside emails, so
+    the Text button opens carcino-s.com/share/, a small page that opens the
+    reader's Messages app (or their phone's share sheet) with the text filled in.
+    """
     if not SHARE_LINKS:
         return "", ""
     title = _plain(getattr(a, "title", "")) or "An oncology paper"
@@ -68,17 +77,17 @@ def _share_links(a) -> tuple[str, str]:
     paper = (getattr(a, "source_url", "") or "").strip()
     short_title = title if len(title) <= 110 else title[:107].rstrip() + "..."
     subject = f"Worth a look: {short_title}"
-    body_parts = [title]
+    body_parts = ["Thought you'd want to see this one:", title]
     if so_what:
-        body_parts.append(f"So what: {so_what}")
+        body_parts.append(so_what)
     if paper:
         body_parts.append(f"Paper: {paper}")
-    body_parts.append("I get these through CarcinoS, a free weekly digest of practice-impacting "
-                      f"oncology papers for the disease sites you follow: {INVITE_URL}")
+    body_parts.append(f"Shared from CarcinoS, a free weekly digest of practice-changing "
+                      f"oncology papers: {INVITE_URL}")
     body = "\n\n".join(body_parts)
-    sms = f"Worth a look: {short_title}" + (f" {paper}" if paper else "") + f" (via CarcinoS, free: {INVITE_URL})"
     q = lambda x: urllib.parse.quote(x, safe="")
-    return f"mailto:?subject={q(subject)}&body={q(body)}", f"sms:?&body={q(sms)}"
+    text_href = f"{SHARE_PAGE_URL}?t={q(short_title)}" + (f"&u={q(paper)}" if paper else "")
+    return f"mailto:?subject={q(subject)}&body={q(body)}", text_href
 
 
 def _care_team_sources(rows: list | None) -> str:
@@ -234,24 +243,24 @@ def build_email_html(
         if ct_sources:
             care_team_row = f"""
               <tr><td style="padding-bottom:12px;">
-                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="display:block;background:#eef4ee;border-left:3px solid #4f8a5a;border-radius:4px;padding:7px 12px;font-size:12.5px;color:{text_dark};text-decoration:none;font-family:Helvetica,Arial,sans-serif;"><span style="color:#1db84a;font-size:13px;">&#9679;</span> <strong>Care team</strong> <span style="color:{text_muted};">&middot; {_esc(ct_sources)} &mdash; details on the card &#8599;</span></a>
+                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="display:block;background:#eef4ee;border-left:3px solid #4f8a5a;border-radius:4px;padding:7px 12px;font-size:12.5px;color:{text_dark};text-decoration:none;font-family:Helvetica,Arial,sans-serif;"><span style="color:#1db84a;font-size:13px;">&#9679;</span> <strong>Care team</strong> <span style="color:#3f4f43;">&middot; {_esc(ct_sources)} &mdash; details on the card &#8599;</span></a>
               </td></tr>"""
 
-        # "Discuss on CarcinoS" deep-link, plus Share by email / text
-        mail_href, sms_href = _share_links(a)
+        # "Discuss on CarcinoS" deep-link, then Share buttons on their own line
+        # (separate, padded buttons so they are easy to tap on a phone).
+        mail_href, text_href = _share_links(a)
         share_html = ""
         if mail_href:
-            link_style = "font-size:12px;font-weight:600;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;"
+            pill = ("display:inline-block;margin:8px 8px 0 0;padding:7px 14px;border:1px solid #7da27d;background:#7da27d;"
+                    "border-radius:16px;font-size:13px;font-weight:700;color:#ffffff;text-decoration:none;"
+                    "font-family:Helvetica,Arial,sans-serif;")
             share_html = (
-                f'<span style="font-size:12px;color:{text_muted};font-family:Helvetica,Arial,sans-serif;">'
-                f'&nbsp;&nbsp;&middot;&nbsp;&nbsp;Share:&nbsp;</span>'
-                f'<a href="{_esc(mail_href)}" style="{link_style}">&#9993; Email</a>'
-                f'<span style="font-size:12px;color:{text_muted};">&nbsp;&middot;&nbsp;</span>'
-                f'<a href="{_esc(sms_href)}" style="{link_style}">&#128172; Text</a>'
+                f'<br><a href="{_esc(mail_href)}" style="{pill}">&#9993;&nbsp; Email a colleague</a>'
+                f'<a href="{_esc(text_href)}" style="{pill}">&#128172;&nbsp; Text a colleague</a>'
             )
         discuss_row = f"""
-              <tr><td style="padding-bottom:12px;">
-                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="font-size:12px;font-weight:700;color:#72a37a;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">&#128172; Discuss on CarcinoS &#8599;</a>{share_html}
+              <tr><td style="padding-bottom:14px;">
+                <a href="https://carcino-s.com/this-week/#card-{_esc(str(a.id))}" style="font-size:14px;font-weight:800;color:#7da27d;text-decoration:none;font-family:Helvetica,Arial,sans-serif;">&#128172; Discuss on CarcinoS &#8599;</a>{share_html}
               </td></tr>"""
 
         # Divider + bottom row

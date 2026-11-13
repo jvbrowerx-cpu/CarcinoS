@@ -26,7 +26,9 @@ from .text import clean_source_text
 log = logging.getLogger("carcinos.care_team.labels")
 
 OPENFDA_URL = "https://api.fda.gov/drug/label.json"
-SECTION_CHAR_LIMIT = 6000
+# Generous: Warnings and Adverse Reactions often run 15,000-45,000 characters, and the
+# data for a newer indication can sit far into the section.
+SECTION_CHAR_LIMIT = 45000
 
 
 @dataclass
@@ -60,16 +62,18 @@ class DrugLabel:
                 "sections": sorted(self.sections), "route": self.route,
                 "other_formulation": self.other_formulation, "label_generic": self.label_generic}
 
-    def prompt_block(self) -> str:
+    def prompt_block(self, max_chars: int = 0) -> str:
         head = f"FDA LABEL — {self.drug} (label: {self.label_generic or self.drug}"
         head += f", {self.route})" if self.route else ")"
         if self.other_formulation:
             head += (" — NOTE: label for another formulation of the same drug; the exact product's "
                      "label was not found. Drug-level warnings and interactions may still apply.")
         parts = [head]
-        for sec in LABEL_SECTIONS:
-            if sec in self.sections:
-                parts.append(f"[SECTION: {sec}] ({SECTION_TITLES[sec]})\n<<<\n{self.sections[sec]}\n>>>")
+        present = [sec for sec in LABEL_SECTIONS if sec in self.sections]
+        per = max(4000, max_chars // len(present)) if (max_chars and present) else 0
+        for sec in present:
+            body = self.sections[sec][:per] if per else self.sections[sec]
+            parts.append(f"[SECTION: {sec}] ({SECTION_TITLES[sec]})\n<<<\n{body}\n>>>")
         return "\n".join(parts)
 
 
@@ -82,23 +86,40 @@ def _http_get_json(url: str) -> Optional[dict]:
         return None
 
 
-def fetch_label(drug: str, getter: Callable[[str], Optional[dict]] = _http_get_json) -> Optional[DrugLabel]:
-    name = (drug or "").strip().lower()
-    if not name or not name.replace("-", "").replace(" ", "").isalnum():
-        return None
-    query = urllib.parse.quote(f'openfda.generic_name:"{name}"')
-    data = getter(f"{OPENFDA_URL}?search={query}&limit=1")
-    results = (data or {}).get("results") or []
-    if not results:
-        return None
-    rec = results[0]
+_PAREN = re.compile(r"\([^)]*\)")
+_FORMULATION_SUFFIX = re.compile(
+    r"\s+and\s+hyaluronidase(?:-[a-z]{4})?$|-[a-z]{4}$|\s+(?:subcutaneous|intravenous|oral|injection|tablets?|capsules?)$")
+ROUTE_WORDS = {"subcutaneous": ["subcutaneous", "subcutaneously", "sc ", "faspro", "hyaluronidase"],
+               "intravenous": ["intravenous", "intravenously", "infusion", " iv "],
+               "oral": ["oral", "orally", "tablet", "capsule"]}
+
+
+def clean_name(name: str) -> str:
+    """'Amivantamab-hyaluronidase (SC)' -> 'amivantamab-hyaluronidase'."""
+    n = _PAREN.sub(" ", (name or "").lower())
+    n = re.sub(r"[^a-z0-9\- ]+", " ", n)
+    return " ".join(n.split())
+
+
+def base_ingredient(name: str) -> str:
+    """'amivantamab and hyaluronidase-lpuj' -> 'amivantamab'; 'trastuzumab-dkst' -> 'trastuzumab'."""
+    n = clean_name(name).replace("-hyaluronidase", " and hyaluronidase")
+    prev = None
+    while prev != n:
+        prev, n = n, _FORMULATION_SUFFIX.sub("", n).strip()
+    return n.split(" and ")[0].strip()
+
+
+def route_hint(text: str) -> str:
+    t = f" {(text or '').lower()} "
+    for route, words in ROUTE_WORDS.items():
+        if any(w in t for w in words):
+            return route
+    return ""
+
+
+def _label_from_record(rec: dict, requested: str) -> Optional[DrugLabel]:
     ofda = rec.get("openfda") or {}
-
-    # Deterministic check: the label must actually list this generic name.
-    generic_names = " | ".join(ofda.get("generic_name") or []).lower()
-    if name not in generic_names:
-        return None
-
     sections: dict[str, str] = {}
     for sec in LABEL_SECTIONS:
         val = rec.get(sec)
@@ -112,40 +133,73 @@ def fetch_label(drug: str, getter: Callable[[str], Optional[dict]] = _http_get_j
     brand = ((ofda.get("brand_name") or [""])[0] or "").strip().title()
     route = ((ofda.get("route") or [""])[0] or "").strip().lower()
     label_generic = ((ofda.get("generic_name") or [""])[0] or "").strip().lower()
-    return DrugLabel(drug=name, set_id=set_id or "", brand=brand, sections=sections,
+    return DrugLabel(drug=requested, set_id=set_id or "", brand=brand, sections=sections,
                      route=route, label_generic=label_generic)
 
 
-_FORMULATION_SUFFIX = re.compile(r"\s+and\s+hyaluronidase(?:-[a-z]{4})?$|-[a-z]{4}$|\s+(?:subcutaneous|intravenous|oral)$")
+def fetch_label(drug: str, getter: Callable[[str], Optional[dict]] = _http_get_json,
+                context: str = "") -> Optional[DrugLabel]:
+    """Find the best FDA label for a drug named on the card.
+
+    Searches openFDA by the core ingredient (so 'amivantamab-hyaluronidase',
+    'amivantamab and hyaluronidase-lpuj' and 'amivantamab' all find the same
+    labels), then picks among them by fixed rules: the label must list the
+    ingredient; prefer the route the card describes (e.g. subcutaneous), a label
+    whose indications mention the card's cancer, and the newest version.
+    """
+    requested = clean_name(drug)
+    base = base_ingredient(requested)
+    if not base or not base.replace("-", "").replace(" ", "").isalnum():
+        return None
+    query = urllib.parse.quote(f'openfda.generic_name:"{base}"')
+    data = getter(f"{OPENFDA_URL}?search={query}&limit=10")
+    results = [r for r in ((data or {}).get("results") or [])
+               if base in " | ".join((r.get("openfda") or {}).get("generic_name") or []).lower()]
+    if not results:
+        return None
+
+    ctx = (context or "").lower()
+    want_route = route_hint(requested + " " + ctx)
+    extra_words = [w for w in requested.replace("-", " ").split() if w not in (base, "and") and len(w) > 3]
+    disease_words = [w for w in re.findall(r"[a-z]{5,}", ctx)
+                     if w not in {"cancer", "patients", "advanced", "metastatic", "approval", "accelerated",
+                                  "grants", "approves", "treatment", "recurrent", "therapy", "adult"}][:12]
+
+    def score(r: dict) -> tuple:
+        o = r.get("openfda") or {}
+        gen = " ".join(o.get("generic_name") or []).lower()
+        rt = " ".join(o.get("route") or []).lower()
+        ind = " ".join(r.get("indications_and_usage") or [])[:20000].lower()
+        return (
+            sum(w in gen for w in extra_words),                    # exact product (e.g. hyaluronidase form)
+            1 if want_route and want_route in rt else 0,           # route the card describes
+            sum(w in ind for w in disease_words),                  # label covers the card's cancer
+            r.get("effective_time") or "",                         # newest
+        )
+
+    best = max(results, key=score)
+    lab = _label_from_record(best, requested)
+    if lab is None:
+        return None
+    gen = lab.label_generic
+    lab.other_formulation = bool(
+        (extra_words and not all(w in gen for w in extra_words))
+        or (want_route and lab.route and want_route not in lab.route)
+    )
+    return lab
 
 
-def base_ingredient(name: str) -> str:
-    """'amivantamab and hyaluronidase-lpuj' -> 'amivantamab'; 'trastuzumab-dkst' -> 'trastuzumab'."""
-    n = (name or "").strip().lower()
-    prev = None
-    while prev != n:
-        prev, n = n, _FORMULATION_SUFFIX.sub("", n).strip()
-    return n
-
-
-def fetch_labels(drugs: list[str], getter: Callable[[str], Optional[dict]] = _http_get_json) -> list[DrugLabel]:
+def fetch_labels(drugs: list[str], getter: Callable[[str], Optional[dict]] = _http_get_json,
+                 context: str = "") -> list[DrugLabel]:
     out: list[DrugLabel] = []
     seen: set[str] = set()
     for d in drugs[:4]:
-        key = (d or "").strip().lower()
-        if key in seen:
+        key = clean_name(d)
+        base = base_ingredient(key)
+        if not key or base in seen:
             continue
-        seen.add(key)
-        lab = fetch_label(key, getter)
-        if lab is None:
-            # Exact product not found (e.g. a new subcutaneous form): use the same
-            # drug's label, clearly named as another formulation.
-            base = base_ingredient(key)
-            if base and base != key and base not in seen:
-                lab = fetch_label(base, getter)
-                if lab:
-                    lab.drug = key            # rows still refer to the card's product
-                    lab.other_formulation = True
+        seen.add(base)
+        lab = fetch_label(key, getter, context)
         if lab:
             out.append(lab)
     return out

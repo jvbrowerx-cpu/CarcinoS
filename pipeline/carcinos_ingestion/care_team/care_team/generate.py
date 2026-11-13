@@ -9,7 +9,7 @@ from typing import Callable, Optional
 from .config import CareTeamSettings
 from .eligibility import check_eligibility
 from .finder import default_searcher, find_verified_excerpts
-from .labels import DrugLabel, fetch_labels
+from .labels import DrugLabel, base_ingredient, fetch_labels
 from .prompt import (
     DISCLAIMER,
     NO_EXTERNAL_BLOCK,
@@ -29,6 +29,9 @@ from .validate import validate
 log = logging.getLogger("carcinos.care_team")
 
 PAPER_CHAR_LIMIT = 20000
+# Total FDA-label text shown to the model per card (shared across labels): keeps
+# cost and response time reasonable for multi-drug regimens.
+LABEL_PROMPT_BUDGET = 120_000
 
 
 def _structured(client, settings: CareTeamSettings, model: str, **kw):
@@ -43,13 +46,22 @@ def _structured(client, settings: CareTeamSettings, model: str, **kw):
         return client.structured(model=fb, **kw), fb
 
 
-def _drug_named_in_card(drug: str, alert: dict, paper_text: str) -> bool:
-    """Deterministic check: only use a label for a drug the card itself names."""
+def _card_context(alert: dict) -> str:
     s = alert.get("summary_json") or {}
-    hay = normalize(" ".join([
-        alert.get("title") or "", s.get("intervention") or "", s.get("regimen_description") or "", paper_text,
-    ]))
-    return bool(drug) and normalize(drug) in hay
+    kr = s.get("key_results") or {}
+    return " ".join(str(x) for x in [
+        alert.get("title") or "", s.get("intervention") or "", s.get("regimen_description") or "",
+        s.get("population") or "", s.get("carcinos_one_liner") or "",
+        kr.get("effect_size") if isinstance(kr, dict) else kr, s.get("disease_site_code") or "",
+    ] if x)
+
+
+def _drug_named_in_card(drug: str, alert: dict, paper_text: str) -> bool:
+    """Deterministic check: only use a label for a drug the card itself names
+    (matched on the core ingredient, so name variants don't matter)."""
+    base = base_ingredient(drug)
+    hay = normalize(_card_context(alert) + " " + (paper_text or ""))
+    return bool(base) and len(base) >= 4 and base in hay
 
 
 def generate_for_alert(
@@ -85,6 +97,8 @@ def generate_for_alert(
     try:
         # 1. Drug names → official FDA labels.
         labels: list[DrugLabel] = []
+        names: list[str] = []
+        label_misses: list[str] = []
         if settings.use_fda_labels:
             dn, _ = _structured(
                 client, settings, settings.drug_name_model,
@@ -93,14 +107,19 @@ def generate_for_alert(
                 schema=DRUG_NAMES_SCHEMA,
             )
             tokens += (dn.usage or {}).get("total_tokens", 0)
-            names = [n for n in (dn.parsed.get("generic_names") or []) if _drug_named_in_card(n, alert, paper_text)]
-            labels = fetch_labels(names, label_getter) if label_getter else fetch_labels(names)
+            raw_names = list(dn.parsed.get("generic_names") or [])
+            names = [n for n in raw_names if _drug_named_in_card(n, alert, paper_text)]
+            label_misses = [f"{n} (not named on the card)" for n in raw_names if n not in names]
+            ctx = _card_context(alert)
+            labels = fetch_labels(names, label_getter, ctx) if label_getter else fetch_labels(names, context=ctx)
+            found = {base_ingredient(l.drug) for l in labels}
+            label_misses += [f"{n} (no FDA label found)" for n in names if base_ingredient(n) not in found]
 
         # 2. Extra trial sources, all downloaded and read by code.
         external: dict = {}          # url -> SourceDoc
         excerpts: list[dict] = []
         finder_rejected: list[dict] = []
-        ncts = nct_ids_for(alert, paper_text)
+        ncts = nct_ids_for(alert, paper_text + " " + _card_context(alert))
         if settings.use_registry:
             for nct in ncts:
                 doc = fetch_registry(nct, page_getter)
@@ -112,7 +131,8 @@ def generate_for_alert(
             external.update(pages)
 
         # 3. Extract rows with quotes.
-        blocks = "\n\n".join(l.prompt_block() for l in labels) if labels else NO_LABELS_BLOCK
+        per_label = LABEL_PROMPT_BUDGET // max(1, len(labels))
+        blocks = "\n\n".join(l.prompt_block(per_label) for l in labels) if labels else NO_LABELS_BLOCK
         ext_parts = [registry_block(d) for d in external.values() if d.kind == "registry"]
         if excerpts:
             ext_parts.append(excerpts_block(excerpts))
@@ -144,6 +164,15 @@ def generate_for_alert(
         "labels": [l.to_dict() for l in labels],
         "external_sources": [d.to_dict() for d in external.values()],
         "finder_rejected": finder_rejected[:12],
+        # What was looked up and found, so a miss is visible in the admin portal.
+        "sources_used": {
+            "drugs": names,
+            "labels": [l.display_brand + (f" ({l.route})" if l.route and not l.other_formulation else "") for l in labels],
+            "label_misses": label_misses,
+            "nct_ids": ncts,
+            "registry_found": [d.name for d in external.values() if d.kind == "registry"],
+            "web_passages": len(excerpts),
+        },
         "rows": check["rows"],                 # everything proposed, with checks (editor only)
         "proposed_display": check["display_rows"],
         "tokens": tokens,

@@ -1603,6 +1603,34 @@
     .modal-submit:hover {
         opacity: 0.88;
     }
+    .modal-tip {
+        font-size: 12.5px;
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.5;
+        margin: 8px 2px 14px;
+    }
+    .modal-homescreen {
+        margin-top: 22px;
+        padding: 14px 16px;
+        border: 1px solid rgba(114, 163, 122, 0.45);
+        border-radius: 10px;
+        background: rgba(114, 163, 122, 0.08);
+        text-align: left;
+    }
+    .modal-homescreen-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+    .modal-homescreen-lead, .modal-homescreen-step, .modal-homescreen-note {
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.5;
+        margin: 0 0 4px;
+    }
+    .modal-homescreen-step strong { color: #fff; }
+    .modal-homescreen-note { color: rgba(255, 255, 255, 0.5); margin-top: 6px; }
     .modal-fine {
         font-size: 12px;
         color: rgba(255, 255, 255, 0.28);
@@ -2632,8 +2660,9 @@
             <div class="modal-step active" id="msStep0">
                 <div class="modal-eyebrow">Request Access</div>
                 <h2 class="modal-headline">Stay ahead of oncology evidence</h2>
-                <p class="modal-body">Get a personalised weekly digest of practice-impacting findings — curated and AI-triaged, then reviewed by expert editors.</p>
+                <p class="modal-body">Get a personalized weekly digest.</p>
                 <input class="modal-input" type="email" id="msEmail" placeholder="Your email address" autocomplete="email" required/>
+                <p class="modal-tip">Tip: we recommend a personal email (like Gmail). Hospital and university email filters often block or delay outside emails.</p>
                 <div class="modal-agree">
                     <input type="checkbox" id="msAgree"/>
                     <label for="msAgree">
@@ -2786,9 +2815,16 @@
                     <div class="modal-success-icon">✓</div>
                     <div class="modal-success-title">You're in</div>
                     <p class="modal-success-msg">
-                        Your account is set up. You'll receive your first CarcinoS digest next Tuesday — and you can log in to the portal anytime to read this week's findings and join the discussion.
+                        Your account is set up. You'll receive your first CarcinoS digest next Tuesday — and you can log in to the portal anytime to read this week's findings, join the discussion, and change your preferences.
                     </p>
                     <a href="this-week/" style="display:inline-block;margin-top:18px;padding:12px 28px;background:#72a37a;border-radius:8px;color:#fff;font-weight:700;font-size:14px;text-decoration:none;">Go to this week's digest →</a>
+                    <div class="modal-homescreen">
+                        <div class="modal-homescreen-title">&#128241; Save CarcinoS to your phone's home screen</div>
+                        <p class="modal-homescreen-lead" id="msHsLead">On your phone, go to carcino-s.com, then:</p>
+                        <p class="modal-homescreen-step" data-os="ios"><strong>iPhone (Safari):</strong> tap Share <span aria-hidden="true">&#x2B06;&#xFE0E;</span>, then <strong>Add to Home Screen</strong>.</p>
+                        <p class="modal-homescreen-step" data-os="android"><strong>Android (Chrome):</strong> tap the <span aria-hidden="true">&#8942;</span> menu, then <strong>Add to Home screen</strong>.</p>
+                        <p class="modal-homescreen-note">It opens like an app: one tap to CarcinoS.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2881,6 +2917,22 @@
         var state = { step: 0, email: '', scope: 'all', sites: [], delivery: 'email' };
 
         // ── Elements ─────────────────────────────────────────────────────────
+        // Home-screen tip: show only the steps for this phone's system.
+        (function () {
+            var ua = navigator.userAgent || '';
+            var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+            var android = /Android/i.test(ua);
+            if (!ios && !android) {  // computer: no home-screen tip
+                var box = document.querySelector('.modal-homescreen');
+                if (box) box.style.display = 'none';
+                return;
+            }
+            var lead = document.getElementById('msHsLead');
+            if (lead) lead.textContent = 'Right here on carcino-s.com:';
+            document.querySelectorAll('.modal-homescreen-step').forEach(function (el) {
+                if ((ios && el.getAttribute('data-os') !== 'ios') || (android && el.getAttribute('data-os') !== 'android')) el.style.display = 'none';
+            });
+        })();
         var overlay   = document.getElementById('earlyAccessModal');
         var trigger   = document.getElementById('earlyAccessTrigger');
         var closeBtn  = document.getElementById('modalClose');

@@ -160,6 +160,12 @@
           <div class="sec">
             <p class="label">Prepared for</p>
             <input type="text" id="preparedFor" placeholder="Group or institution name">
+            <p class="note" style="margin:6px 0 0">Named as the licensee in the ownership notice.</p>
+          </div>
+          <div class="sec">
+            <p class="label">Licensed for (optional)</p>
+            <input type="text" id="licensedFor" placeholder="e.g. Middle East Refresher Course">
+            <p class="note" style="margin:6px 0 0">Left blank, the notice says "internal educational use".</p>
           </div>
           <div class="sec">
             <p class="label">Introduction (optional)</p>
@@ -573,6 +579,18 @@ function subtitleLine(items) {
     (sites.size === 1 ? ' · ' + [...sites][0] : ' across ' + sites.size + ' disease sites');
 }
 
+// ── Ownership and license notice (PDF and HTML) ──────
+function licenseInfo() {
+  const year = new Date().getFullYear();
+  const licensee = $('preparedFor').value.trim();
+  const use = ($('licensedFor') ? $('licensedFor').value.trim() : '') || 'internal educational use';
+  const owner = '\u00A9 ' + year + ' CarcinoS LLC. All rights reserved.';
+  const grant = licensee ? 'Licensed to ' + licensee + ' for ' + use + '.' : 'Licensed for ' + use + '.';
+  const limits = 'Not for redistribution, resale, publication or modification without written permission from CarcinoS LLC.';
+  const footer = '\u00A9 ' + year + ' CarcinoS LLC' + (licensee ? '  \u00B7  Licensed to ' + licensee : '') + '  \u00B7  Not for redistribution';
+  return { owner, grant, limits, footer, licensee };
+}
+
 // ── PDF ──────────────────────────────────────────────
 function cardNode(c, idx) {
   const G = '#3f6b48';
@@ -638,19 +656,24 @@ function buildPdf() {
     { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b706b', characterSpacing: 1, margin: [0, 22, 0, 6] },
     { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#d9e3da' }], margin: [0, 0, 0, 6] },
     ...toc,
-    { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'Curated by CarcinoS  ·  carcino-s.com  ·  Licensed for internal education'],
+    { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'Curated by CarcinoS  ·  carcino-s.com'],
       fontSize: 8, color: '#6b706b', margin: [0, 22, 0, 4] },
+    (() => { const L = licenseInfo(); return { table: { widths: ['*'], body: [[{ stack: [
+        { text: 'OWNERSHIP AND LICENSE', fontSize: 7, bold: true, color: '#3f6b48', characterSpacing: 0.6, margin: [0, 0, 0, 3] },
+        { text: [{ text: L.owner + ' ', bold: true }, L.grant + ' ' + L.limits], fontSize: 7.8, lineHeight: 1.3, color: '#2a2a2a' }] }]] },
+      layout: { fillColor: () => '#f2f6f2', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
+      margin: [0, 4, 0, 6] }; })(),
     { text: 'Each finding was selected and summarized by the CarcinoS pipeline and approved by a practicing radiation oncologist. Summaries support clinician education and do not replace the primary source.',
       fontSize: 7, color: '#8a8f8a', lineHeight: 1.25 },
   ].filter(Boolean);
   return {
     pageSize: 'LETTER', pageMargins: [54, 50, 54, 52],
-    info: { title, author: 'CarcinoS', subject: 'CarcinoS education export' },
+    info: { title, author: 'CarcinoS LLC', subject: 'CarcinoS education export', creator: 'CarcinoS LLC', keywords: licenseInfo().grant },
     defaultStyle: { font: 'Roboto', fontSize: 9, color: '#161816' },
     content: [...cover, ...body],
     footer: (page, pages) => ({ margin: [54, 16, 54, 0], columns: [
       { width: '*', columns: [logoData ? { image: logoData, fit: [40, 12], width: 46 } : { text: '', width: 0 },
-        { text: (prepared ? prepared + '  ·  ' : '') + 'Curated by CarcinoS  ·  carcino-s.com', fontSize: 7, color: '#7a7f7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
+        { text: licenseInfo().footer + '  ·  carcino-s.com', fontSize: 7, color: '#7a7f7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
       { width: 60, text: page + ' / ' + pages, alignment: 'right', fontSize: 7, color: '#7a7f7a', margin: [0, 2, 0, 0] }] }),
     pageBreakBefore: (node, following) => node.headlineLevel === 1 && following.length === 0,
   };
@@ -703,7 +726,9 @@ function buildHtml() {
   });
   h += '<tr><td style="padding:6px 0 0;font-size:12px;color:#6b706b">' + (prepared ? esc(prepared) + ' · ' : '') +
        'Curated by <a href="https://carcino-s.com" style="color:' + G + ';font-weight:bold">CarcinoS</a> · physician-reviewed oncology evidence. ' +
-       '<a href="https://carcino-s.com" style="color:' + G + '">Create a free account</a> for weekly practice-impacting alerts.</td></tr></table>';
+       '<a href="https://carcino-s.com" style="color:' + G + '">Create a free account</a> for weekly practice-impacting alerts.</td></tr>' +
+       (() => { const L = licenseInfo(); return '<tr><td style="padding:8px 0 0;font-size:11px;line-height:1.45;color:#6b706b"><b>' + esc(L.owner) + '</b> ' + esc(L.grant + ' ' + L.limits) + '</td></tr>'; })() +
+       '</table>';
   return h;
 }
 $('htmlBtn').addEventListener('click', async () => {

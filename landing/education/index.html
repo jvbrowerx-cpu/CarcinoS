@@ -8,8 +8,8 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
   :root {
-    --green: #3f6b48; --green-2: #72a37a; --green-pale: #e6efe7; --green-tint: #f2f6f2;
-    --ink: #161816; --ink-2: #3d413d; --ink-3: #6b706b; --line: #dfe5df; --bg: #f6f7f5; --card: #ffffff;
+    --green: #7da27d; --green-2: #7da27d; --green-pale: #eef4ee; --green-tint: #f4f8f4;
+    --ink: #111111; --ink-2: #3a3a3a; --ink-3: #6b6b6b; --line: #e6e6e6; --bg: #ffffff; --card: #ffffff;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
@@ -19,10 +19,13 @@
   .wrap { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; }
   .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
   .brand { display: flex; align-items: center; gap: 12px; }
-  .mark { width: 40px; height: 40px; border-radius: 9px; background: #141414; color: #fff; display: flex; align-items: center;
+  .mark { width: 40px; height: 40px; border-radius: 9px; background: #0a0a0a; border: 1.5px solid #9d9d9d; color: #fff; display: flex; align-items: center;
     justify-content: center; font-family: Georgia, serif; font-size: 18px; }
   .mark span { color: var(--green-2); }
   .h1 { font-size: 20px; font-weight: 700; margin: 0; }
+  .wordmark { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; color: #0a0a0a; }
+  .wordmark .g { color: var(--green); }
+  .h1-light { font-weight: 500; color: var(--ink-3); }
   .sub { font-size: 13px; color: var(--ink-3); margin: 2px 0 0; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
   .grid { display: grid; grid-template-columns: 360px 1fr; gap: 18px; align-items: start; }
@@ -61,17 +64,17 @@
   .item .m { font-size: 12px; color: var(--ink-3); margin-top: 3px; }
   .item .one { font-size: 13px; color: var(--ink-2); margin-top: 4px; line-height: 1.4; }
   .tier { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 4px; margin-right: 6px; }
-  .tier-A { background: var(--green); color: #fff; } .tier-B { background: #d9e6db; color: #2d5233; } .tier-C { background: #eceeec; color: #555; }
+  .tier-A { background: var(--green); color: #fff; } .tier-B { background: #fff; color: var(--green); box-shadow: inset 0 0 0 1px var(--green); } .tier-C { background: #eceeec; color: #555; }
   .move { display: flex; flex-direction: column; gap: 4px; }
   .move button { width: 32px; height: 28px; border: 1px solid var(--line); border-radius: 6px; background: #fff; cursor: pointer; color: var(--ink-2); }
   .empty { padding: 28px 10px; text-align: center; color: var(--ink-3); font-size: 14px; }
   .logo-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .logo-prev { width: 120px; height: 64px; border: 1px dashed var(--line); border-radius: 8px; display: flex; align-items: center;
-    justify-content: center; background: #fafbfa; overflow: hidden; font-size: 12px; color: var(--ink-3); }
+    justify-content: center; background: #ffffff; overflow: hidden; font-size: 12px; color: var(--ink-3); }
   .logo-prev img { max-width: 100%; max-height: 100%; }
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   .status { font-size: 14px; padding: 12px 14px; border-radius: 10px; background: #fff7e6; border: 1px solid #f0d9a8; color: #6b4e12; }
-  .ok { background: var(--green-tint); border-color: #cfe0d2; color: var(--green); }
+  .ok { background: var(--green-tint); border-color: #d3e2d3; color: var(--green); }
   .note { font-size: 12px; color: var(--ink-3); line-height: 1.45; }
   .login { max-width: 420px; margin: 40px auto; }
   .login .field { margin-top: 12px; }
@@ -87,7 +90,7 @@
     <div class="brand">
       <div class="mark">C<span>S</span></div>
       <div>
-        <p class="h1">Education Builder</p>
+        <p class="h1"><span class="wordmark">Carcino<span class="g">S</span></span> <span class="h1-light">Education Builder</span></p>
         <p class="sub" id="whoLine">Turn reviewed CarcinoS findings into a shareable PDF or newsletter section.</p>
       </div>
     </div>
@@ -550,11 +553,11 @@ $('logoSave').addEventListener('click', async () => {
 // ── CarcinoS mark (drawn, so no image file is needed) ─
 function carcinosMark(size) {
   const cv = document.createElement('canvas'); cv.width = cv.height = size; const cx = cv.getContext('2d');
-  const r = size * 0.2; cx.fillStyle = '#141414'; cx.beginPath();
-  cx.moveTo(r, 0); cx.arcTo(size, 0, size, size, r); cx.arcTo(size, size, 0, size, r); cx.arcTo(0, size, 0, 0, r); cx.arcTo(0, 0, size, 0, r); cx.fill();
+  const r = size * 0.2, b = size * 0.035, h = b / 2; cx.fillStyle = '#0a0a0a'; cx.strokeStyle = '#9d9d9d'; cx.lineWidth = b; cx.beginPath();
+  cx.moveTo(r, h); cx.arcTo(size - h, h, size - h, size - h, r - h); cx.arcTo(size - h, size - h, h, size - h, r - h); cx.arcTo(h, size - h, h, h, r - h); cx.arcTo(h, h, size - h, h, r - h); cx.closePath(); cx.fill(); cx.stroke();
   cx.font = (size * 0.46) + 'px Georgia, "Times New Roman", serif'; cx.textBaseline = 'middle';
   const wc = cx.measureText('C').width, ws = cx.measureText('S').width, x = (size - wc - ws) / 2;
-  cx.fillStyle = '#ffffff'; cx.fillText('C', x, size * 0.53); cx.fillStyle = '#72a37a'; cx.fillText('S', x + wc, size * 0.53);
+  cx.fillStyle = '#ffffff'; cx.fillText('C', x, size * 0.53); cx.fillStyle = '#7da27d'; cx.fillText('S', x + wc, size * 0.53);
   return cv.toDataURL('image/png');
 }
 
@@ -593,32 +596,32 @@ function licenseInfo() {
 
 // ── PDF ──────────────────────────────────────────────
 function cardNode(c, idx) {
-  const G = '#3f6b48';
+  const G = '#7da27d';
   const row = (label, text) => text ? {
     columns: [{ width: 82, text: label.toUpperCase(), fontSize: 7, bold: true, color: G, characterSpacing: 0.5, margin: [0, 1.5, 0, 0] },
               { width: '*', text, fontSize: 8.6, lineHeight: 1.25, color: '#2a2a2a' }],
     columnGap: 8, margin: [0, 3, 0, 0] } : null;
   const links = [];
   if (c.paper) links.push({ text: 'Read paper', link: c.paper, color: G, bold: true });
-  if (c.pubmed && c.pubmed !== c.paper) links.push({ text: '   ·   ', color: '#9aa09a' }, { text: 'PubMed', link: c.pubmed, color: G, bold: true });
+  if (c.pubmed && c.pubmed !== c.paper) links.push({ text: '   ·   ', color: '#9a9a9a' }, { text: 'PubMed', link: c.pubmed, color: G, bold: true });
 
   const meta = [c.siteLabel, c.journal, c.pubDate || fmtDay(new Date(c.sortDate)), c.evidence ? 'Evidence ' + c.evidence : ''].filter(Boolean).join('  ·  ');
   const inner = [
     { columns: [
-        { width: 'auto', table: { body: [[{ text: (TIER_LABEL[c.tier] || '').toUpperCase(), fontSize: 6.5, bold: true, color: c.tier === 'A' ? '#ffffff' : '#2d5233', characterSpacing: 0.6, margin: [4, 1, 4, 0] }]] },
-          layout: { fillColor: () => c.tier === 'A' ? G : '#d9e6db', hLineWidth: () => 0, vLineWidth: () => 0, paddingTop: () => 2, paddingBottom: () => 1.5 } },
-        { width: '*', text: meta, fontSize: 7.5, color: '#6b706b', margin: [8, 2, 0, 0] }] },
-    { text: c.title, id: 'card-' + idx, bold: true, fontSize: 11, lineHeight: 1.15, color: '#161816', margin: [0, 7, 0, 4] },
+        { width: 'auto', table: { body: [[{ text: (TIER_LABEL[c.tier] || '').toUpperCase(), fontSize: 6.5, bold: true, color: c.tier === 'A' ? '#ffffff' : G, characterSpacing: 0.6, margin: [4, 1, 4, 0] }]] },
+          layout: { fillColor: () => c.tier === 'A' ? G : '#ffffff', hLineColor: () => G, vLineColor: () => G, hLineWidth: () => c.tier === 'A' ? 0 : 0.7, vLineWidth: () => c.tier === 'A' ? 0 : 0.7, paddingTop: () => 2, paddingBottom: () => 1.5 } },
+        { width: '*', text: meta, fontSize: 7.5, color: '#6b6b6b', margin: [8, 2, 0, 0] }] },
+    { text: c.title, id: 'card-' + idx, bold: true, fontSize: 11, lineHeight: 1.15, color: '#111111', margin: [0, 7, 0, 4] },
     row('Population', c.population), row('Study', c.regimen), row('Key findings', c.findings),
     c.soWhat ? { table: { widths: ['*'], body: [[{ stack: [
         { text: 'WHY IT MATTERS', fontSize: 7, bold: true, color: G, characterSpacing: 0.5, margin: [0, 0, 0, 2] },
         { text: c.soWhat, fontSize: 8.6, lineHeight: 1.25, color: '#2a2a2a' }] }]] },
-      layout: { fillColor: () => '#f2f6f2', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
+      layout: { fillColor: () => '#f4f8f4', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
       margin: [0, 7, 0, 0] } : null,
     links.length ? { text: links, fontSize: 8, margin: [0, 7, 0, 0] } : null,
   ].filter(Boolean);
   return { table: { widths: ['*'], dontBreakRows: true, body: [[{ stack: inner }]] }, unbreakable: true,
-    layout: { hLineColor: () => '#d9e3da', vLineColor: () => '#d9e3da', hLineWidth: () => 0.8, vLineWidth: () => 0.8,
+    layout: { hLineColor: () => '#e2e2e2', vLineColor: () => '#e2e2e2', hLineWidth: () => 0.8, vLineWidth: () => 0.8,
       paddingLeft: () => 11, paddingRight: () => 11, paddingTop: () => 10, paddingBottom: () => 10 },
     margin: [0, 0, 0, 10] };
 }
@@ -628,15 +631,15 @@ function buildPdf() {
   let idx = 0; const toc = []; const body = [];
   gs.forEach((g, gi) => {
     if (g.name) {
-      toc.push({ text: g.name.toUpperCase(), fontSize: 7.5, bold: true, color: '#3f6b48', characterSpacing: 0.6, margin: [0, gi ? 9 : 0, 0, 3] });
-      body.push({ text: [{ text: g.name, fontSize: 15, bold: true }, { text: '   ' + g.items.length + ' finding' + (g.items.length === 1 ? '' : 's'), fontSize: 8, color: '#6b706b' }],
+      toc.push({ text: g.name.toUpperCase(), fontSize: 7.5, bold: true, color: '#7da27d', characterSpacing: 0.6, margin: [0, gi ? 9 : 0, 0, 3] });
+      body.push({ text: [{ text: g.name, fontSize: 15, bold: true }, { text: '   ' + g.items.length + ' finding' + (g.items.length === 1 ? '' : 's'), fontSize: 8, color: '#6b6b6b' }],
         margin: [0, gi ? 8 : 0, 0, 8], pageBreak: gi === 0 ? 'before' : undefined, headlineLevel: 1 });
     } else if (gi === 0) body.push({ text: '', pageBreak: 'before' });
     g.items.forEach(c => {
       const i = idx++;
       toc.push({ columns: [
-        { width: '*', text: [{ text: c.short, bold: true }, { text: '   ' + fmtDay(new Date(c.sortDate)), color: '#6b706b', fontSize: 7.5 }], linkToDestination: 'card-' + i, fontSize: 9 },
-        { width: 24, pageReference: 'card-' + i, alignment: 'right', fontSize: 8.5, color: '#6b706b', linkToDestination: 'card-' + i }],
+        { width: '*', text: [{ text: c.short, bold: true }, { text: '   ' + fmtDay(new Date(c.sortDate)), color: '#6b6b6b', fontSize: 7.5 }], linkToDestination: 'card-' + i, fontSize: 9 },
+        { width: 24, pageReference: 'card-' + i, alignment: 'right', fontSize: 8.5, color: '#6b6b6b', linkToDestination: 'card-' + i }],
         margin: [0, 2.5, 0, 2.5] });
       body.push(cardNode(c, i));
     });
@@ -645,36 +648,36 @@ function buildPdf() {
     { columns: [
         logoData ? { image: logoData, fit: [170, 78], width: 200 } : { text: '', width: 200 },
         { width: '*', alignment: 'right', stack: [
-          { text: 'CURATED BY', fontSize: 7, color: '#6b706b', characterSpacing: 1, margin: [0, 6, 0, 5] },
+          { text: 'CURATED BY', fontSize: 7, color: '#6b6b6b', characterSpacing: 1, margin: [0, 6, 0, 5] },
           { columns: [{ width: '*', text: '' }, { image: mark, width: 26 },
-            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#72a37a' }], fontSize: 16, margin: [7, 4, 0, 0] }] }] }] },
-    { text: title, fontSize: 28, bold: true, color: '#161816', lineHeight: 1.1, margin: [0, 56, 0, 8] },
-    { text: subtitleLine(items), fontSize: 11, color: '#3d413d' },
-    { table: { body: [[{ text: 'PHYSICIAN-REVIEWED  ·  CURATED BY CARCINOS', fontSize: 7.5, bold: true, color: '#2d5233', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
-      layout: { fillColor: () => '#e6efe7', hLineWidth: () => 0, vLineWidth: () => 0 }, margin: [0, 14, 0, 0] },
+            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#7da27d' }], fontSize: 16, margin: [7, 4, 0, 0] }] }] }] },
+    { text: title, fontSize: 28, bold: true, color: '#111111', lineHeight: 1.1, margin: [0, 56, 0, 8] },
+    { text: subtitleLine(items), fontSize: 11, color: '#3a3a3a' },
+    { table: { body: [[{ text: 'PHYSICIAN-REVIEWED  ·  CURATED BY CARCINOS', fontSize: 7.5, bold: true, color: '#7da27d', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
+      layout: { fillColor: () => '#eef4ee', hLineWidth: () => 0, vLineWidth: () => 0 }, margin: [0, 14, 0, 0] },
     intro ? { text: intro, fontSize: 10, lineHeight: 1.3, color: '#2a2a2a', margin: [0, 16, 0, 0] } : null,
-    { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b706b', characterSpacing: 1, margin: [0, 22, 0, 6] },
-    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#d9e3da' }], margin: [0, 0, 0, 6] },
+    { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b6b6b', characterSpacing: 1, margin: [0, 22, 0, 6] },
+    { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#e2e2e2' }], margin: [0, 0, 0, 6] },
     ...toc,
     { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'Curated by CarcinoS  ·  carcino-s.com'],
-      fontSize: 8, color: '#6b706b', margin: [0, 22, 0, 4] },
+      fontSize: 8, color: '#6b6b6b', margin: [0, 22, 0, 4] },
     (() => { const L = licenseInfo(); return { table: { widths: ['*'], body: [[{ stack: [
-        { text: 'OWNERSHIP AND LICENSE', fontSize: 7, bold: true, color: '#3f6b48', characterSpacing: 0.6, margin: [0, 0, 0, 3] },
+        { text: 'OWNERSHIP AND LICENSE', fontSize: 7, bold: true, color: '#7da27d', characterSpacing: 0.6, margin: [0, 0, 0, 3] },
         { text: [{ text: L.owner + ' ', bold: true }, L.grant + ' ' + L.limits], fontSize: 7.8, lineHeight: 1.3, color: '#2a2a2a' }] }]] },
-      layout: { fillColor: () => '#f2f6f2', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
+      layout: { fillColor: () => '#f4f8f4', hLineWidth: () => 0, vLineWidth: () => 0, paddingLeft: () => 8, paddingRight: () => 8, paddingTop: () => 6, paddingBottom: () => 6 },
       margin: [0, 4, 0, 6] }; })(),
     { text: 'Each finding was selected and summarized by the CarcinoS pipeline and approved by a practicing radiation oncologist. Summaries support clinician education and do not replace the primary source.',
-      fontSize: 7, color: '#8a8f8a', lineHeight: 1.25 },
+      fontSize: 7, color: '#8a8a8a', lineHeight: 1.25 },
   ].filter(Boolean);
   return {
     pageSize: 'LETTER', pageMargins: [54, 50, 54, 52],
     info: { title, author: 'CarcinoS LLC', subject: 'CarcinoS education export', creator: 'CarcinoS LLC', keywords: licenseInfo().grant },
-    defaultStyle: { font: 'Roboto', fontSize: 9, color: '#161816' },
+    defaultStyle: { font: 'Roboto', fontSize: 9, color: '#111111' },
     content: [...cover, ...body],
     footer: (page, pages) => ({ margin: [54, 16, 54, 0], columns: [
       { width: '*', columns: [logoData ? { image: logoData, fit: [40, 12], width: 46 } : { text: '', width: 0 },
-        { text: licenseInfo().footer + '  ·  carcino-s.com', fontSize: 7, color: '#7a7f7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
-      { width: 60, text: page + ' / ' + pages, alignment: 'right', fontSize: 7, color: '#7a7f7a', margin: [0, 2, 0, 0] }] }),
+        { text: licenseInfo().footer + '  ·  carcino-s.com', fontSize: 7, color: '#7a7a7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
+      { width: 60, text: page + ' / ' + pages, alignment: 'right', fontSize: 7, color: '#7a7a7a', margin: [0, 2, 0, 0] }] }),
     pageBreakBefore: (node, following) => node.headlineLevel === 1 && following.length === 0,
   };
 }
@@ -704,30 +707,30 @@ $('pdfBtn').addEventListener('click', async () => {
 function buildHtml() {
   const items = chosen(); const gs = groups(items); const prepared = $('preparedFor').value.trim();
   const title = $('docTitle').value.trim() || 'Oncology Updates'; const intro = $('intro').value.trim();
-  const G = '#3f6b48'; const font = 'font-family:Arial,Helvetica,sans-serif;';
-  let h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;' + font + 'color:#161816">';
+  const G = '#7da27d'; const font = 'font-family:Arial,Helvetica,sans-serif;';
+  let h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;' + font + 'color:#111111">';
   h += '<tr><td style="padding:0 0 6px"><div style="font-size:22px;font-weight:bold;line-height:1.25">' + esc(title) + '</div>' +
-       '<div style="font-size:13px;color:#3d413d;margin-top:4px">' + esc(subtitleLine(items)) + '</div>' +
+       '<div style="font-size:13px;color:#3a3a3a;margin-top:4px">' + esc(subtitleLine(items)) + '</div>' +
        (intro ? '<div style="font-size:14px;line-height:1.5;margin-top:12px">' + esc(intro) + '</div>' : '') + '</td></tr>';
   gs.forEach(g => {
-    if (g.name) h += '<tr><td style="padding:18px 0 6px;font-size:16px;font-weight:bold;color:#161816">' + esc(g.name) + '</td></tr>';
+    if (g.name) h += '<tr><td style="padding:18px 0 6px;font-size:16px;font-weight:bold;color:#111111">' + esc(g.name) + '</td></tr>';
     g.items.forEach(c => {
       const field = (l, t) => t ? '<div style="font-size:13px;line-height:1.45;margin-top:5px"><b style="color:' + G + '">' + l + ':</b> ' + esc(t) + '</div>' : '';
       const links = [c.paper ? '<a href="' + esc(c.paper) + '" style="color:' + G + ';font-weight:bold">Read paper</a>' : '',
         c.pubmed && c.pubmed !== c.paper ? '<a href="' + esc(c.pubmed) + '" style="color:' + G + ';font-weight:bold">PubMed</a>' : ''].filter(Boolean).join(' &nbsp;·&nbsp; ');
-      h += '<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #d9e3da;border-radius:8px"><tr><td style="padding:12px 14px">' +
-        '<div style="font-size:11px;color:#6b706b"><span style="background:' + (c.tier === 'A' ? G : '#d9e6db') + ';color:' + (c.tier === 'A' ? '#fff' : '#2d5233') + ';font-weight:bold;font-size:10px;padding:2px 6px;border-radius:3px">' +
+      h += '<tr><td style="padding:0 0 12px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e2e2;border-radius:8px"><tr><td style="padding:12px 14px">' +
+        '<div style="font-size:11px;color:#6b6b6b"><span style="background:' + (c.tier === 'A' ? G : '#ffffff') + ';color:' + (c.tier === 'A' ? '#fff' : G) + ';border:1px solid ' + G + ';font-weight:bold;font-size:10px;padding:1px 6px;border-radius:3px">' +
         esc((TIER_LABEL[c.tier] || '').toUpperCase()) + '</span> &nbsp;' + esc([c.siteLabel, c.journal, c.pubDate].filter(Boolean).join(' · ')) + '</div>' +
         '<div style="font-size:15px;font-weight:bold;line-height:1.3;margin-top:8px">' + esc(c.title) + '</div>' +
         field('Population', c.population) + field('Study', c.regimen) + field('Key findings', c.findings) +
-        (c.soWhat ? '<div style="font-size:13px;line-height:1.45;margin-top:8px;background:#f2f6f2;padding:8px 10px;border-radius:6px"><b style="color:' + G + '">Why it matters:</b> ' + esc(c.soWhat) + '</div>' : '') +
+        (c.soWhat ? '<div style="font-size:13px;line-height:1.45;margin-top:8px;background:#f4f8f4;padding:8px 10px;border-radius:6px"><b style="color:' + G + '">Why it matters:</b> ' + esc(c.soWhat) + '</div>' : '') +
         (links ? '<div style="font-size:13px;margin-top:8px">' + links + '</div>' : '') + '</td></tr></table></td></tr>';
     });
   });
-  h += '<tr><td style="padding:6px 0 0;font-size:12px;color:#6b706b">' + (prepared ? esc(prepared) + ' · ' : '') +
+  h += '<tr><td style="padding:6px 0 0;font-size:12px;color:#6b6b6b">' + (prepared ? esc(prepared) + ' · ' : '') +
        'Curated by <a href="https://carcino-s.com" style="color:' + G + ';font-weight:bold">CarcinoS</a> · physician-reviewed oncology evidence. ' +
        '<a href="https://carcino-s.com" style="color:' + G + '">Create a free account</a> for weekly practice-impacting alerts.</td></tr>' +
-       (() => { const L = licenseInfo(); return '<tr><td style="padding:8px 0 0;font-size:11px;line-height:1.45;color:#6b706b"><b>' + esc(L.owner) + '</b> ' + esc(L.grant + ' ' + L.limits) + '</td></tr>'; })() +
+       (() => { const L = licenseInfo(); return '<tr><td style="padding:8px 0 0;font-size:11px;line-height:1.45;color:#6b6b6b"><b>' + esc(L.owner) + '</b> ' + esc(L.grant + ' ' + L.limits) + '</td></tr>'; })() +
        '</table>';
   return h;
 }

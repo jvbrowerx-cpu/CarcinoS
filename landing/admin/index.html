@@ -107,6 +107,12 @@
       transition: all 0.15s;
     }
     .nav-logout:hover { color: #fff; border-color: rgba(255,255,255,0.3); }
+    .nav-link {
+      font-size: 13px; font-weight: 600; color: #72a37a; text-decoration: none;
+      border: 1px solid rgba(114,163,122,0.45); border-radius: 8px; padding: 6px 12px;
+      transition: all 0.15s; white-space: nowrap;
+    }
+    .nav-link:hover { color: #fff; border-color: #72a37a; background: rgba(114,163,122,0.15); }
 
     /* ── MAIN ── */
     .admin-main { flex: 1; padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%; }
@@ -580,6 +586,8 @@
     </div>
     <div class="nav-right">
       <span class="nav-week" id="navWeek"></span>
+      <a class="nav-link" href="/admin/analytics/" target="_blank" rel="noopener">Analytics &#8599;</a>
+      <a class="nav-link" href="/education/" target="_blank" rel="noopener">Education builder &#8599;</a>
       <button class="add-article-btn" id="addArticleBtn">+ Add Article</button>
       <button class="add-conference-btn" id="addConferenceBtn">+ Add Conference Abstract</button>
       <button class="nav-logout" id="logoutBtn">Sign out</button>

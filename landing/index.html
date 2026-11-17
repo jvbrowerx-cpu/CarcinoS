@@ -2849,8 +2849,14 @@
                             <li><span class="hs-num">2</span><span>Tap <b>Add to Home screen</b> (or <b>Install app</b>).</span></li>
                         </ol>
                         <ol class="modal-hs-steps" data-hs="ios-steps" hidden>
-                            <li><span class="hs-num">1</span><span>Tap the <b>Share</b> button <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg></span> at the bottom of Safari.<span class="hs-sub">Don&#8217;t see it? Tap <b>&#8226;&#8226;&#8226;</b> first.</span></span></li>
+                            <li><span class="hs-num">1</span><span>Tap the <b>Share</b> button <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg></span> at the bottom of Safari.</span></li>
                             <li><span class="hs-num">2</span><span>Scroll down, tap <b>Add to Home Screen</b> <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>, then <b>Add</b>.</span></li>
+                        </ol>
+                        <ol class="modal-hs-steps" data-hs="ios26-steps" hidden>
+                            <li><span class="hs-num">1</span><span>Tap the menu button <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg></span> in the address bar.</span></li>
+                            <li><span class="hs-num">2</span><span>Tap <b>Share</b> <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg></span>.</span></li>
+                            <li><span class="hs-num">3</span><span>Tap <b>View More</b> <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>.</span></li>
+                            <li><span class="hs-num">4</span><span>Tap <b>Add to Home Screen</b> <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>, then <b>Add</b>.</span></li>
                         </ol>
                         <p class="modal-homescreen-note" data-hs="inapp" hidden>Opened this from an app like Gmail or LinkedIn? Open carcino-s.com in <span id="msHsBrowser">Safari</span> first.</p>
                         <p class="modal-homescreen-note" data-hs="done" hidden style="color:#9fd3a6;font-weight:700;">&#10003; Added. Look for the CarcinoS icon on your home screen.</p>
@@ -2961,7 +2967,10 @@
             if ((!ios && !android) || installed) { box.style.display = 'none'; return; }  // computer, or already saved
             var inApp = /FBAN|FBAV|Instagram|LinkedInApp|GSA\/|Line\/|Twitter|; wv\)/i.test(ua);
             if (ios) {
-                show('ios-steps', true);
+                // Safari 26+ (iOS 26) moved Share into the menu in the address bar.
+                var m = ua.match(/Version\/(\d+)/);
+                var newSafari = !m || parseInt(m[1], 10) >= 26;
+                show(newSafari ? 'ios26-steps' : 'ios-steps', true);
                 if (inApp) show('inapp', true);
                 return;
             }

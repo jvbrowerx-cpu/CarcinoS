@@ -7,6 +7,14 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <script>
+    // Android/Chrome: hold the "install" prompt so the sign-up modal can offer a one-tap button.
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault(); window.__csInstallEvt = e;
+      try { window.dispatchEvent(new Event('cs-installable')); } catch (err) {}
+    });
+  </script>
     <title>CarcinoS — Salient Oncology Updates</title>
     <meta name="description" content="Oncology intelligence built differently. A deterministic ingestion pipeline, selective AI assistance, and physician editorial oversight — not an AI curation engine.">
     <meta property="og:title" content="CarcinoS — Salient Oncology Updates">
@@ -1631,6 +1639,18 @@
     }
     .modal-homescreen-step strong { color: #fff; }
     .modal-homescreen-note { color: rgba(255, 255, 255, 0.5); margin-top: 6px; }
+    .modal-hs-steps { list-style: none; margin: 8px 0 0; padding: 0; }
+    .modal-hs-steps li { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px;
+        color: rgba(255, 255, 255, 0.85); line-height: 1.45; margin: 0 0 10px; }
+    .modal-hs-steps li b { color: #fff; }
+    .hs-num { flex: none; width: 22px; height: 22px; border-radius: 50%; background: #72a37a; color: #fff;
+        font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .hs-ico { display: inline-flex; vertical-align: -5px; width: 22px; height: 22px; margin: 0 2px;
+        border-radius: 5px; background: rgba(255, 255, 255, 0.12); align-items: center; justify-content: center; }
+    .hs-ico svg { width: 15px; height: 15px; }
+    .hs-sub { display: block; font-size: 12px; color: rgba(255, 255, 255, 0.55); margin-top: 2px; }
+    .modal-hs-btn { display: block; width: 100%; margin-top: 10px; padding: 12px 16px; border: 0; border-radius: 8px;
+        background: #72a37a; color: #fff; font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
     .modal-fine {
         font-size: 12px;
         color: rgba(255, 255, 255, 0.28);
@@ -2818,12 +2838,22 @@
                         Your account is set up. You'll receive your first CarcinoS digest next Tuesday — and you can log in to the portal anytime to read this week's findings, join the discussion, and change your preferences.
                     </p>
                     <a href="this-week/" style="display:inline-block;margin-top:18px;padding:12px 28px;background:#72a37a;border-radius:8px;color:#fff;font-weight:700;font-size:14px;text-decoration:none;">Go to this week's digest →</a>
-                    <div class="modal-homescreen">
-                        <div class="modal-homescreen-title">&#128241; Save CarcinoS to your phone's home screen</div>
-                        <p class="modal-homescreen-lead" id="msHsLead">On your phone, go to carcino-s.com, then:</p>
-                        <p class="modal-homescreen-step" data-os="ios"><strong>iPhone (Safari):</strong> tap Share <span aria-hidden="true">&#x2B06;&#xFE0E;</span>, then <strong>Add to Home Screen</strong>.</p>
-                        <p class="modal-homescreen-step" data-os="android"><strong>Android (Chrome):</strong> tap the <span aria-hidden="true">&#8942;</span> menu, then <strong>Add to Home screen</strong>.</p>
-                        <p class="modal-homescreen-note">It opens like an app: one tap to CarcinoS.</p>
+                    <div class="modal-homescreen" id="msHomescreen">
+                        <div class="modal-homescreen-title">&#128241; Save CarcinoS to your home screen</div>
+                        <div data-hs="android-button" hidden>
+                            <p class="modal-homescreen-lead">One tap and CarcinoS opens like an app.</p>
+                            <button type="button" class="modal-hs-btn" id="msHsInstall">Add to home screen</button>
+                        </div>
+                        <ol class="modal-hs-steps" data-hs="android-steps" hidden>
+                            <li><span class="hs-num">1</span><span>Tap the <b>&#8942;</b> menu at the top right of Chrome.</span></li>
+                            <li><span class="hs-num">2</span><span>Tap <b>Add to Home screen</b> (or <b>Install app</b>).</span></li>
+                        </ol>
+                        <ol class="modal-hs-steps" data-hs="ios-steps" hidden>
+                            <li><span class="hs-num">1</span><span>Tap the <b>Share</b> button <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#4da3ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M8 7l4-4 4 4"/><path d="M7 11H5v10h14V11h-2"/></svg></span> at the bottom of Safari.<span class="hs-sub">Don&#8217;t see it? Tap <b>&#8226;&#8226;&#8226;</b> first.</span></span></li>
+                            <li><span class="hs-num">2</span><span>Scroll down, tap <b>Add to Home Screen</b> <span class="hs-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>, then <b>Add</b>.</span></li>
+                        </ol>
+                        <p class="modal-homescreen-note" data-hs="inapp" hidden>Opened this from an app like Gmail or LinkedIn? Open carcino-s.com in <span id="msHsBrowser">Safari</span> first.</p>
+                        <p class="modal-homescreen-note" data-hs="done" hidden style="color:#9fd3a6;font-weight:700;">&#10003; Added. Look for the CarcinoS icon on your home screen.</p>
                     </div>
                 </div>
             </div>
@@ -2917,20 +2947,48 @@
         var state = { step: 0, email: '', scope: 'all', sites: [], delivery: 'email' };
 
         // ── Elements ─────────────────────────────────────────────────────────
-        // Home-screen tip: show only the steps for this phone's system.
+        // Home-screen box: one-tap install on Android (when Chrome offers it), visual steps on iPhone.
         (function () {
+            var box = document.getElementById('msHomescreen');
+            if (!box) return;
+            function part(name) { return box.querySelector('[data-hs="' + name + '"]'); }
+            function show(name, on) { var el = part(name); if (el) el.hidden = !on; }
             var ua = navigator.userAgent || '';
             var ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
             var android = /Android/i.test(ua);
-            if (!ios && !android) {  // computer: no home-screen tip
-                var box = document.querySelector('.modal-homescreen');
-                if (box) box.style.display = 'none';
+            var installed = window.navigator.standalone === true ||
+                (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: minimal-ui)').matches));
+            if ((!ios && !android) || installed) { box.style.display = 'none'; return; }  // computer, or already saved
+            var inApp = /FBAN|FBAV|Instagram|LinkedInApp|GSA\/|Line\/|Twitter|; wv\)/i.test(ua);
+            if (ios) {
+                show('ios-steps', true);
+                if (inApp) show('inapp', true);
                 return;
             }
-            var lead = document.getElementById('msHsLead');
-            if (lead) lead.textContent = 'Right here on carcino-s.com:';
-            document.querySelectorAll('.modal-homescreen-step').forEach(function (el) {
-                if ((ios && el.getAttribute('data-os') !== 'ios') || (android && el.getAttribute('data-os') !== 'android')) el.style.display = 'none';
+            // Android
+            var bn = document.getElementById('msHsBrowser'); if (bn) bn.textContent = 'Chrome';
+            function refresh() {
+                var canPrompt = !!window.__csInstallEvt;
+                show('android-button', canPrompt);
+                show('android-steps', !canPrompt);
+                show('inapp', !canPrompt && inApp);
+            }
+            refresh();
+            window.addEventListener('cs-installable', refresh);
+            window.addEventListener('appinstalled', function () {
+                window.__csInstallEvt = null; show('android-button', false); show('android-steps', false); show('inapp', false); show('done', true);
+            });
+            var btn = document.getElementById('msHsInstall');
+            if (btn) btn.addEventListener('click', function () {
+                var evt = window.__csInstallEvt;
+                if (!evt) { refresh(); return; }
+                evt.prompt();
+                evt.userChoice.then(function (choice) {
+                    window.__csInstallEvt = null;
+                    if (choice && choice.outcome === 'accepted') {
+                        show('android-button', false); show('android-steps', false); show('done', true);
+                    } else { refresh(); }
+                }).catch(refresh);
             });
         })();
         var overlay   = document.getElementById('earlyAccessModal');

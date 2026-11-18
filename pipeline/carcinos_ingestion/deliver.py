@@ -83,7 +83,7 @@ def _share_links(a) -> tuple[str, str]:
     if paper:
         body_parts.append(f"Paper: {paper}")
     body_parts.append(f"Shared from CarcinoS, a free weekly digest of practice-changing "
-                      f"oncology papers: {INVITE_URL}")
+                      f"oncology papers: {INVITE_URL}?utm_source=share&utm_medium=email")
     body = "\n\n".join(body_parts)
     q = lambda x: urllib.parse.quote(x, safe="")
     text_href = f"{SHARE_PAGE_URL}?t={q(short_title)}" + (f"&u={q(paper)}" if paper else "")

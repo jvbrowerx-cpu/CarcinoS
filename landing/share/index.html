@@ -43,7 +43,7 @@
 
 <script>
 (function () {
-  var INVITE = 'https://carcino-s.com/invite/';
+  var INVITE = 'https://carcino-s.com/invite/?utm_source=share&utm_medium=text';
   var p = new URLSearchParams(location.search);
   function clean(s, max) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, max); }
   var title = clean(p.get('t'), 200);
@@ -72,6 +72,19 @@
       navigator.share({ text: msg.value }).catch(function () {});
     });
   }
+  // Count, anonymously, that a text share was started (no names, no message text).
+  try {
+    fetch('https://kbsingwzbgbdkmhmdaep.supabase.co/rest/v1/rpc/record_link_open', {
+      method: 'POST', keepalive: true,
+      headers: {
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ p_source: 'share', p_medium: 'text_started', p_page: '/share/' })
+    }).catch(function () {});
+  } catch (e) {}
+
   document.getElementById('copy').addEventListener('click', function () {
     var done = function () { ok.textContent = 'Copied. Paste it into any message.'; };
     if (navigator.clipboard && navigator.clipboard.writeText) {

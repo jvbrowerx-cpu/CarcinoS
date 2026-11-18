@@ -301,7 +301,7 @@ async function enter() {
     return;
   }
   access = data || {};
-  if (!access.role) { status('This account does not have Education Builder access. Contact CarcinoS at info@carcino-s.com to set it up for your institution.'); return; }
+  if (!access.role) { status('This account does not have Education Builder access. Contact CarcinoS at jbrower@carcino-s.com to set it up for your institution.'); return; }
   show('appView', true);
   if (access.role === 'editor') {
     $('whoLine').textContent = 'Education Builder for ' + (access.institution || 'your institution');

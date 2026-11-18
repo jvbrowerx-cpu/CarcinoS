@@ -8,6 +8,7 @@
   <link rel="alternate icon" href="/favicon.ico">
   <link rel="apple-touch-icon" href="/favicon.png">
   <link rel="manifest" href="/manifest.webmanifest">
+  <script src="/carcinos-source.js" defer></script>
   <script>
     // Android/Chrome: hold the "install" prompt so the sign-up modal can offer a one-tap button.
     window.addEventListener('beforeinstallprompt', function (e) {
@@ -1985,7 +1986,7 @@
                 <a href="#" id="earlyAccessTrigger">Request Access</a>
             </li>
             <li>
-                <a href="mailto:info@carcino-s.com">Contact</a>
+                <a href="mailto:jbrower@carcino-s.com">Contact</a>
             </li>
             <li>
                 <a href="admin/" style="opacity:0.45;font-size:0.85em;">Editor</a>
@@ -2874,7 +2875,7 @@
                 </div>
                 <div class="footer-links">
                     <a href="privacy/">Privacy Policy</a>
-                    <a href="mailto:info@carcino-s.com">Contact us</a>
+                    <a href="mailto:jbrower@carcino-s.com">Contact us</a>
                     <a href="join/">Get involved</a>
                     <a href="tos/">Terms of Service</a>
                     <a href="disclaimer/">Medical Disclaimer</a>
@@ -3245,6 +3246,30 @@
                     if (profileError) console.warn('Profile save error:', profileError.message, profileError.code);
                 }
 
+                // ── 4. Record where they came from (never blocks sign-up) ──
+                // Runs after sign-up is complete and is not waited on; if it
+                // fails for any reason, the person is still signed up.
+                try {
+                    var src = (window.CarcinoSSource && window.CarcinoSSource.get()) || {};
+                    fetch(SUPABASE_URL + '/rest/v1/rpc/record_signup_source', {
+                        method: 'POST',
+                        keepalive: true,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON,
+                            'Authorization': 'Bearer ' + SUPABASE_ANON,
+                        },
+                        body: JSON.stringify({
+                            p_email:    state.email,
+                            p_source:   src.source || 'direct',
+                            p_medium:   src.medium || null,
+                            p_content:  src.content || null,
+                            p_landing:  src.landing || null,
+                            p_referrer: src.referrer || null,
+                        }),
+                    }).catch(function() {});
+                } catch(e) {}
+
                 goToStep(4);
 
             } else {
@@ -3296,7 +3321,7 @@
                 <p style="margin-bottom:10px;color:#fff;font-weight:700;">Your Rights</p>
                 <p style="margin-bottom:14px;">
                     You may request removal of your email address from our list at any time by contacting us at
-                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                    <a href="mailto:jbrower@carcino-s.com" style="color:#72a37a;">jbrower@carcino-s.com</a>
                     . We will process removal requests promptly.
                 </p>
                 <p style="margin-bottom:10px;color:#fff;font-weight:700;">Cookies</p>
@@ -3305,7 +3330,7 @@
                 <p style="margin-bottom:14px;">We may update this Privacy Policy as CarcinoS develops. Any changes will be posted on this page with an updated date.</p>
                 <p style="margin-bottom:0;">
                     Questions? Contact us at
-                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                    <a href="mailto:jbrower@carcino-s.com" style="color:#72a37a;">jbrower@carcino-s.com</a>
                 </p>
             </div>
         </div>
@@ -3349,7 +3374,7 @@
                 <p style="margin-bottom:14px;">We reserve the right to update these Terms at any time. Continued use of the site or service constitutes acceptance of any updated Terms.</p>
                 <p style="margin-bottom:0;">
                     Questions? Contact us at
-                    <a href="mailto:info@carcino-s.com" style="color:#72a37a;">info@carcino-s.com</a>
+                    <a href="mailto:jbrower@carcino-s.com" style="color:#72a37a;">jbrower@carcino-s.com</a>
                 </p>
             </div>
         </div>

@@ -159,6 +159,44 @@
     </div>
   </div>
 
+  <div class="row">
+    <div class="card" style="flex: 1 1 380px; min-width: 0;">
+      <h2 class="h">Where sign-ups come from</h2>
+      <p class="sub">New accounts by source, last <span class="srcRange">30 days</span></p>
+      <div id="srcBars"><div class="empty">Loading…</div></div>
+    </div>
+    <div class="card" style="flex: 999 1 560px; min-width: 0;">
+      <h2 class="h">Shared and partner links</h2>
+      <p class="sub">How often each tagged link was opened, and the sign-ups it brought, last <span class="srcRange">30 days</span></p>
+      <div class="tbl-wrap"><table style="min-width:460px;">
+        <thead><tr><th>Link</th><th class="num">Opened</th><th class="num">Sign-ups</th></tr></thead>
+        <tbody id="linkRows"><tr><td colspan="3" class="empty">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="h">Make a tracked link</h2>
+    <p class="sub">Give each partner or post its own link; sign-ups through it appear above under that name.</p>
+    <div class="row" style="margin-top:12px;align-items:flex-end;">
+      <label class="label" style="display:flex;flex-direction:column;gap:4px;text-transform:none;letter-spacing:0;font-weight:400;">Source (who or where)
+        <input type="text" id="lmSource" placeholder="acro" style="width:200px;"></label>
+      <label class="label" style="display:flex;flex-direction:column;gap:4px;text-transform:none;letter-spacing:0;font-weight:400;">Type (optional)
+        <input type="text" id="lmMedium" placeholder="newsletter" style="width:200px;"></label>
+      <label class="label" style="display:flex;flex-direction:column;gap:4px;text-transform:none;letter-spacing:0;font-weight:400;">Opens
+        <select id="lmPage" style="min-height:40px;padding:0 10px;border-radius:9px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.06);color:#fff;font:inherit;font-size:13px;">
+          <option value="https://carcino-s.com/?signup=true">Sign-up form</option>
+          <option value="https://carcino-s.com/">Homepage</option>
+          <option value="https://carcino-s.com/invite/">Invite page</option>
+        </select></label>
+    </div>
+    <div class="row" style="margin-top:12px;align-items:center;">
+      <input type="text" id="lmOut" readonly placeholder="Enter a source to make a link" style="flex:1 1 420px;min-width:0;">
+      <button class="pill" id="lmCopy" type="button">Copy link</button>
+      <span id="lmNote" class="sub" style="margin:0;"></span>
+    </div>
+  </div>
+
   <div class="card">
     <h2 class="h">How each number is counted</h2>
     <div class="defs">
@@ -168,6 +206,8 @@
       <div><strong>Read-paper click:</strong> a click on a card's "Read paper" link.</div>
       <div><strong>Likes and comments:</strong> read from the tables CarcinoS already keeps, so history from before tracking started is included.</div>
       <div><strong>Emailed to:</strong> from the existing digest delivery records. Signed-out visitors are not tracked. Times are Eastern.</div>
+      <div><strong>Sign-up source:</strong> the tagged link someone arrived through (kept for 90 days), otherwise the site that sent them (e.g. Twitter, Google), otherwise "direct". Sign-ups from before this tracking started show as "not recorded".</div>
+      <div><strong>Link opened:</strong> anonymous count of a tagged link being opened, once per browser per day. "Text shares started" counts members tapping Text a colleague.</div>
     </div>
   </div>
 
@@ -285,7 +325,48 @@
     $('siteBars').innerHTML = rows.length ? hbars(rows, 'site', 'clicks') : '<div class="empty">No read-paper clicks in this period yet.</div>';
   }
 
+  var SRC_NAMES = {
+    'share|email': 'Shared by email', 'share|text': 'Shared by text',
+    'share|text_started': 'Text shares started (by members)',
+    'direct|': 'Direct (no source)', 'not recorded|': 'Not recorded (before tracking)',
+    'invite|link': 'Invite page'
+  };
+  function srcLabel(src, med) {
+    var k = (src || '') + '|' + (med || '');
+    return SRC_NAMES[k] || ((src || '—') + (med ? ' · ' + med : ''));
+  }
+  function loadSources() {
+    var d = days || null;
+    Array.prototype.forEach.call(document.querySelectorAll('.srcRange'), function (el) { el.textContent = rangeText(); });
+    Promise.all([
+      rpc('analytics_signup_sources', { p_days: d }),
+      rpc('analytics_link_opens', { p_days: d })
+    ]).then(function (res) {
+      var a = (res[0] || []).map(function (r) { return { l: srcLabel(r.source, r.medium), v: r.signups }; });
+      $('srcBars').innerHTML = a.length ? hbars(a, 'l', 'v') : '<div class="empty">No sign-ups in this period yet.</div>';
+      var b = res[1] || [];
+      $('linkRows').innerHTML = b.length ? b.map(function (r) {
+        return '<tr><td>' + esc(srcLabel(r.source, r.medium)) + '</td><td class="num">' + n(r.opens) + '</td><td class="num">' + n(r.signups) + '</td></tr>';
+      }).join('') : '<tr><td colspan="3" class="empty">No tagged links opened in this period yet.</td></tr>';
+    }).catch(function (e) {
+      var msg = (e && e.message) || String(e);
+      var t = /does not exist|could not find/i.test(msg)
+        ? 'Not set up yet. Run CarcinoS_signup_sources_setup.sql in Supabase.'
+        : 'Could not load: ' + msg;
+      $('srcBars').innerHTML = '<div class="empty">' + esc(t) + '</div>';
+      $('linkRows').innerHTML = '<tr><td colspan="3" class="empty">' + esc(t) + '</td></tr>';
+    });
+  }
+  function makeLink() {
+    var clean = function (v) { return String(v || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9_.-]+/g, '').slice(0, 64); };
+    var src = clean($('lmSource').value), med = clean($('lmMedium').value), base = $('lmPage').value;
+    if (!src) { $('lmOut').value = ''; return; }
+    var join = base.indexOf('?') === -1 ? '?' : '&';
+    $('lmOut').value = base + join + 'utm_source=' + encodeURIComponent(src) + (med ? '&utm_medium=' + encodeURIComponent(med) : '');
+  }
+
   function loadAll() {
+    loadSources();
     showStatus('Loading…');
     var d = days || null;
     return Promise.all([
@@ -345,6 +426,15 @@
       var b = e.target.closest('.study-btn'); if (b) openStudy(b.getAttribute('data-id'), b.getAttribute('data-title'));
     });
     $('studyDialogClose').addEventListener('click', function () { $('studyDialog').close(); });
+    ['lmSource', 'lmMedium', 'lmPage'].forEach(function (id) { $(id).addEventListener('input', makeLink); $(id).addEventListener('change', makeLink); });
+    $('lmCopy').addEventListener('click', function () {
+      makeLink();
+      var v = $('lmOut').value;
+      if (!v) { $('lmNote').textContent = 'Enter a source first.'; return; }
+      var done = function () { $('lmNote').textContent = 'Copied.'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done, function () { $('lmOut').select(); document.execCommand('copy'); done(); });
+      else { $('lmOut').select(); document.execCommand('copy'); done(); }
+    });
   }
 
   var s = document.createElement('script');

@@ -168,7 +168,7 @@
           <div class="sec">
             <p class="label">Selected for (optional)</p>
             <input type="text" id="selectedFor" placeholder="e.g. your team, the SERO physicians, ASTRO 2027">
-            <p class="note" style="margin:6px 0 0">Completes the cover line "Selected for &hellip;". Left blank, the line is left off.</p>
+            <p class="note" style="margin:6px 0 0">Added to the tagline under the logo: &ldquo;Selected for &hellip;.&rdquo; Left blank, it&rsquo;s left off.</p>
           </div>
           <div class="sec">
             <p class="label">Licensed for (optional)</p>
@@ -265,7 +265,8 @@ const TIER_ORDER = { A: 0, B: 1, C: 2 };
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const clean = v => (v && v !== 'not_reported' && v !== 'NOT_REPORTED') ? String(v).trim() : '';
-const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u.trim())) ? u.trim() : '';
+const stripTags = u => u.replace(/\?utm_source=chatgpt\.com&/gi, '?').replace(/[?&]utm_source=chatgpt\.com/gi, '');
+const safeUrl = u => (typeof u === 'string' && /^https?:\/\//i.test(u.trim())) ? stripTags(u.trim()) : '';
 
 let sb = null, access = null, all = [], view = [], selected = new Set(), order = [];
 let state = { sites: new Set(), months: 6, from: '', to: '' };
@@ -659,11 +660,9 @@ function buildPdf() {
         { width: '*', alignment: 'right', stack: [
           { columns: [{ width: '*', text: '' }, { image: mark, width: 26 },
             { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#4c9a52' }, { text: ' Select', color: '#3a3a3a' }, { text: 'S', bold: true, color: '#4c9a52' }], fontSize: 16, margin: [4, 4, 0, 0] }], margin: [0, 2, 0, 0] },
-          { text: SELECT_TAGLINE, fontSize: 7.5, color: '#6b6b6b', margin: [0, 5, 0, 0] }] }] },
+          { text: SELECT_TAGLINE + (selectedFor() ? ' Selected for ' + selectedFor() + '.' : ''), fontSize: 7.5, color: '#6b6b6b', margin: [0, 5, 0, 0] }] }] },
     { text: title, fontSize: 28, bold: true, color: '#111111', lineHeight: 1.1, margin: [0, 56, 0, 8] },
     { text: subtitleLine(items), fontSize: 11, color: '#3a3a3a' },
-    { table: { body: [[{ text: (selectedFor() ? 'SELECTED FOR ' + selectedFor() : 'PHYSICIAN-REVIEWED  ·  CARCINOS SELECTS').toUpperCase(), fontSize: 7.5, bold: true, color: '#ffffff', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
-      layout: { fillColor: () => '#4c9a52', hLineWidth: () => 0, vLineWidth: () => 0 }, margin: [0, 14, 0, 0] },
     intro ? { text: intro, fontSize: 10, lineHeight: 1.3, color: '#2a2a2a', margin: [0, 16, 0, 0] } : null,
     { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b6b6b', characterSpacing: 1, margin: [0, 22, 0, 6] },
     { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#e2e2e2' }], margin: [0, 0, 0, 6] },

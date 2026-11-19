@@ -166,6 +166,11 @@
             <p class="note" style="margin:6px 0 0">Named as the licensee in the ownership notice.</p>
           </div>
           <div class="sec">
+            <p class="label">Selected for (optional)</p>
+            <input type="text" id="selectedFor" placeholder="e.g. your team, the SERO physicians, ASTRO 2027">
+            <p class="note" style="margin:6px 0 0">Completes the cover line "Selected for &hellip;". Left blank, the line is left off.</p>
+          </div>
+          <div class="sec">
             <p class="label">Licensed for (optional)</p>
             <input type="text" id="licensedFor" placeholder="e.g. Middle East Refresher Course">
             <p class="note" style="margin:6px 0 0">Left blank, the notice says "internal educational use".</p>
@@ -583,6 +588,10 @@ function subtitleLine(items) {
 }
 
 // ── Ownership and license notice (PDF and HTML) ──────
+function selectedFor() {
+  const el = $('selectedFor'); return el ? el.value.trim().replace(/[.\s]+$/, '') : '';
+}
+const SELECT_TAGLINE = 'Physician-reviewed, salient oncology updates.';
 function licenseInfo() {
   const year = new Date().getFullYear();
   const licensee = $('preparedFor').value.trim();
@@ -648,18 +657,18 @@ function buildPdf() {
     { columns: [
         logoData ? { image: logoData, fit: [170, 78], width: 200 } : { text: '', width: 200 },
         { width: '*', alignment: 'right', stack: [
-          { text: 'CURATED BY', fontSize: 7, color: '#6b6b6b', characterSpacing: 1, margin: [0, 6, 0, 5] },
           { columns: [{ width: '*', text: '' }, { image: mark, width: 26 },
-            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#4c9a52' }], fontSize: 16, margin: [4, 4, 0, 0] }] }] }] },
+            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#4c9a52' }, { text: ' Select', color: '#3a3a3a' }, { text: 'S', bold: true, color: '#4c9a52' }], fontSize: 16, margin: [4, 4, 0, 0] }], margin: [0, 2, 0, 0] },
+          { text: SELECT_TAGLINE, fontSize: 7.5, color: '#6b6b6b', margin: [0, 5, 0, 0] }] }] },
     { text: title, fontSize: 28, bold: true, color: '#111111', lineHeight: 1.1, margin: [0, 56, 0, 8] },
     { text: subtitleLine(items), fontSize: 11, color: '#3a3a3a' },
-    { table: { body: [[{ text: 'PHYSICIAN-REVIEWED  ·  CURATED BY CARCINOS', fontSize: 7.5, bold: true, color: '#ffffff', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
+    { table: { body: [[{ text: (selectedFor() ? 'SELECTED FOR ' + selectedFor() : 'PHYSICIAN-REVIEWED  ·  CARCINOS SELECTS').toUpperCase(), fontSize: 7.5, bold: true, color: '#ffffff', characterSpacing: 0.8, margin: [6, 2, 6, 1] }]] },
       layout: { fillColor: () => '#4c9a52', hLineWidth: () => 0, vLineWidth: () => 0 }, margin: [0, 14, 0, 0] },
     intro ? { text: intro, fontSize: 10, lineHeight: 1.3, color: '#2a2a2a', margin: [0, 16, 0, 0] } : null,
     { text: 'CONTENTS', fontSize: 8, bold: true, color: '#6b6b6b', characterSpacing: 1, margin: [0, 22, 0, 6] },
     { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 504, y2: 0, lineWidth: 0.6, lineColor: '#e2e2e2' }], margin: [0, 0, 0, 6] },
     ...toc,
-    { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'Curated by CarcinoS  ·  carcino-s.com'],
+    { text: [prepared ? { text: 'Prepared for ' + prepared + '  ·  ' } : '', 'CarcinoS SelectS  ·  carcino-s.com'],
       fontSize: 8, color: '#6b6b6b', margin: [0, 22, 0, 4] },
     (() => { const L = licenseInfo(); return { table: { widths: ['*'], body: [[{ stack: [
         { text: 'OWNERSHIP AND LICENSE', fontSize: 7, bold: true, color: '#4c9a52', characterSpacing: 0.6, margin: [0, 0, 0, 3] },
@@ -671,12 +680,12 @@ function buildPdf() {
   ].filter(Boolean);
   return {
     pageSize: 'LETTER', pageMargins: [54, 50, 54, 52],
-    info: { title, author: 'CarcinoS LLC', subject: 'CarcinoS education export', creator: 'CarcinoS LLC', keywords: licenseInfo().grant },
+    info: { title, author: 'CarcinoS LLC', subject: 'CarcinoS SelectS' + (selectedFor() ? ' \u2014 selected for ' + selectedFor() : ''), creator: 'CarcinoS LLC', keywords: licenseInfo().grant },
     defaultStyle: { font: 'Roboto', fontSize: 9, color: '#111111' },
     content: [...cover, ...body],
     footer: (page, pages) => ({ margin: [54, 16, 54, 0], columns: [
       { width: '*', columns: [logoData ? { image: logoData, fit: [40, 12], width: 46 } : { text: '', width: 0 },
-        { text: licenseInfo().footer + '  ·  carcino-s.com', fontSize: 7, color: '#7a7a7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
+        { text: 'CarcinoS SelectS  ·  ' + licenseInfo().footer + '  ·  carcino-s.com', fontSize: 7, color: '#7a7a7a', link: 'https://carcino-s.com', margin: [0, 2, 0, 0] }] },
       { width: 60, text: page + ' / ' + pages, alignment: 'right', fontSize: 7, color: '#7a7a7a', margin: [0, 2, 0, 0] }] }),
     pageBreakBefore: (node, following) => node.headlineLevel === 1 && following.length === 0,
   };
@@ -720,6 +729,7 @@ function buildHtml() {
   let h = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;' + font + 'color:#111111">';
   h += '<tr><td style="padding:0 0 6px"><div style="font-size:22px;font-weight:bold;line-height:1.25">' + esc(title) + '</div>' +
        '<div style="font-size:13px;color:#3a3a3a;margin-top:4px">' + esc(subtitleLine(items)) + '</div>' +
+       '<div style="font-size:12px;color:' + G + ';font-weight:bold;margin-top:6px">CarcinoS SelectS &middot; ' + esc(SELECT_TAGLINE) + (selectedFor() ? ' Selected for ' + esc(selectedFor()) + '.' : '') + '</div>' +
        (intro ? '<div style="font-size:14px;line-height:1.5;margin-top:12px">' + esc(intro) + '</div>' : '') + '</td></tr>';
   gs.forEach(g => {
     if (g.name) h += '<tr><td style="padding:18px 0 6px;font-size:16px;font-weight:bold;color:#111111">' + esc(g.name) + '</td></tr>';
@@ -737,7 +747,7 @@ function buildHtml() {
     });
   });
   h += '<tr><td style="padding:6px 0 0;font-size:12px;color:#6b6b6b">' + (prepared ? esc(prepared) + ' · ' : '') +
-       'Curated by <a href="https://carcino-s.com" style="color:' + G + ';font-weight:bold">CarcinoS</a> · physician-reviewed oncology evidence. ' +
+       '<a href="https://carcino-s.com" style="color:' + G + ';font-weight:bold">CarcinoS SelectS</a> · physician-reviewed, salient oncology updates. ' +
        '<a href="https://carcino-s.com" style="color:' + G + '">Create a free account</a> for weekly practice-impacting alerts.</td></tr>' +
        (() => { const L = licenseInfo(); return '<tr><td style="padding:8px 0 0;font-size:11px;line-height:1.45;color:#6b6b6b"><b>' + esc(L.owner) + '</b> ' + esc(L.grant + ' ' + L.limits) + '</td></tr>'; })() +
        '</table>';

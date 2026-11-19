@@ -659,7 +659,7 @@ function buildPdf() {
         logoData ? { image: logoData, fit: [170, 78], width: 200 } : { text: '', width: 200 },
         { width: '*', alignment: 'right', stack: [
           { columns: [{ width: '*', text: '' }, { image: mark, width: 26 },
-            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#4c9a52' }, { text: ' Select', color: '#3a3a3a' }, { text: 'S', bold: true, color: '#4c9a52' }], fontSize: 16, margin: [4, 4, 0, 0] }], margin: [0, 2, 0, 0] },
+            { width: 'auto', text: [{ text: 'Carcino', bold: true }, { text: 'S', bold: true, color: '#4c9a52' }, { text: ' Select', color: '#8a8a8a' }, { text: 'S', bold: true, color: '#4c9a52' }], fontSize: 16, margin: [4, 4, 0, 0] }], margin: [0, 2, 0, 0] },
           { text: SELECT_TAGLINE + (selectedFor() ? ' Selected for ' + selectedFor() + '.' : ''), fontSize: 7.5, color: '#6b6b6b', margin: [0, 5, 0, 0] }] }] },
     { text: title, fontSize: 28, bold: true, color: '#111111', lineHeight: 1.1, margin: [0, 56, 0, 8] },
     { text: subtitleLine(items), fontSize: 11, color: '#3a3a3a' },

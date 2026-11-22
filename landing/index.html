@@ -136,6 +136,18 @@
     .nav-links a:hover {
         color: var(--white);
     }
+    .nav-links a#earlyAccessTrigger {
+        background: #72a37a;
+        color: #0b0f0c;
+        font-weight: 700;
+        padding: 7px 16px;
+        border-radius: 20px;
+        transition: background 0.15s;
+    }
+    .nav-links a#earlyAccessTrigger:hover {
+        background: #8bb892;
+        color: #0b0f0c;
+    }
     section {
         position: relative;
         z-index: 1;
@@ -1995,7 +2007,7 @@
         <!-- Mobile-only: shown when .nav-links is hidden -->
         <div class="nav-mobile-actions">
             <a href="this-week/" style="font-size:13px;color:rgba(255,255,255,0.7);text-decoration:none;">This Week</a>
-            <a href="#" id="earlyAccessTriggerMobile" style="font-size:13px;font-weight:600;color:#72a37a;text-decoration:none;padding:6px 14px;border:1px solid rgba(114,163,122,0.5);border-radius:20px;">Request Access</a>
+            <a href="#" id="earlyAccessTriggerMobile" style="font-size:13px;font-weight:600;color:#0b0f0c;background:#72a37a;text-decoration:none;padding:6px 14px;border:1px solid #72a37a;border-radius:20px;">Request Access</a>
         </div>
     </nav>
     <section class="hero">
@@ -2268,8 +2280,8 @@
       </style>
       <div class="bn-inner">
         <div class="eyebrow">How CarcinoS works for you</div>
-        <h2 class="sec-h" style="text-wrap:balance">In an average week, hundreds of new papers become a handful of alerts.</h2>
-        <p class="bn-line"><span><b>~800</b> new papers scanned</span><span class="ar" aria-hidden="true">→</span><span><b>~20</b> make it through scoring</span><span class="ar" aria-hidden="true">→</span><span class="hot"><b>2–4</b> practice-impacting alerts sent to you</span></p>
+        <h2 class="sec-h" style="text-wrap:balance">In an average week, more than 1,000 new papers become a handful of alerts.</h2>
+        <p class="bn-line"><span><b>1,000+</b> new papers scanned</span><span class="ar" aria-hidden="true">→</span><span><b>~25</b> make it through scoring</span><span class="ar" aria-hidden="true">→</span><span class="hot"><b>2–5</b> practice-impacting alerts sent to you</span></p>
         <p class="bn-take">That's <b>over 99% less</b> for you to sift through each week. Everything else worth knowing stays searchable on the site.</p>
       </div>
     </section>
@@ -2297,7 +2309,7 @@
             <li><b>Proactive</b>: finds what you didn't know to look for</li>
             <li><b>Mostly deterministic</b>: defined sources, the same rules and scoring every week</li>
             <li><b>Physician adjudicated</b>: a practicing oncologist makes the final call</li>
-            <li><b>Quiet</b>: typically 2–4 alerts a week, not a firehose</li>
+            <li><b>Quiet</b>: typically 2–5 alerts a week, not a firehose</li>
           </ul>
         </div>
         <div class="col not">

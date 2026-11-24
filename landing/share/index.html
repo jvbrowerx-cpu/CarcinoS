@@ -15,6 +15,11 @@
   .brand span { color: #72b07f; }
   .sub { color: #728075; font-size: 13px; margin-bottom: 20px; }
   label { display: block; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #72b07f; margin-bottom: 8px; }
+  .prev { border: 1px solid #213329; border-radius: 14px; overflow: hidden; background: #1c1f1d; }
+  .prev img { display: block; width: 100%; aspect-ratio: 1200 / 630; object-fit: cover; background: #0b120e; }
+  .prev-meta { padding: 10px 13px 12px; }
+  .prev-t { font-size: 14px; font-weight: 600; color: #fff; line-height: 1.3; }
+  .prev-d { font-size: 12.5px; color: #98a19b; margin-top: 2px; }
   textarea { width: 100%; min-height: 200px; background: #060908; color: #e6e8e6; border: 1px solid #213329; border-radius: 4px; padding: 12px; font: 15px/1.45 'Inter', system-ui, sans-serif; resize: vertical; }
   .btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
   .btn { display: block; width: 100%; text-align: center; padding: 14px; border-radius: 6px; font-size: 16px; font-weight: 600; text-decoration: none; cursor: pointer; border: 1px solid #72b07f; background: transparent; color: #72b07f; font-family: inherit; }
@@ -28,68 +33,70 @@
 <div class="card">
   <div class="brand">Carcino<span>S</span></div>
   <div class="sub">Share a paper with a colleague</div>
-
-  <label for="msg">Your message (you can edit it)</label>
-  <textarea id="msg"></textarea>
-
+  <label>They'll see this in Messages</label>
+  <div class="prev">
+    <img id="pimg" alt="CarcinoS preview card" src="/og-default-share.png">
+    <div class="prev-meta"><div class="prev-t" id="ptitle">Worth a look on CarcinoS</div><div class="prev-d">carcino-s.com</div></div>
+  </div>
   <div class="btns">
     <a id="sms" class="btn primary" href="#">Open in Messages</a>
     <button id="native" class="btn" type="button" hidden>Share another way…</button>
-    <button id="copy" class="btn" type="button">Copy message</button>
+    <button id="copy" class="btn" type="button">Copy link</button>
   </div>
   <div id="ok" class="ok" aria-live="polite"></div>
-  <p class="hint">Nothing is sent until you press send in your messaging app. On a computer without Messages, copy the message and paste it wherever you like.</p>
+  <p class="hint">Nothing is sent until you press send in your messaging app.</p>
 </div>
-
 <script>
 (function () {
-  var INVITE = 'https://carcino-s.com/invite/?utm_source=share&utm_medium=text';
+  var SB = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
   var p = new URLSearchParams(location.search);
   function clean(s, max) { return String(s || '').replace(/\s+/g, ' ').trim().slice(0, max); }
+  var id = clean(p.get('c'), 64).toLowerCase();
+  if (!/^[0-9a-f-]{36}$/.test(id)) id = '';
   var title = clean(p.get('t'), 200);
-  var url = clean(p.get('u'), 500);
-  if (!/^https:\/\//i.test(url)) url = '';   // only show real https links
-
-  var msg = document.getElementById('msg');
-  msg.value = (title ? 'Worth a look: ' + title : 'Worth a look') +
-              (url ? '\n' + url : '') +
-              '\n\nShared from CarcinoS, a free weekly oncology digest: ' + INVITE;
+  var link, text;
+  if (id) {
+    // New emails: one short line + the CarcinoS link (chat apps draw the picture card).
+    link = 'https://carcino-s.com/s/?c=' + id;
+    text = 'Worth a look on CarcinoS';
+    var img = document.getElementById('pimg');
+    img.onerror = function () { img.onerror = null; img.src = '/og-default-share.png'; };
+    img.src = SB + '/storage/v1/object/public/share-cards/' + id + '.png';
+  } else {
+    // Emails sent before this change carry the title and paper link instead.
+    var u = clean(p.get('u'), 500);
+    link = /^https:\/\//i.test(u) ? u : 'https://carcino-s.com/';
+    text = title ? 'Worth a look: ' + title : 'Worth a look';
+  }
+  if (title) document.getElementById('ptitle').textContent = title;
+  var msg = text + '\n' + link;
 
   // iPhone/iPad/Mac use "sms:&body=", Android uses "sms:?body=".
   var apple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
-  var sms = document.getElementById('sms');
-  function updateSms() {
-    sms.href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(msg.value);
-  }
-  updateSms();
-  msg.addEventListener('input', updateSms);
+  document.getElementById('sms').href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(msg);
 
   var ok = document.getElementById('ok');
   if (navigator.share) {
     var nat = document.getElementById('native');
     nat.hidden = false;
     nat.addEventListener('click', function () {
-      navigator.share({ text: msg.value }).catch(function () {});
+      navigator.share({ text: text, url: link }).catch(function () {});
     });
   }
   // Count, anonymously, that a text share was started (no names, no message text).
   try {
-    fetch('https://kbsingwzbgbdkmhmdaep.supabase.co/rest/v1/rpc/record_link_open', {
+    fetch(SB + '/rest/v1/rpc/record_link_open', {
       method: 'POST', keepalive: true,
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY',
-        'Content-Type': 'application/json'
-      },
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
       body: JSON.stringify({ p_source: 'share', p_medium: 'text_started', p_page: '/share/' })
     }).catch(function () {});
   } catch (e) {}
-
   document.getElementById('copy').addEventListener('click', function () {
-    var done = function () { ok.textContent = 'Copied. Paste it into any message.'; };
+    var done = function () { ok.textContent = 'Link copied. Paste it into any message.'; };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(msg.value).then(done, function () { msg.select(); document.execCommand('copy'); done(); });
-    } else { msg.select(); document.execCommand('copy'); done(); }
+      navigator.clipboard.writeText(link).then(done, function () { window.prompt('Copy this link:', link); });
+    } else { window.prompt('Copy this link:', link); }
   });
 })();
 </script>

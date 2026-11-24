@@ -473,8 +473,14 @@
 
   @media (max-width: 640px) {
     .container { padding: 28px 18px 64px; }
-    nav { padding: 12px 18px; }
+    nav { padding: 12px 16px; gap: 18px; }
     a.nav-link[href="../"] { display: none; }
+    a.nav-link[href="/about/"] { display: none; }
+    .nav-brand { gap: 9px; flex-shrink: 0; }
+    .nav-name { font-size: 16px; }
+    .nav-right { gap: 12px; }
+    .nav-auth { gap: 6px; }
+    .nav-auth-btn { padding: 6px 10px; white-space: nowrap; }
     .stats { grid-template-columns: repeat(2, 1fr); }
     .stat-value { font-size: 20px; }
     .hero-title { font-size: 24px; }

@@ -33,6 +33,7 @@ from typing import Any, Optional
 
 from .config import Config
 from .digest import fetch_for_user, SITE_LABEL, TIER_LABEL, TIER_SIGNAL
+from .share_card import ensure_share_cards
 
 CARE_TEAM_DISCLAIMER = (
     "AI-assisted summary of the trial publication and FDA labeling, which may "
@@ -69,6 +70,7 @@ def _share_links(a) -> tuple[str, str]:
     Text: many email apps (Gmail, Outlook) block sms: links inside emails, so
     the Text button opens carcino-s.com/share/, a small page that opens the
     reader's Messages app (or their phone's share sheet) with the text filled in.
+    The text itself is one line plus a carcino-s.com/s/ link (see share_card.py).
     """
     if not SHARE_LINKS:
         return "", ""
@@ -86,7 +88,9 @@ def _share_links(a) -> tuple[str, str]:
                       f"oncology papers: {INVITE_URL}?utm_source=share&utm_medium=email")
     body = "\n\n".join(body_parts)
     q = lambda x: urllib.parse.quote(x, safe="")
-    text_href = f"{SHARE_PAGE_URL}?t={q(short_title)}" + (f"&u={q(paper)}" if paper else "")
+    # Text: the share page needs only the card id. It sends one short line plus
+    # carcino-s.com/s/?c=<id>, which chat apps show as a CarcinoS picture card.
+    text_href = f"{SHARE_PAGE_URL}?c={q(str(getattr(a, 'id', '')))}&t={q(short_title)}"
     return f"mailto:?subject={q(subject)}&body={q(body)}", text_href
 
 
@@ -632,6 +636,9 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_emai
     except Exception:
         pass  # non-critical
 
+    # Share preview images, rendered once per alert for the whole run (share_card.py).
+    share_cards_done: set = set()
+
     for sub in subscribers:
         user_id  = sub["id"]
         email    = sub["email"]
@@ -702,6 +709,9 @@ def run_delivery(config: Config, days: int = 7, dry_run: bool = False, user_emai
             continue
 
         print(f"    {len(alerts)} alert(s) | scope={scope}")
+
+        if SHARE_LINKS:
+            ensure_share_cards(sb, alerts, share_cards_done, SITE_LABEL, dry_run=dry_run)
 
         # EMAIL
         email_ok = False

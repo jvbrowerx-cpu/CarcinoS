@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--OG-START-->
+<title>Worth a look on CarcinoS</title>
+<meta name="description" content="Physician-reviewed oncology updates, shared by a colleague.">
+<meta property="og:site_name" content="CarcinoS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Worth a look on CarcinoS">
+<meta property="og:description" content="Physician-reviewed oncology updates, shared by a colleague.">
+<meta property="og:image" content="https://carcino-s.com/og-default-share.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<!--OG-END-->
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #060908; --card: #0b120e; --border: #79ad86; --border-inner: #213329;
+    --green: #72b07f; --green-dim: #3d6b4a; --green-faint: #162118;
+    --pill: #9fc7a6; --text: #e6e8e6; --text-muted: #728075; --text-dim: #3e4a42;
+    --panel-text: #1a1a1a; --panel-border: #e8ebe8; --panel-dot: #68a876;
+  }
+  html, body { background: var(--bg); min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+  body { display: flex; justify-content: center; align-items: flex-start; padding: 28px 16px 48px; }
+  .card { width: 100%; max-width: 480px; background: var(--card); border: 2px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .stripe { height: 4px; background: var(--border); }
+  .card-inner { padding: 28px 26px 30px; }
+  .brand-row { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; text-decoration: none; }
+  .logomark { width: 42px; height: 42px; background: #111; border: 1px solid #2e3830; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Libre Baskerville', Georgia, serif; font-size: 15px; font-weight: 700; flex-shrink: 0; letter-spacing: -0.5px; color: #e0e0e0; }
+  .logomark b, .brand-name b { color: var(--green); font-weight: 700; }
+  .brand-name { font-family: 'Libre Baskerville', Georgia, serif; font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.3px; margin-bottom: 5px; }
+  .brand-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; }
+  .divider { border: none; border-top: 1px solid var(--border-inner); margin: 0 0 20px; }
+
+  .pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; color: var(--card); background: var(--pill); border-radius: 3px; padding: 4px 8px; }
+  .pill.outline { background: transparent; color: var(--pill); border: 1px solid var(--green-dim); padding: 3px 8px; font-weight: 700; }
+  .paper-title { font-weight: 400; font-family: 'Libre Baskerville', Georgia, serif; font-size: 18px; line-height: 1.45; color: #fff; margin-bottom: 14px; }
+  .sowhat { font-size: 14px; line-height: 1.68; color: #d4d8d4; margin-bottom: 12px; }
+  .sowhat strong { color: #fff; font-weight: 600; }
+  .read { display: inline-block; font-size: 14px; font-weight: 700; color: var(--green); text-decoration: none; }
+  .read:hover { color: #8fc89b; }
+  .paper-missing { font-size: 14px; line-height: 1.6; color: #b9c0bb; }
+  .paper-missing a { color: var(--green); }
+
+  .features { background: #fff; border-radius: 3px; overflow: hidden; margin: 24px 0 18px; border: 1px solid var(--panel-border); }
+  .feature-row { display: flex; align-items: flex-start; border-bottom: 1px solid var(--panel-border); padding: 12px 16px; }
+  .feature-row:last-child { border-bottom: none; }
+  .feat-dot { color: var(--panel-dot); font-size: 16px; line-height: 22px; flex-shrink: 0; width: 18px; }
+  .feat-text { font-size: 13px; line-height: 1.6; color: var(--panel-text); flex: 1; }
+
+  .cta-block { background: var(--green-faint); border: 1px solid var(--green-dim); border-radius: 4px; padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; text-decoration: none; transition: border-color .15s, background .15s; }
+  .cta-block:hover { border-color: var(--border); background: #1a2e20; }
+  .cta-copy-head { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .cta-copy-sub { font-size: 12px; color: var(--text-muted); }
+  .cta-btn { display: inline-block; background: var(--green); color: #060908; font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 5px; white-space: nowrap; flex-shrink: 0; }
+
+  .foot { border-top: 1px solid var(--border-inner); padding-top: 18px; font-size: 10px; color: var(--text-dim); line-height: 1.9; }
+  .foot a { color: var(--green-dim); text-decoration: none; }
+  .foot a:hover { color: var(--green); }
+  @media (max-width: 500px) {
+    body { padding: 0; align-items: stretch; }
+    .card { max-width: 100%; border-radius: 0; border-left: none; border-right: none; }
+    .card-inner { padding: 24px 20px 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="stripe"></div>
+  <div class="card-inner">
+
+    <a class="brand-row" href="/">
+      <div class="logomark">C<b>S</b></div>
+      <div>
+        <div class="brand-name">Carcino<b>S</b></div>
+        <div class="brand-sub">A colleague shared this with you</div>
+      </div>
+    </a>
+
+    <hr class="divider">
+
+    <div id="paper" aria-live="polite"></div>
+
+    <div class="features">
+      <div class="feature-row"><div class="feat-dot">•</div><div class="feat-text">Weekly email, filtered to your disease sites: only what is most likely to change practice</div></div>
+      <div class="feature-row"><div class="feat-dot">•</div><div class="feat-text">Physician-reviewed before anything is sent</div></div>
+      <div class="feature-row"><div class="feat-dot">•</div><div class="feat-text">Searchable archive, plus comment threads to discuss papers with colleagues</div></div>
+    </div>
+
+    <a class="cta-block" id="cta" href="/?signup=true&amp;utm_source=share&amp;utm_medium=text">
+      <div>
+        <div class="cta-copy-head">Free · takes about a minute</div>
+        <div class="cta-copy-sub">Pick your disease sites</div>
+      </div>
+      <div class="cta-btn">Get access ↗</div>
+    </a>
+
+    <div class="foot">
+      CarcinoS · carcino-s.com<br>
+      <a href="/tos/">Terms</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="/privacy/">Privacy</a>&nbsp;&nbsp;·&nbsp;&nbsp;<a href="/disclaimer/">Medical Disclaimer</a>
+    </div>
+  </div>
+</div>
+
+<!--CARD-DATA-->
+<script>
+(function () {
+  var SB = 'https://kbsingwzbgbdkmhmdaep.supabase.co';
+  var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtic2luZ3d6YmdiZGttaG1kYWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1NzcyMTIsImV4cCI6MjA5NjE1MzIxMn0.NgC1xqY22-q4dLOhsuBb10uPHcnkEP8smSTtcwUqMpY';
+  var SITE = { breast: 'Breast', thoracic: 'Thoracic', gastrointestinal: 'GI', gu: 'GU', gynecologic: 'Gynecologic',
+               hematologic: 'Hematology', cns: 'CNS', head_neck: 'Head & Neck', cutaneous: 'Cutaneous',
+               sarcoma: 'Sarcoma', pediatric: 'Pediatric', benign: 'Benign' };
+  var TIER = { A: ['Practice Impacting', '■■■'], B: ['Incremental', '■■'], C: ['Horizon', '■'] };
+  var box = document.getElementById('paper');
+  var id = (new URLSearchParams(location.search).get('c') || '').toLowerCase();
+
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function plain(s) { var d = document.createElement('div'); d.innerHTML = String(s || ''); return (d.textContent || '').replace(/\s+/g, ' ').trim(); }
+
+  function render(row) {
+    var s = row.summary_json || {};
+    var src = Array.isArray(s.sources) && s.sources[0] ? s.sources[0] : {};
+    var url = src.url || (src.pmid ? 'https://pubmed.ncbi.nlm.nih.gov/' + src.pmid + '/' : '');
+    if (!/^https:\/\//i.test(url)) url = '';
+    var tier = TIER[row.tier] || TIER.A;
+    var site = SITE[s.disease_site_code] || '';
+    var soWhat = plain(s.carcinos_one_liner).replace(/^\*\*?so what[^:]*:\*?\*?\s*/i, '');
+    box.innerHTML =
+      '<div class="pills"><span class="pill">' + tier[1] + ' ' + esc(tier[0].toUpperCase()) + '</span>' +
+      (site ? '<span class="pill outline">' + esc(site.toUpperCase()) + '</span>' : '') + '</div>' +
+      '<h1 class="paper-title">' + esc(plain(row.title)) + '</h1>' +
+      (soWhat ? '<p class="sowhat"><strong>So what:</strong> ' + esc(soWhat) + '</p>' : '') +
+      (url ? '<a class="read" href="' + esc(url) + '" target="_blank" rel="noopener">↗ Read paper</a>' : '');
+  }
+  function missing() {
+    box.innerHTML = '<p class="paper-missing">This paper isn’t available here any more. You can browse every CarcinoS card in the <a href="/archive/">archive</a>.</p>';
+  }
+
+  if (window.__CARD__) { render(window.__CARD__); }
+  else if (/^[0-9a-f-]{36}$/.test(id)) {
+    fetch(SB + '/rest/v1/alerts?id=eq.' + id + '&status=in.(PUBLISHED,CORRECTED)&select=id,tier,title,summary_json', {
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY }
+    }).then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) { rows && rows[0] ? render(rows[0]) : missing(); })
+      .catch(missing);
+  } else { missing(); }
+
+  // Count, anonymously, that a shared text link was opened (no names, no message text).
+  try {
+    fetch(SB + '/rest/v1/rpc/record_link_open', {
+      method: 'POST', keepalive: true,
+      headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_source: 'share', p_medium: 'text_opened', p_page: '/s/' })
+    }).catch(function () {});
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

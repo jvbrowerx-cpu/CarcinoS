@@ -64,17 +64,42 @@
     img.onerror = function () { img.onerror = null; img.src = '/og-default-share.png'; };
     img.src = SB + '/storage/v1/object/public/share-cards/' + id + '.png';
   } else {
-    // Emails sent before this change carry the title and paper link instead.
+    // Emails sent before this change carry only the title and paper link.
+    // Until the card is found below, fall back to the original message
+    // (title, paper link and the CarcinoS invite link).
     var u = clean(p.get('u'), 500);
-    link = /^https:\/\//i.test(u) ? u : 'https://carcino-s.com/';
-    text = title ? 'Worth a look: ' + title : 'Worth a look';
+    var paper = /^https:\/\//i.test(u) ? u : '';
+    link = 'https://carcino-s.com/invite/?utm_source=share&utm_medium=text';
+    text = (title ? 'Worth a look: ' + title : 'Worth a look') + (paper ? '\n' + paper : '') +
+           '\n\nShared from CarcinoS, a free weekly oncology digest:';
   }
   if (title) document.getElementById('ptitle').textContent = title;
-  var msg = text + '\n' + link;
 
   // iPhone/iPad/Mac use "sms:&body=", Android uses "sms:?body=".
   var apple = /iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent);
-  document.getElementById('sms').href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(msg);
+  function setSms() {
+    document.getElementById('sms').href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(text + '\n' + link);
+  }
+  setSms();
+
+  // Older emails: find the CarcinoS card by its title, then switch to the
+  // short CarcinoS link so the text shows the CarcinoS card and page.
+  if (!id && title) {
+    var prefix = title.replace(/(\.\.\.|…)$/, '').slice(0, 90).replace(/[*%_\\]/g, '_');
+    fetch(SB + '/rest/v1/alerts?select=id&status=in.(PUBLISHED,CORRECTED)&order=published_at.desc&limit=1&title=ilike.' +
+          encodeURIComponent(prefix + '*'), { headers: { apikey: KEY, Authorization: 'Bearer ' + KEY } })
+      .then(function (r) { return r.ok ? r.json() : []; })
+      .then(function (rows) {
+        if (!rows || !rows[0] || !/^[0-9a-f-]{36}$/.test(rows[0].id)) return;
+        id = rows[0].id;
+        link = 'https://carcino-s.com/s/?c=' + id;
+        text = 'Worth a look on CarcinoS';
+        setSms();
+        var img = document.getElementById('pimg');
+        img.onerror = function () { img.onerror = null; img.src = '/og-default-share.png'; };
+        img.src = SB + '/storage/v1/object/public/share-cards/' + id + '.png';
+      }).catch(function () {});
+  }
 
   var ok = document.getElementById('ok');
   if (navigator.share) {

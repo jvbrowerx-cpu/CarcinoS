@@ -1,5 +1,7 @@
 [build]
   publish = "landing"
+  # Edge functions live inside landing/ (Netlify looks in ./netlify/edge-functions by default)
+  edge_functions = "landing/netlify/edge-functions"
 
   # Only rebuild when the landing/ website files change.
   # Pushes that only touch pipeline/, mobile_github/, or .github/
@@ -8,3 +10,7 @@
   # Exit 0 = no changes in landing/ = skip build
   # Exit 1 = landing/ changed = trigger build
   ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- landing"
+
+
+# share-preview declares its own path (/s/) inside its file. admin-auth stays off
+# (no path declared for it here).
